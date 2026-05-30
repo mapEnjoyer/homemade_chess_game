@@ -9,6 +9,7 @@ Date: 05/30/26
     creating and maintaining the window settings for the chess game.  
 """
 import arcade
+from pathlib import Path
 
 # Window Constants
 WINDOW_WIDTH = 1280
@@ -27,6 +28,16 @@ class GameView(arcade.Window):
 
         self.background_color = arcade.csscolor.DARK_OLIVE_GREEN
 
+        visuals_path = Path.cwd()._str + '/visuals'
+
+        # Create the chess board texture
+        self.board_texture = arcade.load_texture(visuals_path + '/textures/chessboard_test.jpg')
+
+        # Create the chess board sprite
+        self.board_sprite = arcade.Sprite(self.board_texture)
+        self.board_sprite.center_x = 64  # TODO: determine where the board needs centered
+        self.board_sprite.center_y = 128
+
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
         pass
@@ -41,6 +52,9 @@ class GameView(arcade.Window):
         self.clear()
 
         # Code to draw other things will go here
+
+        # Draw chess board background
+        arcade.draw_sprite(self.board_sprite)
 
 """
 Function Name: window_init
