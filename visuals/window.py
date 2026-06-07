@@ -16,8 +16,6 @@ WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 1040
 WINDOW_TITLE = "EAKs Chess Game"
 
-b_use_board_texture = False  # Determines if board will be drawn using squares or premade texture
-
 class GameView(arcade.Window):
     """
     Main application class. Handles visuals for the game
@@ -35,12 +33,7 @@ class GameView(arcade.Window):
         # Set path to visuals
         visuals_path = Path.cwd()._str + '/visuals'
 
-        if b_use_board_texture:
-            # Create the chess board texture
-            self.board_texture = arcade.load_texture(visuals_path + '/textures/chessboard_test.jpg')
-
-            # Create the chess board sprite
-            self.board_sprite = arcade.Sprite(self.board_texture)
+        # TODO: Load textures and sprites
 
         return
 
@@ -59,25 +52,10 @@ class GameView(arcade.Window):
 
         # Code to draw other things will go here
 
-        # Draw the chess board
-        self.draw_board()
+        # TODO: Draw the chess board
 
         return
 
-    def draw_board(self):
-        """Draws the chess board on screen"""
-        # Determine where the center of the screen is relative to the size of the window
-        screen_center_x = self.width/2
-        screen_center_y = self.height/2
-        
-        if b_use_board_texture:
-
-            # Draw chess board background in the center of the screen
-            self.board_sprite.center_x = screen_center_x
-            self.board_sprite.center_y = screen_center_y     
-            arcade.draw_sprite(self.board_sprite)
-
-        return
 
 """
 Function Name: window_init
