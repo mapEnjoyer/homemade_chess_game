@@ -54,6 +54,11 @@ class GameView(arcade.Window):
 
         # Code to draw other things will go here
 
+        # Draw the chess board
+        self.draw_board()
+
+    def draw_board(self):
+        """Draws the chess board on screen"""
         # Determine where the center of the screen is relative to the size of the window
         screen_center_x = self.width/2
         screen_center_y = self.height/2
