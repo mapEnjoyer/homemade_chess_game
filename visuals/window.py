@@ -117,15 +117,19 @@ class GameView(arcade.Window):
                 y_pos = square_size * 2.5
                 x_pos += square_size
 
-        # Update the column label x/y positions
+        # Determine row/column label font size (1/4th square size seemed good from testing)
+        font_size = square_size / 4      
+    
+        # Update the column label x/y positions and font size
         for col in board.board_col_labels:
-            chess_board.col_labels[col].x = chess_board.board_spaces[col+"1"].center_x
-            chess_board.col_labels[col].y = chess_board.board_spaces[col+"1"].center_y - square_size
-
+            chess_board.col_labels[col].x         = chess_board.board_spaces[col+"1"].center_x - font_size/2
+            chess_board.col_labels[col].y         = chess_board.board_spaces[col+"1"].center_y - square_size
+            chess_board.col_labels[col].font_size = font_size
         # Update the row label x/y positions
         for row in board.board_row_labels:
-            chess_board.row_labels[row].x = chess_board.board_spaces["A"+row].center_x - square_size
-            chess_board.row_labels[row].y = chess_board.board_spaces["A"+row].center_y        
+            chess_board.row_labels[row].x         = chess_board.board_spaces["A"+row].center_x - square_size
+            chess_board.row_labels[row].y         = chess_board.board_spaces["A"+row].center_y - font_size/2       
+            chess_board.row_labels[row].font_size = font_size      
 
         return
     
