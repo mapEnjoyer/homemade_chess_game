@@ -38,8 +38,6 @@ class GameView(arcade.Window):
 
         # Create the chess board sprite
         self.board_sprite = arcade.Sprite(self.board_texture)
-        self.board_sprite.center_x = WINDOW_WIDTH/2
-        self.board_sprite.center_y = WINDOW_HEIGHT/2
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -56,7 +54,13 @@ class GameView(arcade.Window):
 
         # Code to draw other things will go here
 
-        # Draw chess board background
+        # Determine where the center of the screen is relative to the size of the window
+        screen_center_x = self.width/2
+        screen_center_y = self.height/2
+
+        # Draw chess board background in the center of the screen
+        self.board_sprite.center_x = screen_center_x
+        self.board_sprite.center_y = screen_center_y     
         arcade.draw_sprite(self.board_sprite)
 
 """
