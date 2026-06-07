@@ -77,13 +77,13 @@ class board():
             # Create text objects for each row lable
             # Don't worry about text position, its up
             # to the window to set the positions before drawing
-            self.row_labels[row] = arcade.Text(text=row, x = 0, y = 0, color=arcade.color.BLACK)
+            self.row_labels[row] = arcade.Text(text=row, x = 0, y = 0, color=arcade.color.BLACK, align="center")
 
         for col in board_col_labels:
             # Create text objects for each row lable
             # Don't worry about text position, its up
             # to the window to set the positions before drawing
-            self.col_labels[col] = arcade.Text(text=col, x = 0, y = 0, color=arcade.color.BLACK)
+            self.col_labels[col] = arcade.Text(text=col, x = 0, y = 0, color=arcade.color.BLACK, align="center")
 
     def draw_board(self):
         """ draws the chess board on screen by drawing each square"""
