@@ -116,7 +116,13 @@ class GameView(arcade.Window):
     def __update_board_positions(self):
         """
             Updates all positions of the checkerboard squares,
-            row labels and column labels.
+            row labels and column labels. This is done by allocating
+            a 12x12 grid worth of squares in space starting at the 
+            bottom left hand corner of the screen. Position data
+            is assigned to each of the chess board squares and 
+            labels to have them appear on the screen in the proper
+            location. A 2x2 square border is alloted at the edges
+            of the board to give a margin
 
         Args:
             None
@@ -132,8 +138,8 @@ class GameView(arcade.Window):
         else:
             square_size = self.height/12
     
-        # Set staring X/Y coordinates
-        x_pos = y_pos = square_size * 2.5
+        # Set staring X/Y coordinates (center of square x = 2, y = 2 on our imaginary 12x12 grid)
+        y_start = x_pos = y_pos = square_size * 2.5
 
         for space in chess_board.board_spaces:
             # Update  row count
@@ -149,21 +155,32 @@ class GameView(arcade.Window):
                 y_pos += square_size
             else:
                 # Shifting over to the next column. Reset y position and shift x
-                y_pos = square_size * 2.5
+                y_pos = y_start
                 x_pos += square_size
 
         # Determine row/column label font size (1/4th square size seemed good from testing)
-        font_size = square_size / 4      
-    
+        font_size = square_size / 4 
+
+        # Calculate text shift (used to center label along the square)    
+        text_shift = font_size / 2
+
         # Update the column label x/y positions and font size
         for col in board.board_col_labels:
-            chess_board.col_labels[col].x         = chess_board.board_spaces[col+"1"].center_x - font_size/2
+            # Column label x position is the same as the square above it shifted by the text_shift
+            chess_board.col_labels[col].x         = chess_board.board_spaces[col+"1"].center_x - text_shift
+
+            # Column label y position is 1 square below the first 1
             chess_board.col_labels[col].y         = chess_board.board_spaces[col+"1"].center_y - square_size
             chess_board.col_labels[col].font_size = font_size
+        
         # Update the row label x/y positions
         for row in board.board_row_labels:
+            # Row label x position is position is 1 square to  the left of first column 1
             chess_board.row_labels[row].x         = chess_board.board_spaces["A"+row].center_x - square_size
-            chess_board.row_labels[row].y         = chess_board.board_spaces["A"+row].center_y - font_size/2       
+            
+            # Row label y position is same as the square to the right shifted by the text shift
+            chess_board.row_labels[row].y         = chess_board.board_spaces["A"+row].center_y - text_shift
+               
             chess_board.row_labels[row].font_size = font_size      
 
         return
