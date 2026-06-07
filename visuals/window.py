@@ -28,6 +28,11 @@ class GameView(arcade.Window):
         # TODO: Probably want to save these settings in a user_config.json 
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, resizable=True)
 
+        # Initialize "previous" screen sizes. Used for determining if 
+        # screen size has changed and position values need calculated
+        self.prev_width  = WINDOW_WIDTH
+        self.prev_height = WINDOW_HEIGHT
+
         # Set window settings
         self.background_color = arcade.csscolor.DARK_OLIVE_GREEN # Background color
 
@@ -40,6 +45,8 @@ class GameView(arcade.Window):
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
+        # Update positions of all objects drawn on screen
+        self.__update_screen_positions()
         pass
 
     def on_draw(self):
@@ -53,14 +60,71 @@ class GameView(arcade.Window):
 
         # Code to draw other things will go here
 
-        # TODO: Draw the chess board
+        if self.prev_height != self.height or self.prev_width != self.width:
+            # Screen size has changed, update positions of all on screen objects
+            self.__update_screen_positions()
+
+        # Save screen size for next pass
+        self.prev_height = self.height
+        self.prev_width  = self.width
+
+        # Draw the chess board
         self.__draw_board()
         return
         
     def __draw_board(self):
-        """ Draws the checkerboard pattern relative to the size of the window """
+        """ Draws the checkerboard pattern """
+
+        for space in board.board_spaces:
+            # Draw the square on the screen
+            board.board_spaces[space].draw_square()
+        
         return
 
+    def __update_screen_positions(self):
+        """ 
+            Updates all positions of objects drawn on screen. 
+            Intended to be called whenever screen size changes 
+        """
+        # Update checkerboard positions
+        self.__update_board_positions()
+
+        return
+
+    def __update_board_positions(self):
+        """
+            Updates all positions of the checkerboard squares.
+        """
+
+        # Scale the square size relative to the window
+        # Chess board requires 8x8 squares, we use a factor of 1/12th to give margins
+        if self.width <= self.height:
+            square_size = self.width/12 
+        else:
+            square_size = self.height/12
+    
+        # Set staring X/Y coordinates
+        x_pos = y_pos = square_size * 2.5
+
+        for space in board.board_spaces:
+            # Update  row count
+            row_count = int(space[1])
+
+            # Update space positions relative to window size
+            board.board_spaces[space].center_x = x_pos
+            board.board_spaces[space].center_y = y_pos
+            board.board_spaces[space].length   = square_size
+
+            if row_count != 8:
+                # Still in the same columnm. Increment the y position
+                y_pos += square_size
+            else:
+                # Shifting over to the next column. Reset y position and shift x
+                y_pos = square_size * 2.5
+                x_pos += square_size
+
+        return
+    
 """
 Function Name: window_init
 
