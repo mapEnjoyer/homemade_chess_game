@@ -72,16 +72,7 @@ class GameView(arcade.Window):
         self.prev_width  = self.width
 
         # Draw the chess board
-        self.__draw_board()
-        return
-        
-    def __draw_board(self):
-        """ Draws the checkerboard pattern """
-
-        for space in chess_board.board_spaces:
-            # Draw the square on the screenchess_board
-            chess_board.board_spaces[space].draw_square()
-        
+        chess_board.draw_board()
         return
 
     def __update_screen_positions(self):
@@ -125,6 +116,16 @@ class GameView(arcade.Window):
                 # Shifting over to the next column. Reset y position and shift x
                 y_pos = square_size * 2.5
                 x_pos += square_size
+
+        # Update the column label x/y positions
+        for col in board.board_col_labels:
+            chess_board.col_labels[col].x = chess_board.board_spaces[col+"1"].center_x
+            chess_board.col_labels[col].y = chess_board.board_spaces[col+"1"].center_y - square_size
+
+        # Update the row label x/y positions
+        for row in board.board_row_labels:
+            chess_board.row_labels[row].x = chess_board.board_spaces["A"+row].center_x - square_size
+            chess_board.row_labels[row].y = chess_board.board_spaces["A"+row].center_y        
 
         return
     
