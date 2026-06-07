@@ -64,18 +64,14 @@ class board_space():
         Returns:
             None
         """
-        arcade.draw_rect_filled(arcade.rect.XYWH(self.center_x, self.center_y, self.length, self.length, self.color))
+        arcade.draw_rect_filled(arcade.rect.XYWH(self.center_x, self.center_y, self.length, self.length), self.color)
         return
     
 
 def board_init():
     """
-    Creates space objects for all 64 tiles on the board. Requires
-    the window class as an argument since each square needs to be
-    sized relative to the window size. In order to create margins
-    around the border of the board, we treat the whole screen as
-    a 12x12 set of squares, only populating the center 8x8 as chess
-    board spaces.
+    Creates space objects for all 64 tiles on the board.
+    Initializes the space colors to get the checkerboard pattern.
 
     Args:
         window : GameView window object containing screen size information
@@ -89,23 +85,20 @@ def board_init():
     row_count = 0
 
     for name in space_names:
+        
+        # Update row_count 
+        row_count = int(name[1])
+
         # Create a space class for each space
         board_spaces[name] = board_space(color = space_color)
 
-        # increment row count for next row
-        row_count += 1
-
         if row_count != 8:
             if space_color == arcade.color.BLACK:
-                # Swap color to white
-                space_color = arcade.color.WHITE
+                # Swap color to tan
+                space_color = arcade.color.TAN
 
             else:
                 # Swap color back to black
                 space_color = arcade.color.BLACK
-        else:
-            # Last row before starting the next column, reset row count and don't toggle color
-            row_count = 0
-
 
     return
