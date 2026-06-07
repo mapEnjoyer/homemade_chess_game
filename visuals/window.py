@@ -24,10 +24,13 @@ class GameView(arcade.Window):
     def __init__(self):
 
         # Call the parent class to set up the window
-        super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
+        # TODO: Probably want to save these settings in a user_config.json 
+        super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, resizable=True)
 
-        self.background_color = arcade.csscolor.DARK_OLIVE_GREEN
+        # Set window settings
+        self.background_color = arcade.csscolor.DARK_OLIVE_GREEN # Background color
 
+        # Set path to visuals
         visuals_path = Path.cwd()._str + '/visuals'
 
         # Create the chess board texture
@@ -35,8 +38,8 @@ class GameView(arcade.Window):
 
         # Create the chess board sprite
         self.board_sprite = arcade.Sprite(self.board_texture)
-        self.board_sprite.center_x = 64  # TODO: determine where the board needs centered
-        self.board_sprite.center_y = 128
+        self.board_sprite.center_x = WINDOW_WIDTH/2
+        self.board_sprite.center_y = WINDOW_HEIGHT/2
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
