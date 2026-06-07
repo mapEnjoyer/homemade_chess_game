@@ -11,10 +11,6 @@ Date: 05/30/26
 
 import arcade
 
-# Dictonary containing all board spaces. Initialized in board_init
-# {"A1" : board_space A1; "A2": board_space A2; ...}
-board_spaces = {}
-
 # List of all board spaces as strings
 space_names =  ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8",
                 "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8",
@@ -25,6 +21,43 @@ space_names =  ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8",
                 "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8",
                 "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8",]
 
+class board():
+    """
+    Board class. Used to access all spaces on the board.
+    Args:
+        None
+
+    Returns:
+        None    
+    """
+
+    def __init__(self):
+
+        # Dictonary containing all board spaces. Initialized in board_init
+        # {"A1" : board_space A1; "A2": board_space A2; ...}
+        self.board_spaces = {}
+
+        # A1 is black on chess board
+        space_color = arcade.color.BLACK
+        row_count = 0
+
+        for name in space_names:
+            
+            # Update row_count 
+            row_count = int(name[1])
+
+            # Create a space class for each space
+            self.board_spaces[name] = board_space(color = space_color)
+
+            if row_count != 8:
+                if space_color == arcade.color.BLACK:
+                    # Swap color to tan
+                    space_color = arcade.color.TAN
+
+                else:
+                    # Swap color back to black
+                    space_color = arcade.color.BLACK       
+        
 class board_space():
     """
     Board space class. Manages each space on the board, 
@@ -66,39 +99,3 @@ class board_space():
         """
         arcade.draw_rect_filled(arcade.rect.XYWH(self.center_x, self.center_y, self.length, self.length), self.color)
         return
-    
-
-def board_init():
-    """
-    Creates space objects for all 64 tiles on the board.
-    Initializes the space colors to get the checkerboard pattern.
-
-    Args:
-        window : GameView window object containing screen size information
-
-    Returns:
-        None
-    """
-    
-    # A1 is black on chess board
-    space_color = arcade.color.BLACK
-    row_count = 0
-
-    for name in space_names:
-        
-        # Update row_count 
-        row_count = int(name[1])
-
-        # Create a space class for each space
-        board_spaces[name] = board_space(color = space_color)
-
-        if row_count != 8:
-            if space_color == arcade.color.BLACK:
-                # Swap color to tan
-                space_color = arcade.color.TAN
-
-            else:
-                # Swap color back to black
-                space_color = arcade.color.BLACK
-
-    return

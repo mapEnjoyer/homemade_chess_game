@@ -17,6 +17,9 @@ WINDOW_WIDTH = 1920
 WINDOW_HEIGHT = 1080
 WINDOW_TITLE = "EAK's Chess Game"
 
+# Chess board object
+chess_board = board.board()
+
 class GameView(arcade.Window):
     """
     Main application class. Handles visuals for the game
@@ -75,9 +78,9 @@ class GameView(arcade.Window):
     def __draw_board(self):
         """ Draws the checkerboard pattern """
 
-        for space in board.board_spaces:
-            # Draw the square on the screen
-            board.board_spaces[space].draw_square()
+        for space in chess_board.board_spaces:
+            # Draw the square on the screenchess_board
+            chess_board.board_spaces[space].draw_square()
         
         return
 
@@ -106,14 +109,14 @@ class GameView(arcade.Window):
         # Set staring X/Y coordinates
         x_pos = y_pos = square_size * 2.5
 
-        for space in board.board_spaces:
+        for space in chess_board.board_spaces:
             # Update  row count
             row_count = int(space[1])
 
             # Update space positions relative to window size
-            board.board_spaces[space].center_x = x_pos
-            board.board_spaces[space].center_y = y_pos
-            board.board_spaces[space].length   = square_size
+            chess_board.board_spaces[space].center_x = x_pos
+            chess_board.board_spaces[space].center_y = y_pos
+            chess_board.board_spaces[space].length   = square_size
 
             if row_count != 8:
                 # Still in the same columnm. Increment the y position
@@ -137,9 +140,6 @@ def window_init():
     # Create a instance of the GameView class
     window = GameView()
     window.setup()
-
-    # Initialize the chess board
-    board.board_init()
 
     return
 
