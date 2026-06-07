@@ -13,7 +13,7 @@ from pathlib import Path
 
 # Window Constants
 WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
+WINDOW_HEIGHT = 1040
 WINDOW_TITLE = "EAKs Chess Game"
 
 class GameView(arcade.Window):
