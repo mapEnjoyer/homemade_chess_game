@@ -1,5 +1,5 @@
 """
-File name: main.py
+File name: window.py
 Project: homemade_chess_game
 Author: Eric Kellmyer
 Date: 05/30/26
@@ -10,11 +10,12 @@ Date: 05/30/26
 """
 import arcade
 from pathlib import Path
+from visuals import board
 
 # Window Constants
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 1040
-WINDOW_TITLE = "EAKs Chess Game"
+WINDOW_WIDTH = 1920
+WINDOW_HEIGHT = 1080
+WINDOW_TITLE = "EAK's Chess Game"
 
 class GameView(arcade.Window):
     """
@@ -53,9 +54,12 @@ class GameView(arcade.Window):
         # Code to draw other things will go here
 
         # TODO: Draw the chess board
-
+        self.__draw_board()
         return
-
+        
+    def __draw_board(self):
+        """ Draws the checkerboard pattern relative to the size of the window """
+        return
 
 """
 Function Name: window_init
@@ -70,4 +74,8 @@ def window_init():
     window = GameView()
     window.setup()
 
+    # Initialize the chess board
+    board.board_init()
+
     return
+
