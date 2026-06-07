@@ -86,7 +86,16 @@ class board():
             self.col_labels[col] = arcade.Text(text=col, x = 0, y = 0, color=arcade.color.BLACK, align="center")
 
     def draw_board(self):
-        """ draws the chess board on screen by drawing each square"""
+        """ 
+        Draws the chess board on screen by drawing each square,
+        row and column label based on set positions.
+
+        Args: 
+            None
+
+        Returns:
+            None    
+        """
         for space in self.board_spaces:
             # Draw the square on the screen
             self.board_spaces[space].draw_square()
@@ -117,7 +126,16 @@ class _board_space():
     
     def __init__(self, center_x: float = 0, center_y: float = 0, length: float = 0, color: arcade.color = arcade.color.WHITE):
         """
-            Initializes space object
+        Initializes space object
+        
+        Args:
+            center_x: Center x position of the space
+            center_y: Center y position of the space
+            length:   Length of square
+            color:    Color of the square
+
+        Returns:
+            None
         """
         
         # Assign property values

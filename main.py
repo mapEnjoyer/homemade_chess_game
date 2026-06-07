@@ -16,8 +16,11 @@ Function Name: main
 
     Main function call for the chess application
 
-@param  None
-@return None
+    Args:
+        None
+
+    Returns:
+        None
 """
 if __name__ == "__main__":
     # Initialize the application window

@@ -23,6 +23,11 @@ chess_board = board.board()
 class GameView(arcade.Window):
     """
     Main application class. Handles visuals for the game
+    Args:
+        None
+
+    Returns:
+        None
     """
 
     def __init__(self):
@@ -47,13 +52,31 @@ class GameView(arcade.Window):
         return
 
     def setup(self):
-        """Set up the game here. Call this function to restart the game."""
+        """
+        Set up the game here. Call this function to restart the game.
+        
+        Args:
+            None
+
+        Returns:
+            None
+        """
         # Update positions of all objects drawn on screen
         self.__update_screen_positions()
         pass
 
     def on_draw(self):
-        """Render the screen."""
+        """
+        Render the screen. Screen rendering requires updating positions of
+        on screen objects BEFORE drawing. Positions are always updated whenever
+        the size of the screen has changed from the last pass.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
 
         # The clear method should always be called at the start of on_draw.
         # It clears the whole screen to whatever the background color is
@@ -78,7 +101,12 @@ class GameView(arcade.Window):
     def __update_screen_positions(self):
         """ 
             Updates all positions of objects drawn on screen. 
-            Intended to be called whenever screen size changes 
+            Intended to be called whenever screen size changes
+        Args:
+            None
+
+        Returns:
+            None
         """
         # Update checkerboard positions
         self.__update_board_positions()
@@ -87,7 +115,14 @@ class GameView(arcade.Window):
 
     def __update_board_positions(self):
         """
-            Updates all positions of the checkerboard squares.
+            Updates all positions of the checkerboard squares,
+            row labels and column labels.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         # Scale the square size relative to the window
@@ -138,8 +173,11 @@ Function Name: window_init
 
     Initializes the window containing game visuals
 
-@param  None
-@return None
+    Args:
+        None
+
+    Returns:
+        None
 """
 def window_init():
     # Create a instance of the GameView class
