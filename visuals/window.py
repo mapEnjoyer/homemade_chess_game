@@ -13,9 +13,6 @@ import constants
 from pathlib import Path
 from visuals import board
 
-# Chess board object
-chess_board = board.Board()
-
 class GameView(arcade.Window):
     """
     Main application class. Handles visuals for the game
@@ -24,6 +21,7 @@ class GameView(arcade.Window):
         - prev_width: Width of the screen when it was last drawn
         - prev_height: Height of the screen when it was last drawn
         - background_color: Color of the background
+        - chess_board: Chess board object to display in window
     """
 
     def __init__(self):
@@ -51,6 +49,9 @@ class GameView(arcade.Window):
 
         # Set window settings
         self.background_color = arcade.csscolor.DARK_OLIVE_GREEN # Background color
+
+        # Chess board object
+        self.chess_board = board.Board()
 
         # Set path to visuals
         visuals_path = Path.cwd()._str + '/visuals'
@@ -103,7 +104,7 @@ class GameView(arcade.Window):
         self.prev_width  = self.width
 
         # Draw the chess board
-        chess_board.draw_board()
+        self.chess_board.draw_board()
         return
 
     def __update_screen_positions(self):
@@ -149,14 +150,14 @@ class GameView(arcade.Window):
         # Set staring X/Y coordinates (center of square x = 2, y = 2 on our imaginary 12x12 grid)
         y_start = x_pos = y_pos = square_size * 2.5
 
-        for space in chess_board.board_spaces:
+        for space in self.chess_board.board_spaces:
             # Update  row count
             row_count = int(space[1])
 
             # Update space positions relative to window size
-            chess_board.board_spaces[space].center_x = x_pos
-            chess_board.board_spaces[space].center_y = y_pos
-            chess_board.board_spaces[space].length   = square_size
+            self.chess_board.board_spaces[space].center_x = x_pos
+            self.chess_board.board_spaces[space].center_y = y_pos
+            self.chess_board.board_spaces[space].length   = square_size
 
             if row_count != 8:
                 # Still in the same columnm. Increment the y position
@@ -175,21 +176,21 @@ class GameView(arcade.Window):
         # Update the column label x/y positions and font size
         for col in constants.board_col_labels:
             # Column label x position is the same as the square above it shifted by the text_shift
-            chess_board.col_labels[col].x         = chess_board.board_spaces[col+"1"].center_x - text_shift
+            self.chess_board.col_labels[col].x         = self.chess_board.board_spaces[col+"1"].center_x - text_shift
 
             # Column label y position is 1 square below the first 1
-            chess_board.col_labels[col].y         = chess_board.board_spaces[col+"1"].center_y - square_size
-            chess_board.col_labels[col].font_size = font_size
+            self.chess_board.col_labels[col].y         = self.chess_board.board_spaces[col+"1"].center_y - square_size
+            self.chess_board.col_labels[col].font_size = font_size
         
         # Update the row label x/y positions
         for row in constants.board_row_labels:
             # Row label x position is position is 1 square to  the left of first column 1
-            chess_board.row_labels[row].x         = chess_board.board_spaces["A"+row].center_x - square_size
+            self.chess_board.row_labels[row].x         = self.chess_board.board_spaces["A"+row].center_x - square_size
             
             # Row label y position is same as the square to the right shifted by the text shift
-            chess_board.row_labels[row].y         = chess_board.board_spaces["A"+row].center_y - text_shift
+            self.chess_board.row_labels[row].y         = self.chess_board.board_spaces["A"+row].center_y - text_shift
                
-            chess_board.row_labels[row].font_size = font_size      
+            self.chess_board.row_labels[row].font_size = font_size      
 
         return
     
