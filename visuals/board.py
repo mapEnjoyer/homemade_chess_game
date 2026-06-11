@@ -74,7 +74,7 @@ class Board():
         for name in constants.space_names:
             
             # Update row_count 
-            row_count = int(name[1])
+            row_count = int(name[-1])
 
             # Create a space class for each space
             self.board_spaces[name] = _Board_Space(color = space_color)

@@ -150,8 +150,8 @@ class GameView(arcade.Window):
         y_start = x_pos = y_pos = square_size * 2.5
 
         for space in self.chess_board.board_spaces:
-            # Update  row count
-            row_count = int(space[1])
+            # Update row count
+            row_count = int(space[-1])
 
             # Update space positions relative to window size
             self.chess_board.board_spaces[space].center_x = x_pos
