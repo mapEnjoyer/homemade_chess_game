@@ -80,13 +80,13 @@ class Board():
             self.board_spaces[name] = _Board_Space(color = space_color)
 
             if row_count != 8:
-                if space_color == arcade.color.BLACK:
+                if space_color == arcade.color.BISTRE:
                     # Swap color to tan
                     space_color = arcade.color.TAN
 
                 else:
                     # Swap color back to black
-                    space_color = arcade.color.BLACK
+                    space_color = arcade.color.BISTRE
 
         return
 
