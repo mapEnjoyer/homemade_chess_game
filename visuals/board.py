@@ -183,5 +183,6 @@ class _Board_Space():
         Returns:
             None
         """
+        # self.length used as both height and width args to ensure square shape
         arcade.draw_rect_filled(arcade.rect.XYWH(self.center_x, self.center_y, self.length, self.length), self.color)
         return
