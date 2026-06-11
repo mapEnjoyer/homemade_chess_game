@@ -57,8 +57,8 @@ class Board():
             None          
         """
 
-        # A1 is black on chess board
-        space_color = arcade.color.BLACK
+        # A1 is brown on chess board
+        space_color = arcade.color.BISTRE
         row_count = 0
 
         for name in constants.space_names:
