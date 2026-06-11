@@ -24,7 +24,6 @@ Function Name: main
 """
 if __name__ == "__main__":
     # Initialize the application window
-    window.window_init()
-
+    game_window = window.GameView()
     arcade.run()
     

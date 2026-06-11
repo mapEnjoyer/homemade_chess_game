@@ -31,6 +31,7 @@ class GameView(arcade.Window):
             - Initializes the saved prev_width/prev_height
             - Sets the background color
             - Initializes the chess board
+            - Runs setup
 
         Args:
             None
@@ -58,6 +59,9 @@ class GameView(arcade.Window):
         visuals_path = Path(__file__).parent
 
         # TODO: Load textures and sprites
+
+        # Run setup
+        self.setup()
 
         return
 
@@ -191,22 +195,4 @@ class GameView(arcade.Window):
             self.chess_board.row_labels[row].font_size = font_size      
 
         return
-    
-"""
-Function Name: window_init
-
-    Initializes the window containing game visuals
-
-    Args:
-        None
-
-    Returns:
-        None
-"""
-def window_init():
-    # Create a instance of the GameView class
-    window = GameView()
-    window.setup()
-
-    return
 
