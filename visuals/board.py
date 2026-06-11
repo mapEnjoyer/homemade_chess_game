@@ -26,15 +26,15 @@ class Board():
 
         # Dictonary containing all board spaces.
         # {"A1" : _Board_Space A1; "A2": _Board_Space A2; ...}
-        self.board_spaces = {}
+        self.board_spaces:dict[str, _Board_Space] = {}
 
         # Dictionary containing all column label text objects
         # {"A": Text A; "B": Text B; ...}
-        self.col_labels = {}
+        self.col_labels:dict[str, arcade.Text] = {}
 
         # Dictionary containing all row label text objects
         # {"1": Text 1; "2": Text 2; ...}
-        self.row_labels = {}        
+        self.row_labels:dict[str, arcade.Text] = {}        
 
         # A1 is black on chess board
         space_color = arcade.color.BLACK
