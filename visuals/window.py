@@ -9,6 +9,7 @@ Date: 05/30/26
     creating and maintaining the window settings for the chess game.  
 """
 import arcade
+import constants
 from pathlib import Path
 from visuals import board
 
@@ -165,7 +166,7 @@ class GameView(arcade.Window):
         text_shift = font_size / 2
 
         # Update the column label x/y positions and font size
-        for col in board.board_col_labels:
+        for col in constants.board_col_labels:
             # Column label x position is the same as the square above it shifted by the text_shift
             chess_board.col_labels[col].x         = chess_board.board_spaces[col+"1"].center_x - text_shift
 
@@ -174,7 +175,7 @@ class GameView(arcade.Window):
             chess_board.col_labels[col].font_size = font_size
         
         # Update the row label x/y positions
-        for row in board.board_row_labels:
+        for row in constants.board_row_labels:
             # Row label x position is position is 1 square to  the left of first column 1
             chess_board.row_labels[row].x         = chess_board.board_spaces["A"+row].center_x - square_size
             

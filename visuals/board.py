@@ -10,6 +10,7 @@ Date: 05/30/26
 """
 
 import arcade
+import constants
 
 class board():
     """
@@ -39,7 +40,7 @@ class board():
         space_color = arcade.color.BLACK
         row_count = 0
 
-        for name in space_names:
+        for name in constants.space_names:
             
             # Update row_count 
             row_count = int(name[1])
@@ -56,13 +57,13 @@ class board():
                     # Swap color back to black
                     space_color = arcade.color.BLACK
 
-        for row in board_row_labels:
+        for row in constants.board_row_labels:
             # Create text objects for each row lable
             # Don't worry about text position, its up
             # to the window to set the positions before drawing
             self.row_labels[row] = arcade.Text(text=row, x = 0, y = 0, color=arcade.color.BLACK, align="center")
 
-        for col in board_col_labels:
+        for col in constants.board_col_labels:
             # Create text objects for each row lable
             # Don't worry about text position, its up
             # to the window to set the positions before drawing
