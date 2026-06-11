@@ -175,20 +175,19 @@ class GameView(arcade.Window):
         # Update the column label x/y positions and font size
         for col in constants.board_col_labels:
             # Column label x position is the same as the square above it shifted by the text_shift
-            self.chess_board.col_labels[col].x         = self.chess_board.board_spaces[col+"1"].center_x - text_shift
+            self.chess_board.col_labels[col].x = self.chess_board.board_spaces[col+"1"].center_x - text_shift
 
             # Column label y position is 1 square below the first 1
-            self.chess_board.col_labels[col].y         = self.chess_board.board_spaces[col+"1"].center_y - square_size
+            self.chess_board.col_labels[col].y = self.chess_board.board_spaces[col+"1"].center_y - square_size
             self.chess_board.col_labels[col].font_size = font_size
         
         # Update the row label x/y positions
         for row in constants.board_row_labels:
             # Row label x position is position is 1 square to  the left of first column 1
-            self.chess_board.row_labels[row].x         = self.chess_board.board_spaces["A"+row].center_x - square_size
+            self.chess_board.row_labels[row].x = self.chess_board.board_spaces["A"+row].center_x - square_size
             
             # Row label y position is same as the square to the right shifted by the text shift
-            self.chess_board.row_labels[row].y         = self.chess_board.board_spaces["A"+row].center_y - text_shift
-               
+            self.chess_board.row_labels[row].y = self.chess_board.board_spaces["A"+row].center_y - text_shift
             self.chess_board.row_labels[row].font_size = font_size      
 
         return
