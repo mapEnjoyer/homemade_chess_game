@@ -73,7 +73,8 @@ class GameView(arcade.Window):
         """
         # Update positions of all objects drawn on screen
         self.__update_screen_positions()
-        pass
+        
+        return
 
     def on_draw(self):
         """
@@ -96,7 +97,7 @@ class GameView(arcade.Window):
 
         # Code to draw other things will go here
 
-        if self.prev_height != self.height or self.prev_width != self.width:
+        if min(self.prev_height, self.prev_width) != min(self.height, self.width):
             # Screen size has changed, update positions of all on screen objects
             self.__update_screen_positions()
 
@@ -143,10 +144,7 @@ class GameView(arcade.Window):
 
         # Scale the square size relative to the window
         # Chess board requires 8x8 squares, we use a factor of 1/12th to give margins
-        if self.width <= self.height:
-            square_size = self.width/12 
-        else:
-            square_size = self.height/12
+        square_size = min(self.width, self.height)/12
     
         # Set staring X/Y coordinates (center of square x = 2, y = 2 on our imaginary 12x12 grid)
         y_start = x_pos = y_pos = square_size * 2.5
