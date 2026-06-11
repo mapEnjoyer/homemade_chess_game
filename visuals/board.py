@@ -15,14 +15,24 @@ import constants
 class Board():
     """
     Board class. Used to access all spaces on the board.
-    Args:
-        None
 
-    Returns:
-        None    
+    Attributes:
+        - board_spaces: Dictionary containing all 64 board space objects
+        - col_labels: Dictonary containing 8 column label text objects
+        - row_labels: Dictionary containing 8 row label text objects
     """
 
     def __init__(self):
+        """
+        Initializes the board object by creating the board spaces, row and 
+        column dictionaries and populating them with their necessary objects.
+        
+        Args:
+            None
+
+        Returns:
+            None    
+        """
 
         # Dictonary containing all board spaces.
         # {"A1" : _Board_Space A1; "A2": _Board_Space A2; ...}
@@ -134,15 +144,11 @@ class _Board_Space():
     Board space class. Manages each space on the board, 
     and allows pieces to know where they are on the board.
 
-    Args:
-        center_x: Center x position of the space
-        center_y: Center y position of the space
-        length:   Length of square
-        color:    Color of the square
-
-    Returns:
-        None
-
+    Attributes:
+        - center_x: Square's center x position in the window
+        - center_y: Square's center y position in the window
+        - length: Length of the sqaure edge
+        - color: Color of the sqaure
     """
     
     def __init__(self, center_x: float = 0, center_y: float = 0, length: float = 0, color: arcade.color = arcade.color.WHITE):

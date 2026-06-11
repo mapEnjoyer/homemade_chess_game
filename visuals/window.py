@@ -24,14 +24,26 @@ chess_board = board.Board()
 class GameView(arcade.Window):
     """
     Main application class. Handles visuals for the game
-    Args:
-        None
 
-    Returns:
-        None
+    Attributes:
+        - prev_width: Width of the screen when it was last drawn
+        - prev_height: Height of the screen when it was last drawn
+        - background_color: Color of the background
     """
 
     def __init__(self):
+        """
+        Initializes the game window by performing the following steps:
+            - Creates the window
+            - Initializes the saved prev_width/prev_height
+            - Sets the background color
+
+        Args:
+            None
+
+        Returns:
+            None  
+        """
 
         # Call the parent class to set up the window
         # TODO: Probably want to save these settings in a user_config.json 
