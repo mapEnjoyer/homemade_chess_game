@@ -19,7 +19,7 @@ WINDOW_HEIGHT = 1080
 WINDOW_TITLE = "EAK's Chess Game"
 
 # Chess board object
-chess_board = board.board()
+chess_board = board.Board()
 
 class GameView(arcade.Window):
     """

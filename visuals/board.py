@@ -12,7 +12,7 @@ Date: 05/30/26
 import arcade
 import constants
 
-class board():
+class Board():
     """
     Board class. Used to access all spaces on the board.
     Args:
@@ -25,7 +25,7 @@ class board():
     def __init__(self):
 
         # Dictonary containing all board spaces.
-        # {"A1" : _board_space A1; "A2": _board_space A2; ...}
+        # {"A1" : _Board_Space A1; "A2": _Board_Space A2; ...}
         self.board_spaces = {}
 
         # Dictionary containing all column label text objects
@@ -46,7 +46,7 @@ class board():
             row_count = int(name[1])
 
             # Create a space class for each space
-            self.board_spaces[name] = _board_space(color = space_color)
+            self.board_spaces[name] = _Board_Space(color = space_color)
 
             if row_count != 8:
                 if space_color == arcade.color.BLACK:
@@ -92,7 +92,7 @@ class board():
         for row in self.row_labels:
             self.row_labels[row].draw()        
         
-class _board_space():
+class _Board_Space():
     """
     Board space class. Manages each space on the board, 
     and allows pieces to know where they are on the board.
