@@ -34,7 +34,28 @@ class Board():
 
         # Dictionary containing all row label text objects
         # {"1": Text 1; "2": Text 2; ...}
-        self.row_labels:dict[str, arcade.Text] = {}        
+        self.row_labels:dict[str, arcade.Text] = {}
+
+        # Initialize chess board squares
+        self.__init_squares()
+
+        # Initialize the chess board labels
+        self.__init_labels()
+
+        return
+
+    def __init_squares(self):
+        """
+        Initializes the board squares by creating the object, populating the board_spaces 
+        dictionary and assigning the space color. It does NOT assign their x/y positions 
+        as it is up to the window to do so.
+
+        Args: 
+            None
+
+        Returns:
+            None          
+        """
 
         # A1 is black on chess board
         space_color = arcade.color.BLACK
@@ -57,6 +78,20 @@ class Board():
                     # Swap color back to black
                     space_color = arcade.color.BLACK
 
+        return
+
+    def __init_labels(self):
+        """
+        Initializes the board labels by creating the object, assigning it to the dictionary and 
+        setting the color to black. It does NOT assign their x/y positions as it is up to the 
+        window to do so.
+
+        Args: 
+            None
+
+        Returns:
+            None 
+        """
         for row in constants.board_row_labels:
             # Create text objects for each row lable
             # Don't worry about text position, its up
@@ -69,6 +104,8 @@ class Board():
             # to the window to set the positions before drawing
             self.col_labels[col] = arcade.Text(text=col, x = 0, y = 0, color=arcade.color.BLACK, align="center")
 
+        return
+    
     def draw_board(self):
         """ 
         Draws the chess board on screen by drawing each square,
