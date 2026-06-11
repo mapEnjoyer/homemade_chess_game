@@ -30,6 +30,7 @@ class GameView(arcade.Window):
             - Creates the window
             - Initializes the saved prev_width/prev_height
             - Sets the background color
+            - Initializes the chess board
 
         Args:
             None
@@ -54,7 +55,7 @@ class GameView(arcade.Window):
         self.chess_board = board.Board()
 
         # Set path to visuals
-        visuals_path = Path.cwd()._str + '/visuals'
+        visuals_path = Path(__file__).parent
 
         # TODO: Load textures and sprites
 
