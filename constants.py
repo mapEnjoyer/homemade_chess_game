@@ -25,3 +25,8 @@ board_col_labels:Final = ["A", "B", "C", "D", "E", "F", "G", "H"]
 
 # List of board row labels as strings
 board_row_labels:Final = ["1", "2", "3", "4", "5", "6", "7", "8"]
+
+# Window Constants
+WINDOW_WIDTH = 1920
+WINDOW_HEIGHT = 1080
+WINDOW_TITLE = "EAK's Chess Game"

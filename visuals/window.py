@@ -13,11 +13,6 @@ import constants
 from pathlib import Path
 from visuals import board
 
-# Window Constants
-WINDOW_WIDTH = 1920
-WINDOW_HEIGHT = 1080
-WINDOW_TITLE = "EAK's Chess Game"
-
 # Chess board object
 chess_board = board.Board()
 
@@ -47,12 +42,12 @@ class GameView(arcade.Window):
 
         # Call the parent class to set up the window
         # TODO: Probably want to save these settings in a user_config.json 
-        super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, resizable=True)
+        super().__init__(constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT, constants.WINDOW_TITLE, resizable=True)
 
         # Initialize "previous" screen sizes. Used for determining if 
         # screen size has changed and position values need calculated
-        self.prev_width  = WINDOW_WIDTH
-        self.prev_height = WINDOW_HEIGHT
+        self.prev_width  = constants.WINDOW_WIDTH
+        self.prev_height = constants.WINDOW_HEIGHT
 
         # Set window settings
         self.background_color = arcade.csscolor.DARK_OLIVE_GREEN # Background color
