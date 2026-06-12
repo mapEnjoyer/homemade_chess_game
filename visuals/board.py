@@ -144,17 +144,16 @@ class Board():
             None         
         """
         # Create the A2-H2 pawns
-        text_file_name = "white_pawn.jpeg"
-        text_file_path = Path(__file__).parent / "textures" / text_file_name
+        text_file_path = Path(__file__).parent / "textures" / constants.white_pawn_image_name
         
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["A2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.png'))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["B2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.png'))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["C2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.png'))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["D2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.png'))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["E2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.png'))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["F2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.png'))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["G2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.png'))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["H2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.png'))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["A2"], text_file_path.__str__()))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["B2"], text_file_path.__str__()))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["C2"], text_file_path.__str__()))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["D2"], text_file_path.__str__()))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["E2"], text_file_path.__str__()))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["F2"], text_file_path.__str__()))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["G2"], text_file_path.__str__()))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["H2"], text_file_path.__str__()))
 
         # After each piece is created, add its sprite to the sprite list so they can be drawn each frame
         for piece in self.white_pieces:

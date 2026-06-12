@@ -31,6 +31,7 @@ WINDOW_WIDTH = 1920
 WINDOW_HEIGHT = 1080
 WINDOW_TITLE = "EAK's Chess Game"
 
-# Pawn texture image size
+# Pawn texture image constants
+white_pawn_image_name = "white_pawn.png"
 pawn_image_width = 1920
 pawn_image_height = 1920
