@@ -7,6 +7,7 @@ Date: 05/30/26
 @brief: 
     This file contains class/logic for pawns.
 """
+import constants
 import arcade
 from visuals import board
 
@@ -39,10 +40,11 @@ class Pawn():
         # Update the pawn sprite's position to match the square
         self.sprite.center_x = self.occupied_square.center_x
         self.sprite.center_y = self.occupied_square.center_y
-        self.sprite.scale = 0.04
-        # # Update the sprite's scale to always fit in the square
-        # try:
-        #     self.sprite.scale = max(self.sprite.height, self.sprite.width)/self.occupied_square.length
-        # except:
-        #     # Probably tried to divide by 0
-        #     self.sprite.scale = 1
+        # Update the sprite's scale to always fit in the square
+        try:
+            self.sprite.scale = self.occupied_square.length/constants.pawn_image_width
+        except:
+            # Probably tried to divide by 0
+            self.sprite.scale = 1
+
+        return

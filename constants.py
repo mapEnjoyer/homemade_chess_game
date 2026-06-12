@@ -30,3 +30,7 @@ board_row_labels:Final = ["1", "2", "3", "4", "5", "6", "7", "8"]
 WINDOW_WIDTH = 1920
 WINDOW_HEIGHT = 1080
 WINDOW_TITLE = "EAK's Chess Game"
+
+# Pawn texture image size
+pawn_image_width = 1920
+pawn_image_height = 1920
