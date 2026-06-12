@@ -11,7 +11,8 @@ Date: 05/30/26
 
 import arcade
 import constants
-
+from pieces import pawn
+from pathlib import Path
 class Board():
     """
     Board class. Used to access all spaces on the board.
@@ -20,6 +21,8 @@ class Board():
         - board_spaces: Dictionary containing all 64 board space objects
         - col_labels: Dictonary containing 8 column label text objects
         - row_labels: Dictionary containing 8 row label text objects
+        - white_pieces: List of all white pieces currently on the board. As pieces are removed, they are popped from the list.
+        - black_pieces: List of all black pieces currently on the board. As pieces are removed, they are popped from the list.
     """
 
     def __init__(self):
@@ -46,11 +49,25 @@ class Board():
         # {"1": Text 1; "2": Text 2; ...}
         self.row_labels:dict[str, arcade.Text] = {}
 
+        # List containing all white pieces on board
+        self.white_pieces = []
+
+        # List containing all black pieces on board
+        self.black_pieces = []
+
+        # Sprite list containing all sprites on the board
+        self.sprite_list = arcade.SpriteList()
+
         # Initialize chess board squares
         self.__init_squares()
 
         # Initialize the chess board labels
         self.__init_labels()
+
+        # Initialize white pieces
+        self.__init_white_pieces()
+
+        # TODO: Init black pieces
 
         return
 
@@ -116,6 +133,35 @@ class Board():
 
         return
     
+    def __init_white_pieces(self):
+        """
+        Initializes the white pieces by creating objects for each piece inside the associated piece list.
+
+        Args: 
+            None
+
+        Returns:
+            None         
+        """
+        # Create the A2-H2 pawns
+        text_file_name = "white_pawn.jpeg"
+        text_file_path = Path(__file__).parent / "textures" / text_file_name
+        
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["A2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.jpg'))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["B2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.jpg'))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["C2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.jpg'))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["D2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.jpg'))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["E2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.jpg'))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["F2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.jpg'))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["G2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.jpg'))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["H2"], 'C://int//sec//Projects//homemade_chess_game//visuals//textures//white_pawn.jpg'))
+
+        # After each piece is created, add its sprite to the sprite list so they can be drawn each frame
+        for piece in self.white_pieces:
+            self.sprite_list.append(piece.sprite)
+
+        return
+    
     def draw_board(self):
         """ 
         Draws the chess board on screen by drawing each square,
@@ -137,7 +183,10 @@ class Board():
 
         # Draw the row labels
         for row in self.row_labels:
-            self.row_labels[row].draw()        
+            self.row_labels[row].draw()
+
+        # Draw the pieces
+        self.sprite_list.draw()
         
 class _Board_Space():
     """
