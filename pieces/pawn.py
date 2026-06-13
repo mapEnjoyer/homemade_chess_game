@@ -42,7 +42,7 @@ class Pawn():
         self.sprite.center_y = self.occupied_square.center_y
         # Update the sprite's scale to always fit in the square
         try:
-            self.sprite.scale = self.occupied_square.length/constants.pawn_image_width
+            self.sprite.scale = self.occupied_square.length/constants.piece_image_width
         except:
             # Probably tried to divide by 0
             self.sprite.scale = 1
