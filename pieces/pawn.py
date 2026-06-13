@@ -9,7 +9,7 @@ Date: 05/30/26
 """
 import constants
 import arcade
-from visuals import board
+from visuals import board, board_space
 
 class Pawn():
     """
@@ -17,7 +17,7 @@ class Pawn():
     Attributes:
         - TODO:
     """
-    def __init__(self, space: board._Board_Space, texture_path:str):
+    def __init__(self, space: board_space.Board_Space, texture_path:str):
         """
         Initializes pawn object by performing the following steps:
             
@@ -30,7 +30,7 @@ class Pawn():
 
         return
     
-    def update_space(self, space: board._Board_Space):
+    def update_space(self, space: board_space.Board_Space):
         """
         Updates the space the pawn occupies
         """

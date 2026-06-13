@@ -11,6 +11,7 @@ Date: 05/30/26
 
 import arcade
 import constants
+from visuals import board_space
 from pieces import pawn
 from pathlib import Path
 class Board():
@@ -38,8 +39,8 @@ class Board():
         """
 
         # Dictonary containing all board spaces.
-        # {"A1" : _Board_Space A1; "A2": _Board_Space A2; ...}
-        self.board_spaces:dict[str, _Board_Space] = {}
+        # {"A1" : board_space.Board_Space A1; "A2": board_space.Board_Space A2; ...}
+        self.board_spaces:dict[str, board_space.Board_Space] = {}
 
         # Dictionary containing all column label text objects
         # {"A": Text A; "B": Text B; ...}
@@ -94,7 +95,7 @@ class Board():
             row_count = int(name[-1])
 
             # Create a space class for each space
-            self.board_spaces[name] = _Board_Space(color = space_color)
+            self.board_spaces[name] = board_space.Board_Space(color = space_color)
 
             if row_count != 8:
                 if space_color == arcade.color.BISTRE:
@@ -186,51 +187,5 @@ class Board():
 
         # Draw the pieces
         self.sprite_list.draw()
-        
-class _Board_Space():
-    """
-    Board space class. Manages each space on the board, 
-    and allows pieces to know where they are on the board.
 
-    Attributes:
-        - center_x: Square's center x position in the window
-        - center_y: Square's center y position in the window
-        - length: Length of the sqaure edge
-        - color: Color of the sqaure
-    """
-    
-    def __init__(self, center_x: float = 0, center_y: float = 0, length: float = 0, color: arcade.color = arcade.color.WHITE):
-        """
-        Initializes space object
-        
-        Args:
-            center_x: Center x position of the space
-            center_y: Center y position of the space
-            length:   Length of square
-            color:    Color of the square
-
-        Returns:
-            None
-        """
-        
-        # Assign property values
-        self.center_x = center_x
-        self.center_y = center_y
-        self.length = length
-        self.color = color
-
-        return
-
-    def draw_square(self):
-        """
-        Draws the square at its position values
-
-        Args:,
-            None
-
-        Returns:
-            None
-        """
-        # self.length used as both height and width args to ensure square shape
-        arcade.draw_rect_filled(arcade.rect.XYWH(self.center_x, self.center_y, self.length, self.length), self.color)
         return
