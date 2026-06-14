@@ -34,9 +34,12 @@ WINDOW_TITLE = "EAK's Chess Game"
 # Piece texture image constants
 white_pawn_image_name = "white_pawn.png"
 white_rook_image_name = "white_rook.png"
+white_knight_image_name = "white_knight.png"
 
 # Piece image size constants
 pawn_image_width = 110
 pawn_image_height = 110
 rook_image_width = 110
 rook_image_height = 110
+knight_image_width = 110
+knight_image_height = 110

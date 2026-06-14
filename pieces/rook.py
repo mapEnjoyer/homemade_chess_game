@@ -9,7 +9,7 @@ Date: 05/30/26
 """
 import constants
 import arcade
-from visuals import board, board_space
+from visuals import board_space
 
 class Rook():
     """
