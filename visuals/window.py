@@ -55,11 +55,6 @@ class GameView(arcade.Window):
         # Chess board object
         self.chess_board = board.Board()
 
-        # Set path to visuals
-        visuals_path = Path(__file__).parent
-
-        # TODO: Load textures and sprites
-
         # Run setup
         self.setup()
 
