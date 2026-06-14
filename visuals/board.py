@@ -12,7 +12,7 @@ Date: 05/30/26
 import arcade
 import constants
 from visuals import board_space
-from pieces import pawn, rook, knight, bishop, queen
+from pieces import pawn, rook, knight, bishop, queen, king
 from pathlib import Path
 class Board():
     """
@@ -177,7 +177,12 @@ class Board():
         # Create D1 queen
         text_file_path = Path(__file__).parent / "textures" / constants.white_queen_image_name
 
-        self.white_pieces.append(bishop.Bishop(self.board_spaces["D1"], text_file_path.__str__()))
+        self.white_pieces.append(queen.Queen(self.board_spaces["D1"], text_file_path.__str__()))
+
+        # Create E1 king
+        text_file_path = Path(__file__).parent / "textures" / constants.white_king_image_name
+
+        self.white_pieces.append(king.King(self.board_spaces["E1"], text_file_path.__str__()))        
 
         # After each piece is created, add its sprite to the sprite list so they can be drawn each frame
         for piece in self.white_pieces:

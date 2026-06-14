@@ -37,6 +37,7 @@ white_rook_image_name = "white_rook.png"
 white_knight_image_name = "white_knight.png"
 white_bishop_image_name = "white_bishop.png"
 white_queen_image_name = "white_queen.png"
+white_king_image_name = "white_king.png"
 
 # Piece image size constants
 pawn_image_width = 110
@@ -49,3 +50,5 @@ bishop_image_width = 120
 bishop_image_height = 125
 queen_image_width = 125
 queen_image_height = 125
+king_image_width = 125
+king_image_height = 125
