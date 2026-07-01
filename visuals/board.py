@@ -219,6 +219,11 @@ class Board():
         self.black_pieces.append(rook.Rook(self.board_spaces["A8"], text_file_path.__str__()))
         self.black_pieces.append(rook.Rook(self.board_spaces["H8"], text_file_path.__str__()))
 
+        # Create E8 king
+        text_file_path = Path(__file__).parent / "textures" / constants.black_king_image_name
+        
+        self.black_pieces.append(king.King(self.board_spaces["E8"], text_file_path.__str__()))        
+
         # After each piece is created, add its sprite to the sprite list so they can be drawn each frame
         for piece in self.black_pieces:
             self.sprite_list.append(piece.sprite)
