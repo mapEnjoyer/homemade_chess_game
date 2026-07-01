@@ -40,6 +40,7 @@ white_queen_image_name = "white_queen.png"
 white_king_image_name = "white_king.png"
 
 black_pawn_image_name = "black_pawn.png"
+black_rook_image_name = "black_rook.png"
 
 # Piece image size constants
 pawn_image_width = 110
