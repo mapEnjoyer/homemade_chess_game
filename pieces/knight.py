@@ -13,15 +13,31 @@ from visuals import board_space
 
 class Knight():
     """
-    Knight class. TODO: Update description
+    Knight class. Allows for the creation of knight pieces, the creation of 
+    their sprite objects and the ability to move around the chess board. 
     Attributes:
-        - TODO:
+        - occupied_space: board space object. Used to set which square the
+                          piece is on and draw the sprite on the screen. 
+
+        - sprite: arcade sprite object. Used to draw the piece on the board.
+                  Requires a valid texture path.
     """
     def __init__(self, space: board_space.Board_Space, texture_path:str):
         """
         Initializes knight object by performing the following steps:
-            
+            - Creating sprite
+            - Setting occupied square
+
+        Args:
+            space: Board_Space object the piece occupies
+            texture_path: str to image file used for piece sprite.
+
+        Returns:
+            None
         """
+        # Create occupied_square attribute (will be set in update_space())
+        self.occupied_square = None
+
         # Create the knight sprite from the texture path (TODO: error handling on path?)
         self.sprite = arcade.Sprite(texture_path)
 
@@ -33,6 +49,12 @@ class Knight():
     def update_space(self, space: board_space.Board_Space):
         """
         Updates the space the knight occupies
+
+        Args:
+            space: Board_Space object the piece occupies
+
+        Returns:
+            None
         """
         # Save the square the knight occupies 
         self.occupied_square = space
