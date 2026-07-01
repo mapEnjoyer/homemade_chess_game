@@ -69,6 +69,7 @@ class Board():
         self.__init_white_pieces()
 
         # TODO: Init black pieces
+        self.__init_black_pieces()
 
         return
 
@@ -186,6 +187,34 @@ class Board():
 
         # After each piece is created, add its sprite to the sprite list so they can be drawn each frame
         for piece in self.white_pieces:
+            self.sprite_list.append(piece.sprite)
+
+        return
+    
+    def __init_black_pieces(self):
+        """
+        Initializes the black pieces by creating objects for each piece inside the associated piece list.
+
+        Args: 
+            None
+
+        Returns:
+            None         
+        """
+        # Create the A7-H7 pawns
+        text_file_path = Path(__file__).parent / "textures" / constants.black_pawn_image_name
+
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["A7"], text_file_path.__str__()))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["B7"], text_file_path.__str__()))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["C7"], text_file_path.__str__()))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["D7"], text_file_path.__str__()))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["E7"], text_file_path.__str__()))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["F7"], text_file_path.__str__()))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["G7"], text_file_path.__str__()))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["H7"], text_file_path.__str__()))
+
+        # After each piece is created, add its sprite to the sprite list so they can be drawn each frame
+        for piece in self.black_pieces:
             self.sprite_list.append(piece.sprite)
 
         return
