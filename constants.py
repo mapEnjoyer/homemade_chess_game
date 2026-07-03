@@ -43,7 +43,7 @@ black_pawn_image_name = "black_pawn.png"
 black_rook_image_name = "black_rook.png"
 black_knight_image_name = "black_knight.png"
 black_bishop_image_name = "black_bishop.png"
-
+black_queen_image_name = "black_queen.png"
 black_king_image_name = "black_king.png"
 
 # Piece image size constants
