@@ -223,7 +223,13 @@ class Board():
         text_file_path = Path(__file__).parent / "textures" / constants.black_knight_image_name
 
         self.black_pieces.append(knight.Knight(self.board_spaces["B8"], text_file_path.__str__()))
-        self.black_pieces.append(knight.Knight(self.board_spaces["G8"], text_file_path.__str__()))        
+        self.black_pieces.append(knight.Knight(self.board_spaces["G8"], text_file_path.__str__()))
+
+        # Create C8/F8 bishops
+        text_file_path = Path(__file__).parent / "textures" / constants.black_bishop_image_name
+
+        self.black_pieces.append(bishop.Bishop(self.board_spaces["C8"], text_file_path.__str__()))
+        self.black_pieces.append(bishop.Bishop(self.board_spaces["F8"], text_file_path.__str__()))   
 
         # Create E8 king
         text_file_path = Path(__file__).parent / "textures" / constants.black_king_image_name
