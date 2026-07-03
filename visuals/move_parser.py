@@ -43,7 +43,13 @@ class MoveParser():
 
         # x, y and width does not matter as the window will have 
         # to reassign these settings based on the size of the window.
-        self.text_entry = pyglet.gui.TextEntry(text="Test", x=0, y=0, width=300, batch=self.text_batch)
+        self.text_entry = pyglet.gui.TextEntry(text="Test", 
+                                               x=0, 
+                                               y=0, 
+                                               width=300, 
+                                               batch=self.text_batch, 
+                                               color=arcade.csscolor.BLACK, 
+                                               text_color=arcade.csscolor.WHITE)
         
         # Need to call push_handlers of accompanying 
         # window to get text box to react to user. 

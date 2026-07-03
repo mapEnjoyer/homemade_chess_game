@@ -207,14 +207,14 @@ class GameView(arcade.Window):
             self.chess_board.row_labels[row].font_size = font_size 
 
         # Update the move parser text box size and location
-        # Move parser x location should start one square width away from last square
-        self.move_parser.text_entry.x = x_pos + square_size
+        # Move parser x location should start at last square
+        self.move_parser.text_entry.x = x_pos
 
         # Move parser y location should be in line with row 1 of chess board
         self.move_parser.text_entry.y = y_start
 
-        # Move parser width should always be 1/10th of window size
-        self.move_parser.text_entry.width =  self.width/10 
+        # Move parser width should always be 1/4th of window size
+        self.move_parser.text_entry.width =  self.width/4 
 
         return
 
