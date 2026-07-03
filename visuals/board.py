@@ -219,6 +219,12 @@ class Board():
         self.black_pieces.append(rook.Rook(self.board_spaces["A8"], text_file_path.__str__()))
         self.black_pieces.append(rook.Rook(self.board_spaces["H8"], text_file_path.__str__()))
 
+        # Create B8/G8 knights
+        text_file_path = Path(__file__).parent / "textures" / constants.black_knight_image_name
+
+        self.black_pieces.append(knight.Knight(self.board_spaces["B8"], text_file_path.__str__()))
+        self.black_pieces.append(knight.Knight(self.board_spaces["G8"], text_file_path.__str__()))        
+
         # Create E8 king
         text_file_path = Path(__file__).parent / "textures" / constants.black_king_image_name
         

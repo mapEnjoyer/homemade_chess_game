@@ -41,6 +41,7 @@ white_king_image_name = "white_king.png"
 
 black_pawn_image_name = "black_pawn.png"
 black_rook_image_name = "black_rook.png"
+black_knight_image_name = "black_knight.png"
 black_king_image_name = "black_king.png"
 
 # Piece image size constants
