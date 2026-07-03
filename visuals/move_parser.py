@@ -49,7 +49,8 @@ class MoveParser():
                                                width=300, 
                                                batch=self.text_batch, 
                                                color=arcade.csscolor.BLACK, 
-                                               text_color=arcade.csscolor.WHITE)
+                                               text_color=arcade.csscolor.WHITE,
+                                               caret_color=arcade.csscolor.WHITE)
         
         # Need to call push_handlers of accompanying 
         # window to get text box to react to user. 
