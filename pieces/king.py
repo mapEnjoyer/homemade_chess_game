@@ -7,11 +7,10 @@ Date: 05/30/26
 @brief: 
     This file contains class/logic for kings.
 """
-import constants
-import arcade
+from pieces import piece
 from visuals import board_space
 
-class King():
+class King(piece.Piece):
     """
     King class. Allows for the creation of king pieces, the creation of 
     their sprite objects and the ability to move around the chess board. 
@@ -21,8 +20,10 @@ class King():
 
         - sprite: arcade sprite object. Used to draw the piece on the board.
                   Requires a valid texture path.
+
+        - image_width: Width in pixels of the image used in the sprite.
     """
-    def __init__(self, space: board_space.Board_Space, texture_path:str):
+    def __init__(self, space: board_space.Board_Space, texture_path:str, image_width:int):
         """
         Initializes king object by performing the following steps:
             - Creating sprite
@@ -35,38 +36,7 @@ class King():
         Returns:
             None
         """
-        # Create occupied_square attribute (will be set in update_space())
-        self.occupied_square = None
-        
-        # Create the king sprite from the texture path (TODO: error handling on path?)
-        self.sprite = arcade.Sprite(texture_path)
-
-        # Set the occupying space
-        self.update_space(space)
-
-        return
-    
-    def update_space(self, space: board_space.Board_Space):
-        """
-        Updates the space the king occupies
-        
-        Args:
-            space: Board_Space object the piece occupies
-
-        Returns:
-            None
-        """
-        # Save the square the king occupies 
-        self.occupied_square = space
-
-        # Update the king sprite's position to match the square
-        self.sprite.center_x = self.occupied_square.center_x
-        self.sprite.center_y = self.occupied_square.center_y
-        # Update the sprite's scale to always fit in the square
-        try:
-            self.sprite.scale = self.occupied_square.length/constants.king_image_width
-        except:
-            # Probably tried to divide by 0
-            self.sprite.scale = 1
+        # Run parent class init
+        super().__init__(space, texture_path, image_width)
 
         return

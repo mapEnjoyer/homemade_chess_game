@@ -148,42 +148,42 @@ class Board():
         # Create the A2-H2 pawns
         text_file_path = Path(__file__).parent / "textures" / constants.white_pawn_image_name
         
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["A2"], text_file_path.__str__()))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["B2"], text_file_path.__str__()))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["C2"], text_file_path.__str__()))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["D2"], text_file_path.__str__()))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["E2"], text_file_path.__str__()))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["F2"], text_file_path.__str__()))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["G2"], text_file_path.__str__()))
-        self.white_pieces.append(pawn.Pawn(self.board_spaces["H2"], text_file_path.__str__()))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["A2"], text_file_path.__str__(), constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["B2"], text_file_path.__str__(), constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["C2"], text_file_path.__str__(), constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["D2"], text_file_path.__str__(), constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["E2"], text_file_path.__str__(), constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["F2"], text_file_path.__str__(), constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["G2"], text_file_path.__str__(), constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["H2"], text_file_path.__str__(), constants.pawn_image_width))
 
         # Create A1/H1 rooks
         text_file_path = Path(__file__).parent / "textures" / constants.white_rook_image_name
 
-        self.white_pieces.append(rook.Rook(self.board_spaces["A1"], text_file_path.__str__()))
-        self.white_pieces.append(rook.Rook(self.board_spaces["H1"], text_file_path.__str__()))
+        self.white_pieces.append(rook.Rook(self.board_spaces["A1"], text_file_path.__str__(), constants.rook_image_width))
+        self.white_pieces.append(rook.Rook(self.board_spaces["H1"], text_file_path.__str__(), constants.rook_image_width))
 
         # Create B1/G1 knights
         text_file_path = Path(__file__).parent / "textures" / constants.white_knight_image_name
 
-        self.white_pieces.append(knight.Knight(self.board_spaces["B1"], text_file_path.__str__()))
-        self.white_pieces.append(knight.Knight(self.board_spaces["G1"], text_file_path.__str__()))
+        self.white_pieces.append(knight.Knight(self.board_spaces["B1"], text_file_path.__str__(), constants.knight_image_width))
+        self.white_pieces.append(knight.Knight(self.board_spaces["G1"], text_file_path.__str__(), constants.knight_image_width))
 
         # Create C1/F1 bishops
         text_file_path = Path(__file__).parent / "textures" / constants.white_bishop_image_name
 
-        self.white_pieces.append(bishop.Bishop(self.board_spaces["C1"], text_file_path.__str__()))
-        self.white_pieces.append(bishop.Bishop(self.board_spaces["F1"], text_file_path.__str__()))
+        self.white_pieces.append(bishop.Bishop(self.board_spaces["C1"], text_file_path.__str__(), constants.bishop_image_width))
+        self.white_pieces.append(bishop.Bishop(self.board_spaces["F1"], text_file_path.__str__(), constants.bishop_image_width))
 
         # Create D1 queen
         text_file_path = Path(__file__).parent / "textures" / constants.white_queen_image_name
 
-        self.white_pieces.append(queen.Queen(self.board_spaces["D1"], text_file_path.__str__()))
+        self.white_pieces.append(queen.Queen(self.board_spaces["D1"], text_file_path.__str__(), constants.queen_image_width))
 
         # Create E1 king
         text_file_path = Path(__file__).parent / "textures" / constants.white_king_image_name
 
-        self.white_pieces.append(king.King(self.board_spaces["E1"], text_file_path.__str__()))        
+        self.white_pieces.append(king.King(self.board_spaces["E1"], text_file_path.__str__(), constants.king_image_width))
 
         # After each piece is created, add its sprite to the sprite list so they can be drawn each frame
         for piece in self.white_pieces:
@@ -204,42 +204,42 @@ class Board():
         # Create the A7-H7 pawns
         text_file_path = Path(__file__).parent / "textures" / constants.black_pawn_image_name
 
-        self.black_pieces.append(pawn.Pawn(self.board_spaces["A7"], text_file_path.__str__()))
-        self.black_pieces.append(pawn.Pawn(self.board_spaces["B7"], text_file_path.__str__()))
-        self.black_pieces.append(pawn.Pawn(self.board_spaces["C7"], text_file_path.__str__()))
-        self.black_pieces.append(pawn.Pawn(self.board_spaces["D7"], text_file_path.__str__()))
-        self.black_pieces.append(pawn.Pawn(self.board_spaces["E7"], text_file_path.__str__()))
-        self.black_pieces.append(pawn.Pawn(self.board_spaces["F7"], text_file_path.__str__()))
-        self.black_pieces.append(pawn.Pawn(self.board_spaces["G7"], text_file_path.__str__()))
-        self.black_pieces.append(pawn.Pawn(self.board_spaces["H7"], text_file_path.__str__()))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["A7"], text_file_path.__str__(), constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["B7"], text_file_path.__str__(), constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["C7"], text_file_path.__str__(), constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["D7"], text_file_path.__str__(), constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["E7"], text_file_path.__str__(), constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["F7"], text_file_path.__str__(), constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["G7"], text_file_path.__str__(), constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["H7"], text_file_path.__str__(), constants.pawn_image_width))
 
         # Create A8/H8 rooks
         text_file_path = Path(__file__).parent / "textures" / constants.black_rook_image_name
 
-        self.black_pieces.append(rook.Rook(self.board_spaces["A8"], text_file_path.__str__()))
-        self.black_pieces.append(rook.Rook(self.board_spaces["H8"], text_file_path.__str__()))
+        self.black_pieces.append(rook.Rook(self.board_spaces["A8"], text_file_path.__str__(), constants.rook_image_width))
+        self.black_pieces.append(rook.Rook(self.board_spaces["H8"], text_file_path.__str__(), constants.rook_image_width))
 
         # Create B8/G8 knights
         text_file_path = Path(__file__).parent / "textures" / constants.black_knight_image_name
 
-        self.black_pieces.append(knight.Knight(self.board_spaces["B8"], text_file_path.__str__()))
-        self.black_pieces.append(knight.Knight(self.board_spaces["G8"], text_file_path.__str__()))
+        self.black_pieces.append(knight.Knight(self.board_spaces["B8"], text_file_path.__str__(), constants.knight_image_width))
+        self.black_pieces.append(knight.Knight(self.board_spaces["G8"], text_file_path.__str__(), constants.knight_image_width))
 
         # Create C8/F8 bishops
         text_file_path = Path(__file__).parent / "textures" / constants.black_bishop_image_name
 
-        self.black_pieces.append(bishop.Bishop(self.board_spaces["C8"], text_file_path.__str__()))
-        self.black_pieces.append(bishop.Bishop(self.board_spaces["F8"], text_file_path.__str__()))   
+        self.black_pieces.append(bishop.Bishop(self.board_spaces["C8"], text_file_path.__str__(), constants.bishop_image_width))
+        self.black_pieces.append(bishop.Bishop(self.board_spaces["F8"], text_file_path.__str__(), constants.bishop_image_width))   
 
         # Create D8 queen
         text_file_path = Path(__file__).parent / "textures" / constants.black_queen_image_name
 
-        self.black_pieces.append(queen.Queen(self.board_spaces["D8"], text_file_path.__str__()))
+        self.black_pieces.append(queen.Queen(self.board_spaces["D8"], text_file_path.__str__(), constants.queen_image_width))
 
         # Create E8 king
         text_file_path = Path(__file__).parent / "textures" / constants.black_king_image_name
         
-        self.black_pieces.append(king.King(self.board_spaces["E8"], text_file_path.__str__()))        
+        self.black_pieces.append(king.King(self.board_spaces["E8"], text_file_path.__str__(), constants.king_image_width))        
 
         # After each piece is created, add its sprite to the sprite list so they can be drawn each frame
         for piece in self.black_pieces:
