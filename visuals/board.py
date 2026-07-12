@@ -100,7 +100,7 @@ class Board():
             row_count = int(name[-1])
 
             # Create a space class for each space
-            self.board_spaces[name] = board_space.Board_Space(color = space_color)
+            self.board_spaces[name] = board_space.Board_Space(color = space_color, name=name)
 
             if row_count != 8:
                 if space_color == arcade.color.BISTRE:

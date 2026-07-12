@@ -10,8 +10,9 @@ Date: 07/10/26
 import constants
 import arcade
 from visuals import board_space
+from abc import ABC, abstractmethod
 
-class Piece():
+class Piece(ABC):
     """
     Piece class. This class is intended to be used as the parent for the other
     pieces, not to be used on it's on.
@@ -23,6 +24,8 @@ class Piece():
                   Requires a valid texture path.
 
         - image_width: Width in pixels of the image used in the sprite.
+
+        - has_moved: Boolean indicator indicating if piece has moved before.
     """
     def __init__(self, space: board_space.Board_Space, texture_path:str, image_width:int):
         """
@@ -45,6 +48,9 @@ class Piece():
 
         # Save the image width
         self.image_width = image_width
+
+        # Set has moved indicator to false
+        self.has_moved = False
 
         # Set the occupying space
         self.update_space(space)
@@ -75,3 +81,8 @@ class Piece():
             self.sprite.scale = 1
 
         return
+    
+    # TODO: Restore
+    # @abstractmethod
+    # def is_move_valid(space:str):
+    #     pass
