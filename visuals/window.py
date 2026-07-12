@@ -109,6 +109,14 @@ class GameView(arcade.Window):
         self.prev_height = self.height
         self.prev_width  = self.width
 
+        if self.move_parser.piece_type is not None and self.move_parser.space is not None:
+            # Player move was input into move parser. Pass along to board
+            self.chess_board.handle_move(self.move_parser.piece_type, self.move_parser.space)
+
+            # Clear move parser after move is handled
+            self.move_parser.piece_type = None
+            self.move_parser.space = None
+
         # Draw the chess board
         self.chess_board.draw_board()
 

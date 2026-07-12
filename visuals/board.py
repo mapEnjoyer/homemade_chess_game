@@ -24,6 +24,7 @@ class Board():
         - row_labels: Dictionary containing 8 row label text objects
         - white_pieces: List of all white pieces currently on the board. As pieces are removed, they are popped from the list.
         - black_pieces: List of all black pieces currently on the board. As pieces are removed, they are popped from the list.
+        - player_turn: Indicates which players turn it is. Initialized to 'white'.
     """
 
     def __init__(self):
@@ -58,6 +59,9 @@ class Board():
 
         # Sprite list containing all sprites on the board
         self.sprite_list = arcade.SpriteList()
+
+        # Set starting player turn to 'white'
+        self.player_turn = 'white'
 
         # Initialize chess board squares
         self.__init_squares()
@@ -274,3 +278,50 @@ class Board():
         self.sprite_list.draw()
 
         return
+    
+    def handle_move(self, piece_type, space:str):
+        """
+        Handles incoming move by first determining if move is possible. If so,
+        the piece is moved to that square, resolving any captures at the destination.
+
+        Args: 
+            piece_type: type of piece being moved. Valid piece tpyes include:
+                - Pawn
+                - Rook
+                - Knight
+                - Bishop
+                - Queen
+                - King
+
+            space: space to move to. Space must match one of the spaces found in constants.space_names
+
+        Returns:
+            None   
+        """
+        try:
+            # Check that piece type is valid
+            if piece_type is not pawn.Pawn and \
+               piece_type is not rook.Rook and \
+               piece_type is not knight.Knight and \
+               piece_type is not bishop.Bishop and \
+               piece_type is not queen.Queen and \
+               piece_type is not king.King:
+                # TODO: raise exception
+                pass                
+
+
+            # Check that square is valid
+            if space not in constants.space_names:
+                # TODO: raise exception
+                pass
+
+            # Step 1: Check if piece move is valid first with how the piece behaves regardless of obstacles in the way.
+
+            # Step 2: Assuming the move is valid, check squares between the moves for obstacles.
+
+            # Step 3: Move the piece to the new square.
+
+            # Step 4: If a capture occured, remove the piece from the opposing players list of pieces.
+
+        except:
+            pass
