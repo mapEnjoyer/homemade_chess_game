@@ -52,6 +52,9 @@ class MoveParser():
                                                text_color=arcade.csscolor.WHITE,
                                                caret_color=arcade.csscolor.WHITE)
         
+        # Set "on_commit" handler to method used for text entry
+        self.text_entry.on_commit = self.parse_move_entry
+
         # Need to call push_handlers of accompanying 
         # window to get text box to react to user. 
         window.push_handlers(self.text_entry)
@@ -70,4 +73,18 @@ class MoveParser():
             None       
         """
         self.text_batch.draw()
+        return
+    
+    def parse_move_entry(self, widget: pyglet.gui.TextEntry, text: str):
+        """
+        Takes in move string and sends information to board regarding 
+        which piece type is being move and where it is trying to go.
+
+        Args:
+            None
+
+        Returns:
+            None          
+        """
+        print (text)
         return
