@@ -21,9 +21,10 @@ class Board_Space():
         - center_y: Square's center y position in the window
         - length: Length of the sqaure edge
         - color: Color of the sqaure
+        - name: Name of the square on the board (A1, A2...)
     """
     
-    def __init__(self, center_x: float = 0, center_y: float = 0, length: float = 0, color: arcade.color = arcade.color.WHITE):
+    def __init__(self, center_x: float = 0, center_y: float = 0, length: float = 0, color: arcade.color = arcade.color.WHITE, name: str = 'A1'):
         """
         Initializes space object
         
@@ -42,6 +43,7 @@ class Board_Space():
         self.center_y = center_y
         self.length = length
         self.color = color
+        self.name = name
 
         return
 
