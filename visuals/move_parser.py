@@ -12,6 +12,8 @@ Date: 07/03/26
 
 import pyglet
 import arcade
+import constants
+from pieces import pawn, rook, knight, bishop, queen, king
 
 class MoveParser():
     """
@@ -19,7 +21,10 @@ class MoveParser():
     for players to move pieces around the chess board.
 
     Attributes:
-        TBD
+        text_batch: Graphics batch the move parser widget is apart of. 
+        text_entry: Widget type the parser is apart of. 
+        piece_type: Type of piece to be moved next. Will be 'None' if no move is to be processed.
+        space: Space next move is referring to. Will be 'None' if no move is to be processed.
     """
 
     def __init__(self, window:arcade.Window):
@@ -34,6 +39,9 @@ class MoveParser():
         Returns:
             None
         """
+        # Initialize attributes
+        self.piece_type = None
+        self.space = None
     
         # Text entry window
         # The only way I could find to get the text box widget
@@ -43,7 +51,7 @@ class MoveParser():
 
         # x, y and width does not matter as the window will have 
         # to reassign these settings based on the size of the window.
-        self.text_entry = pyglet.gui.TextEntry(text="Test", 
+        self.text_entry = pyglet.gui.TextEntry(text="", 
                                                x=0, 
                                                y=0, 
                                                width=300, 
@@ -79,6 +87,8 @@ class MoveParser():
         """
         Takes in move string and sends information to board regarding 
         which piece type is being move and where it is trying to go.
+        This method is called whenever the user hits "enter" on the move
+        entry text box.
 
         Args:
             None
@@ -86,5 +96,98 @@ class MoveParser():
         Returns:
             None          
         """
-        print (text)
+
+        # Remove all white space from text
+        text = " ".join(text.split())
+
+        # Convert to upper case
+        text = text.upper()
+
+        try:
+            if len(text) == 2:
+                # Assume piece is of type 'pawn' as pawn moves do not 
+                # include the piece type in algebraic notation (ex: e4)
+                piece_type = pawn.Pawn
+
+            elif len(text) == 3:
+
+                if text[0] == 'R':
+                    # Piece is of type 'rook'
+                    piece_type = rook.Rook
+
+                elif text[0] == 'N':
+                    # Piece is of type 'knight'
+                    piece_type = knight.Knight
+
+                elif text[0] == 'B':
+                    # Piece is of type 'bishop'
+                    piece_type = bishop.Bishop
+
+                elif text[0] == 'Q':
+                    # Piece is of type 'queen'
+                    piece_type = queen.Queen
+
+                elif text[0] == 'K':
+                    # Piece is of type 'king'
+                    piece_type = king.King
+
+                else:
+                    # Invalid move entry, notify
+                    raise InvalidPieceTypeError()
+                
+            # Now that we have determined piece type, attempt to determine square
+            space = text[-2:]
+
+            if space not in constants.space_names:
+                raise InvalidSpaceError()
+
+        except InvalidPieceTypeError: 
+            # TODO: Show error message in game screen, not terminal
+            print (f'Invalid piece type! Valid piece types include "R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King. Pawn moves do not include a "P" (ex: E4).')
+
+        except InvalidSpaceError:
+            # TODO: Show error message in game screen, not terminal
+            print (f'Space does not exist on board! Use the row/column labels to determine square piece is moving to. Column letter always comes before row number (ex: E4).')
+
+        else:
+            # Assign piece type and space to move parser so they can be used by the window
+            self.piece_type = piece_type
+            self.space = space
+
+        finally:
+            # Clear text box after parsing is complete
+            self.text_entry._doc.text = ""
+
         return
+    
+class InvalidPieceTypeError(Exception):
+    """
+    Custom exception handler for when user tries to move piece of a type that doesn't exist
+    """
+    
+    def __init__(self):
+
+        """
+        Notifies the player that the move they have entered references a piece type
+        that does not exist.
+
+        Returns:
+            None
+        """
+        super().__init__()
+
+class InvalidSpaceError(Exception):
+    """
+    Custom exception handler for when user tries to move piece to a square that doesn't exist
+    """
+    
+    def __init__(self):
+
+        """
+        Notifies the player that the move they have entered references a piece type
+        that does not exist.
+
+        Returns:
+            None
+        """
+        super().__init__()
