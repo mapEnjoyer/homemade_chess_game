@@ -13,6 +13,7 @@ Date: 07/03/26
 import pyglet
 import arcade
 import constants
+import excpetions
 from pieces import pawn, rook, knight, bishop, queen, king
 
 class MoveParser():
@@ -133,21 +134,30 @@ class MoveParser():
 
                 else:
                     # Invalid move entry, notify
-                    raise InvalidPieceTypeError()
+                    raise excpetions.InvalidPieceTypeError()
+                
+            else:
+                # Move input too long. Raise exception
+                raise InvalidMoveEntry()
+
                 
             # Now that we have determined piece type, attempt to determine square
             space = text[-2:]
 
             if space not in constants.space_names:
-                raise InvalidSpaceError()
+                raise excpetions.InvalidSpaceError()
 
-        except InvalidPieceTypeError: 
+        except excpetions.InvalidPieceTypeError: 
             # TODO: Show error message in game screen, not terminal
             print (f'Invalid piece type! Valid piece types include "R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King. Pawn moves do not include a "P" (ex: E4).')
 
-        except InvalidSpaceError:
+        except excpetions.InvalidSpaceError:
             # TODO: Show error message in game screen, not terminal
             print (f'Space does not exist on board! Use the row/column labels to determine square piece is moving to. Column letter always comes before row number (ex: E4).')
+
+        except InvalidMoveEntry:
+            # TODO: Show error message in game screen, not terminal
+            print (f'Move entry is invalid. Length of move should be no longer than 3 characters (ex: KC3)')
 
         else:
             # Assign piece type and space to move parser so they can be used by the window
@@ -159,33 +169,21 @@ class MoveParser():
             self.text_entry._doc.text = ""
 
         return
-    
-class InvalidPieceTypeError(Exception):
+
+class InvalidMoveEntry(Exception):
     """
-    Custom exception handler for when user tries to move piece of a type that doesn't exist
+    Custom exception handler for when a move is invalid for reasons other than 
+    invalid piece type or space reference.
     """
     
     def __init__(self):
 
         """
-        Notifies the player that the move they have entered references a piece type
-        that does not exist.
+        Notifies the player that the move they have entered is invalid for reasons 
+        other than invalid piece type or space reference.
 
-        Returns:
+        Args:
             None
-        """
-        super().__init__()
-
-class InvalidSpaceError(Exception):
-    """
-    Custom exception handler for when user tries to move piece to a square that doesn't exist
-    """
-    
-    def __init__(self):
-
-        """
-        Notifies the player that the move they have entered references a piece type
-        that does not exist.
 
         Returns:
             None
