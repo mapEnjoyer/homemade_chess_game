@@ -45,9 +45,9 @@ class Pawn(piece.Piece):
 
         # Use row the pawn was created on (2 = white, 7 = black) to determine color
         if int(self.occupied_square.name[1]) == 2:
-            self.color = "white"
+            self.color = constants.PlayerColor.WHITE
         elif int(self.occupied_square.name[1]) == 7:
-            self.color = "black"
+            self.color = constants.PlayerColor.BLACK
 
         return
 
@@ -75,14 +75,14 @@ class Pawn(piece.Piece):
         adj_col = []
         
         # Determine direction value based on color
-        if self.color == 'white':
+        if self.color == constants.PlayerColor.WHITE:
             direction = 1 # positive means "forward" is incrementing row count
         else:
             direction = -1 # negative means "forward" is decrementing row count
  
         if new_col == cur_col:
             # pawn can move "forward" 1 row always or 2 rows if it hasn't moved yet
-            if new_row == ((cur_row+1)*direction) or (new_row == ((cur_row+2)*direction) and self.has_moved == False):
+            if new_row == cur_row+direction or new_row == cur_row+2*direction and self.has_moved == False:
                 # Move is technically legal
                 move_is_valid = True
 

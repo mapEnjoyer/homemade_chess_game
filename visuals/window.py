@@ -111,15 +111,20 @@ class GameView(arcade.Window):
 
         if all(val is not None for val in [self.move_parser.piece_type, self.move_parser.cur_space, self.move_parser.new_space]):
             # Player move was input into move parser. Pass along to board
-            self.chess_board.handle_move(self.move_parser.piece_type, 
-                                         self.move_parser.cur_space, 
-                                         self.move_parser.new_space,
-                                         self.move_parser.player_turn)
-
+            if self.chess_board.handle_move(self.move_parser.piece_type, 
+                                            self.move_parser.cur_space, 
+                                            self.move_parser.new_space,
+                                            self.move_parser.player_turn):
+            
+                # Update player turn based on if move was handled successfully
+                if self.move_parser.player_turn == constants.PlayerColor.WHITE:
+                     self.move_parser.player_turn = constants.PlayerColor.BLACK
+                else:
+                     self.move_parser.player_turn = constants.PlayerColor.WHITE
+    
             # Clear move parser after move is handled
             self.move_parser.piece_type = self.move_parser.cur_space = self.move_parser.new_space = None
 
-            # TODO: Update player turn based on if move was handled successfully
 
         # Draw the chess board
         self.chess_board.draw_board()

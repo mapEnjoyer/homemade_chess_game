@@ -292,30 +292,37 @@ class Board():
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
-            None   
+            piece_moved: Boolean indicator True if piece moved, False otherwise   
         """
+        piece_moved = False
+        
         try:
             # Check that piece type is valid
             if piece_type not in constants.valid_piece_types:
                 # TODO: raise exception
-                pass                
+                raise Exception                
 
 
             # Check that starting square is valid
             if start_space not in constants.space_names:
                 # TODO: raise exception
-                pass
+                raise Exception
 
             # Check that next square is valid
             if next_space not in constants.space_names:
                 # TODO: raise exception
-                pass
+                raise Exception
+
+            # Check that the piece being moved is the right color
+            if self.board_spaces[start_space].occupying_piece.color != player_turn:
+                # TODO: raise exception
+                raise Exception
 
             # Run move handler for the piece type
             match(type(self.board_spaces[start_space].occupying_piece)):
                 case pawn.Pawn:
                     # Run pawn handler
-                    piece_moved = self.__pawn_move_handler(piece, next_space)
+                    piece_moved = self.__pawn_move_handler(self.board_spaces[start_space].occupying_piece, next_space, player_turn)
                     pass
                 case _:
                     pass
@@ -323,7 +330,9 @@ class Board():
         except:
             pass
 
-    def __pawn_move_handler(self, pawn:pawn.Pawn, next_space:str):
+        return piece_moved
+
+    def __pawn_move_handler(self, pawn:pawn.Pawn, next_space:str, player_turn:constants.PlayerColor):
         """
         Handles pawn moves by first checking if the move between the spaces is
         technically viable per how the pawn moves. If so, then any spaces the 
@@ -340,13 +349,44 @@ class Board():
         """
         pawn_moved = False
 
-        # Run move validity check at the piece level
-        move_is_valid = pawn.is_move_valid(next_space)
+        try:
+            # Run move validity check at the piece level
+            move_is_valid = pawn.is_move_valid(next_space)
 
-        if move_is_valid:
-            # Move is technically valid. Next steps depend on if pawn is move vertically or diagonally
-            if pawn.occupied_square[0] == next_space[0]:
-                # Pawn is staying in the same column. Check square(s) it is moving through.
-                pass
+            if move_is_valid:
+
+                # Determine direction value based on color
+                if player_turn == constants.PlayerColor.WHITE:
+                    direction = 1 # positive means "forward" is incrementing row count
+                else:
+                    direction = -1 # negative means "forward" is decrementing row count
+
+                # Move is technically valid. Next steps depend on if pawn is move vertically or diagonally
+                cur_col = pawn.occupied_square.name[0]
+                cur_row = int(pawn.occupied_square.name[1])
+                next_col = next_space[0]
+                next_row = int(next_space[1])
+                if  cur_col == next_col :
+                    # Pawn is staying in the same column. Check square(s) it is moving through.
+                    for row in range(cur_row+direction, next_row+direction, direction):
+                        if self.board_spaces[cur_col+str(row)].occupying_piece is not None:
+                            # TODO: A piece occupies the row(s) ahead of the pawn. Raise an exception
+                            raise Exception
+
+                else:
+                    # Pawn is moving diagonally. Check destination for opposing color piece
+                    if self.board_spaces[next_space].occupying_piece is None \
+                    or pawn.color == self.board_spaces[next_space].occupying_piece.color:
+                        # TODO: There's no piece to capture. Raise an exception
+                        raise Exception
+
+
+                # No pieces occupying the spaces ahead of the pawn. Move it to the new space
+                pawn.update_space(self.board_spaces[next_space])
+                pawn_moved = True
+
+        except:
             pass
+            
+        return pawn_moved
 
