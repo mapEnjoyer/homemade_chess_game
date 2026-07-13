@@ -9,6 +9,7 @@ Date: 05/30/26
 """
 
 from typing import Final
+from pieces import pawn, rook, knight, bishop, queen, king
 
 # List of all board spaces as strings
 space_names:Final =  ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8",
@@ -25,6 +26,9 @@ board_col_labels:Final = ["A", "B", "C", "D", "E", "F", "G", "H"]
 
 # List of board row labels as strings
 board_row_labels:Final = ["1", "2", "3", "4", "5", "6", "7", "8"]
+
+# Valid piece types
+valid_piece_types = [pawn.Pawn, rook.Rook, knight.Knight, bishop.Bishop, queen.Queen, king.King]
 
 # Window Constants
 WINDOW_WIDTH = 800

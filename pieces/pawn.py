@@ -58,7 +58,7 @@ class Pawn(piece.Piece):
         Valid pawn moves include:
             - Going 1 square "forward" (depends on color of pawn) in the same column
             - Going 1 square "forward" diagonally if capturing (requires the board to determine that).
-            - Going 2 squares "foward" if the pawn has not moved yet. 
+            - Going 2 squares "forward" if the pawn has not moved yet. 
 
         Args:
             space: Destination space for the pawn to move to

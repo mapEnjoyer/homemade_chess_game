@@ -25,7 +25,8 @@ class MoveParser():
         text_batch: Graphics batch the move parser widget is apart of. 
         text_entry: Widget type the parser is apart of. 
         piece_type: Type of piece to be moved next. Will be 'None' if no move is to be processed.
-        space: Space next move is referring to. Will be 'None' if no move is to be processed.
+        cur_space: Space next move is starting from. Will be 'None' if no move is to be processed.
+        new_space: Space next move is moving to. Will be 'None' if no move is to be processed.
     """
 
     def __init__(self, window:arcade.Window):
@@ -42,8 +43,9 @@ class MoveParser():
         """
         # Initialize attributes
         self.piece_type = None
-        self.space = None
-    
+        self.cur_space = None
+        self.new_space = None
+
         # Text entry window
         # The only way I could find to get the text box widget
         # to appear on screen was to make it apart of a "batch" 
@@ -87,7 +89,15 @@ class MoveParser():
     def parse_move_entry(self, widget: pyglet.gui.TextEntry, text: str):
         """
         Takes in move string and sends information to board regarding 
-        which piece type is being move and where it is trying to go.
+        which piece type is being move and where it is trying to go. It
+        expects a string that uses a modified version of standard chess
+        algebraic notation. Valid string lengths will either be 4 or 5
+        characters, depending on if the piece is a pawn. 
+        
+        Examples:
+            - Pawn on E2 -> E4: E2E4
+            - Knight on B1 -> C3: KB1C3
+
         This method is called whenever the user hits "enter" on the move
         entry text box.
 
@@ -105,12 +115,12 @@ class MoveParser():
         text = text.upper()
 
         try:
-            if len(text) == 2:
+            if len(text) == 4:
                 # Assume piece is of type 'pawn' as pawn moves do not 
                 # include the piece type in algebraic notation (ex: e4)
                 piece_type = pawn.Pawn
 
-            elif len(text) == 3:
+            elif len(text) == 5:
 
                 if text[0] == 'R':
                     # Piece is of type 'rook'
@@ -141,10 +151,11 @@ class MoveParser():
                 raise InvalidMoveEntry()
 
                 
-            # Now that we have determined piece type, attempt to determine square
-            space = text[-2:]
+            # Now that we have determined piece type, attempt to determine current and new squares
+            cur_space = text[-4:-2]
+            new_space = text[-2:]
 
-            if space not in constants.space_names:
+            if any(space not in constants.space_names for space in [cur_space, new_space]):
                 raise excpetions.InvalidSpaceError()
 
         except excpetions.InvalidPieceTypeError: 
@@ -162,7 +173,8 @@ class MoveParser():
         else:
             # Assign piece type and space to move parser so they can be used by the window
             self.piece_type = piece_type
-            self.space = space
+            self.cur_space = cur_space
+            self.new_space = new_space
 
         finally:
             # Clear text box after parsing is complete
