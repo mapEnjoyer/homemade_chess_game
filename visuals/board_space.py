@@ -33,6 +33,7 @@ class Board_Space():
             center_y: Center y position of the space
             length:   Length of square
             color:    Color of the square
+            name:     Name of the square based on row and column it occupies
 
         Returns:
             None

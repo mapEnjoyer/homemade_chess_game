@@ -27,6 +27,7 @@ class MoveParser():
         piece_type: Type of piece to be moved next. Will be 'None' if no move is to be processed.
         cur_space: Space next move is starting from. Will be 'None' if no move is to be processed.
         new_space: Space next move is moving to. Will be 'None' if no move is to be processed.
+        player_turn: Indicates which player's turn it is. Set to WHITE on startup.
     """
 
     def __init__(self, window:arcade.Window):
@@ -45,6 +46,9 @@ class MoveParser():
         self.piece_type = None
         self.cur_space = None
         self.new_space = None
+                
+        # Set player turn
+        self.player_turn = constants.PlayerColor.WHITE
 
         # Text entry window
         # The only way I could find to get the text box widget

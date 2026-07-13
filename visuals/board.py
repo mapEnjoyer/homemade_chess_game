@@ -24,7 +24,6 @@ class Board():
         - row_labels: Dictionary containing 8 row label text objects
         - white_pieces: List of all white pieces currently on the board. As pieces are removed, they are popped from the list.
         - black_pieces: List of all black pieces currently on the board. As pieces are removed, they are popped from the list.
-        - player_turn: Indicates which players turn it is. Initialized to 'white'.
     """
 
     def __init__(self):
@@ -59,9 +58,6 @@ class Board():
 
         # Sprite list containing all sprites on the board
         self.sprite_list = arcade.SpriteList()
-
-        # Set starting player turn to 'white'
-        self.player_turn = 'white'
 
         # Initialize chess board squares
         self.__init_squares()
@@ -279,7 +275,7 @@ class Board():
 
         return
     
-    def handle_move(self, piece_type, start_space:str, next_space:str):
+    def handle_move(self, piece_type, start_space:str, next_space:str, player_turn:constants.PlayerColor):
         """
         Handles incoming move by first determining if move is possible. If so,
         the piece is moved to that square, resolving any captures at the destination.
@@ -316,13 +312,59 @@ class Board():
                 # TODO: raise exception
                 pass
 
-            # Step 1: Check if piece move is valid first with how the piece behaves regardless of obstacles in the way.
+            # Assign reference to piece list based on player turn
+            if player_turn == constants.PlayerColor.WHITE:
+                pieces = self.white_pieces
 
-            # Step 2: Assuming the move is valid, check squares between the moves for obstacles.
+            else:
+                pieces = self.black_pieces
 
-            # Step 3: Move the piece to the new square.
+            # Step 1: Check if a piece of the proper type is on the starting square
+            piece_found:bool = False
+            for piece in pieces:
+                if isinstance(piece, piece_type) and piece.occupied_square.name == start_space:
+                    piece_found = True
+                    break
 
-            # Step 4: If a capture occured, remove the piece from the opposing players list of pieces.
+            if not piece_found:
+                # TODO: Raise exception
+                pass
+
+            # Step 2: Run move handler for the piece type
+            match(type(piece)):
+                case pawn.Pawn:
+                    # Run pawn handler
+                    piece_moved = self.__pawn_move_handler(piece, next_space)
+                    pass
+                case _:
+                    pass
 
         except:
             pass
+
+    def __pawn_move_handler(self, pawn:pawn.Pawn, next_space:str):
+        """
+        Handles pawn moves by first checking if the move between the spaces is
+        technically viable per how the pawn moves. If so, then any spaces the 
+        pawn would pass through are checked for obstacles if moving forward. If
+        the pawn is moving diagonally, then that space is checked for a piece of
+        the opposing color.
+
+        Args:
+            pawn: Pawn object being moved.
+            next_space: space to move to. Space must match one of the spaces found in constants.space_names
+
+        Returns:
+            pawn_moved: Boolean True if pawn moved, False otherwise  
+        """
+        pawn_moved = False
+
+        # Run move validity check at the piece level
+        move_is_valid = pawn.is_move_valid(next_space)
+
+        if move_is_valid:
+            # Move is technically valid. Next steps depend on if pawn is move vertically or diagonally
+            if pawn.occupied_square[0] == next_space[0]:
+                # Pawn is staying in the same column. Check square(s) it is moving through.
+            pass
+

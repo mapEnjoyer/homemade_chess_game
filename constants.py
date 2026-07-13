@@ -8,6 +8,7 @@ Date: 05/30/26
     This file contains constants intended to be used throughout the project.
 """
 
+from enum import Enum
 from typing import Final
 from pieces import pawn, rook, knight, bishop, queen, king
 
@@ -63,3 +64,8 @@ queen_image_width = 125
 queen_image_height = 125
 king_image_width = 125
 king_image_height = 125
+
+# Player number enumeration
+class PlayerColor(Enum):
+    WHITE = 0
+    BLACK = 1
