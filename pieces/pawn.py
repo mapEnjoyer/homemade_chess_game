@@ -9,7 +9,6 @@ Date: 05/30/26
 """
 import constants
 from pieces import piece
-from visuals import board_space
 
 class Pawn(piece.Piece):
     """
@@ -26,7 +25,7 @@ class Pawn(piece.Piece):
         - color: Because pawns are the only piece that can move 1 direction, they need
                  to know what color they are for move validity checks.
     """
-    def __init__(self, space: board_space.Board_Space, texture_path:str, image_width:int):
+    def __init__(self, space: piece.Board_Space, texture_path:str, image_width:int):
         """
         Initializes pawn object by performing the following steps:
             - Creating sprite

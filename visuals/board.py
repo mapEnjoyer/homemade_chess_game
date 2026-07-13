@@ -11,8 +11,7 @@ Date: 05/30/26
 
 import arcade
 import constants
-from visuals import board_space
-from pieces import pawn, rook, knight, bishop, queen, king
+from pieces import piece, pawn, rook, knight, bishop, queen, king
 from pathlib import Path
 class Board():
     """
@@ -39,8 +38,8 @@ class Board():
         """
 
         # Dictonary containing all board spaces.
-        # {"A1" : board_space.Board_Space A1; "A2": board_space.Board_Space A2; ...}
-        self.board_spaces:dict[str, board_space.Board_Space] = {}
+        # {"A1" : piece.Board_Space A1; "A2": piece.Board_Space A2; ...}
+        self.board_spaces:dict[str, piece.Board_Space] = {}
 
         # Dictionary containing all column label text objects
         # {"A": Text A; "B": Text B; ...}
@@ -96,7 +95,7 @@ class Board():
             row_count = int(name[-1])
 
             # Create a space class for each space
-            self.board_spaces[name] = board_space.Board_Space(color = space_color, name=name)
+            self.board_spaces[name] = piece.Board_Space(color = space_color, name=name)
 
             if row_count != 8:
                 if space_color == arcade.color.BISTRE:
@@ -312,26 +311,8 @@ class Board():
                 # TODO: raise exception
                 pass
 
-            # Assign reference to piece list based on player turn
-            if player_turn == constants.PlayerColor.WHITE:
-                pieces = self.white_pieces
-
-            else:
-                pieces = self.black_pieces
-
-            # Step 1: Check if a piece of the proper type is on the starting square
-            piece_found:bool = False
-            for piece in pieces:
-                if isinstance(piece, piece_type) and piece.occupied_square.name == start_space:
-                    piece_found = True
-                    break
-
-            if not piece_found:
-                # TODO: Raise exception
-                pass
-
-            # Step 2: Run move handler for the piece type
-            match(type(piece)):
+            # Run move handler for the piece type
+            match(type(self.board_spaces[start_space].occupying_piece)):
                 case pawn.Pawn:
                     # Run pawn handler
                     piece_moved = self.__pawn_move_handler(piece, next_space)
@@ -366,5 +347,6 @@ class Board():
             # Move is technically valid. Next steps depend on if pawn is move vertically or diagonally
             if pawn.occupied_square[0] == next_space[0]:
                 # Pawn is staying in the same column. Check square(s) it is moving through.
+                pass
             pass
 

@@ -9,8 +9,78 @@ Date: 07/10/26
 """
 import constants
 import arcade
-from visuals import board_space
 from abc import ABC, abstractmethod
+
+"""
+File name: board_space.py
+Project: homemade_chess_game
+Author: Eric Kellmyer
+Date: 05/30/26
+
+@brief: 
+    This file contains the necessary classes, functions, methods, etc.
+    maintaining an individual space on the chess board.
+"""
+
+import arcade
+
+class Board_Space():
+    """
+    Board space class. Manages each space on the board, 
+    and allows pieces to know where they are on the board.
+
+    Attributes:
+        - center_x: Square's center x position in the window
+        - center_y: Square's center y position in the window
+        - length: Length of the sqaure edge
+        - color: Color of the sqaure
+        - name: Name of the square on the board (A1, A2...)
+        - occupying_piece: Piece object that occupies the square. 
+                           Set to none on creation, updated when
+                           a piece is given a sqaure in update_space()
+
+    """
+    
+    def __init__(self, center_x: float = 0, center_y: float = 0, length: float = 0, color: arcade.color = arcade.color.WHITE, name: str = 'A1'):
+        """
+        Initializes space object
+        
+        Args:
+            center_x: Center x position of the space
+            center_y: Center y position of the space
+            length:   Length of square
+            color:    Color of the square
+            name:     Name of the square based on row and column it occupies
+
+        Returns:
+            None
+        """
+        
+        # Assign property values
+        self.center_x = center_x
+        self.center_y = center_y
+        self.length = length
+        self.color = color
+        self.name = name
+
+        # Initialize the occupying piece
+        self.occupying_piece = None
+
+        return
+
+    def draw_square(self):
+        """
+        Draws the square at its position values
+
+        Args:,
+            None
+
+        Returns:
+            None
+        """
+        # self.length used as both height and width args to ensure square shape
+        arcade.draw_rect_filled(arcade.rect.XYWH(self.center_x, self.center_y, self.length, self.length), self.color)
+        return
 
 class Piece(ABC):
     """
@@ -27,7 +97,7 @@ class Piece(ABC):
 
         - has_moved: Boolean indicator indicating if piece has moved before.
     """
-    def __init__(self, space: board_space.Board_Space, texture_path:str, image_width:int):
+    def __init__(self, space: Board_Space, texture_path:str, image_width:int):
         """
         Initializes piece object by performing the following steps:
             - Creating sprite
@@ -57,7 +127,7 @@ class Piece(ABC):
 
         return
     
-    def update_space(self, space: board_space.Board_Space):
+    def update_space(self, space: Board_Space):
         """
         Updates the space the piece occupies
 
@@ -67,8 +137,16 @@ class Piece(ABC):
         Returns:
             None
         """
+        # Need this if statement since occupied_square is None until first square is assigned
+        if isinstance(self.occupied_square, Board_Space):
+            # Clear the occupying_piece attribute of the space the piece is leaving
+            self.occupied_square.occupying_piece = None
+
         # Save the square the piece occupies 
         self.occupied_square = space
+
+        # Update the occupying_piece attribute of the space now that a new piece is on the square
+        self.occupied_square.occupying_piece = self
 
         # Update the piece sprite's position to match the square
         self.sprite.center_x = self.occupied_square.center_x

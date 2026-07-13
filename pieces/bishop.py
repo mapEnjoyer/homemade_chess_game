@@ -8,7 +8,6 @@ Date: 05/30/26
     This file contains class/logic for bishops.
 """
 from pieces import piece
-from visuals import board_space
 
 class Bishop(piece.Piece):
     """
@@ -23,7 +22,7 @@ class Bishop(piece.Piece):
 
         - image_width: Width in pixels of the image used in the sprite.
     """
-    def __init__(self, space: board_space.Board_Space, texture_path:str, image_width:int):
+    def __init__(self, space: piece.Board_Space, texture_path:str, image_width:int):
         """
         Initializes bishop object by performing the following steps:
             - Creating sprite
