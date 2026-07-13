@@ -100,7 +100,7 @@ class Pawn(piece.Piece):
 
             for col in adj_col:
                 # Is the move targeting one square "forward" on the adjacent column?
-                if new_col == col and new_row == ((cur_row+1)*direction):
+                if new_col == col and new_row == cur_row+direction:
                     # Move is technically legal assuming there is a capture
                     move_is_valid = True
                     break
