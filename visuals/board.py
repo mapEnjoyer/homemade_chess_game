@@ -304,26 +304,26 @@ class Board():
         try:
             # Check that piece type is valid
             if piece_type not in constants.valid_piece_types:
-                # TODO: raise exception
-                raise Exception                
+                # raise exception indicating the piece type is not valid
+                raise InvalidMoveException('Piece type does not exist.')                
 
             # Check that starting square is valid
             if start_space not in constants.space_names:
-                # TODO: raise exception
-                raise Exception
+                # raise exception indicating the starting space does not exist
+                raise InvalidMoveException('Starting space does not exist.')     
 
             # Check that next square is valid
             if next_space not in constants.space_names:
-                # TODO: raise exception
-                raise Exception
+                # raise exception indicating destination space does not exist
+                raise InvalidMoveException('Destination space does not exist.')     
             
             # Set piece we are working with
             piece = self.board_spaces[start_space].occupying_piece
 
             # Check that the piece being moved is the right color
             if piece.color != player_turn:
-                # TODO: raise exception
-                raise Exception
+                # raise exception indicating the player is interacting with the wrong color pieces
+                raise InvalidMoveException('Wrong color piece.')     
 
             # Run move handler for the piece type
             match(type(piece)):
@@ -384,7 +384,6 @@ class Board():
             move_is_valid = pawn.is_move_valid(next_space)
 
             if move_is_valid:
-
                 # Determine direction value based on color
                 if player_turn == constants.PlayerColor.WHITE:
                     direction = 1 # positive means "forward" is incrementing row count
@@ -400,15 +399,16 @@ class Board():
                     # Pawn is staying in the same column. Check square(s) it is moving through.
                     for row in range(cur_row+direction, next_row+direction, direction):
                         if self.board_spaces[cur_col+str(row)].occupying_piece is not None:
-                            # TODO: A piece occupies the row(s) ahead of the pawn. Raise an exception
-                            raise Exception
+                            # A piece occupies the row(s) ahead of the pawn. Raise an exception
+                            raise InvalidMoveException('There is another piece blocking the way.')     
 
                 else:
                     # Pawn is moving diagonally. Check destination for opposing color piece
+                    # TODO: En passant
                     if self.board_spaces[next_space].occupying_piece is None \
                     or pawn.color == self.board_spaces[next_space].occupying_piece.color:
-                        # TODO: There's no piece to capture. Raise an exception
-                        raise Exception
+                        # There's no piece to capture. Raise an exception
+                        raise InvalidMoveException('Pawns can only move diagonally when capturing.')     
                     else:
                         # "Capture" the enemy piece by removing it from the list of pieces
                         self.__capture_piece(self.board_spaces[next_space].occupying_piece)
@@ -419,8 +419,34 @@ class Board():
                 pawn.update_space(self.board_spaces[next_space])
                 pawn_moved = True
 
+                # TODO: Pawn promotion
+
+            else:
+                # Pawn move invalid. Raise an exception
+                InvalidMoveException("Pawns can't move that way.")
+
         except:
             pass
             
         return pawn_moved
+    
+
+class InvalidMoveException(Exception):
+    """
+    Custom exception handler for when a move fails to execute.
+    """
+    def __init__(self, msg:str):
+
+        """
+        Notifies the player why the move they tried to make has failed.
+
+        Args:
+            msg: Message to display indicating why move could not complete
+
+        Returns:
+            None
+        """
+        super().__init__()
+        print(f'Move failed! {msg}')
+    
 
