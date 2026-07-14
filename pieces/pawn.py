@@ -61,8 +61,8 @@ class Pawn(piece.Piece):
         # Intitialize variables for readability
         new_col = space[0]
         new_row = int(space[1])
-        cur_col = self.occupied_square.name[0]
-        cur_row = int(self.occupied_square.name[1])
+        cur_col = self.occupied_square.square_col
+        cur_row = self.occupied_square.square_row
         move_is_valid = False
         adj_col = []
         

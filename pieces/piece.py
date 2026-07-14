@@ -67,6 +67,30 @@ class Board_Space():
         self.occupying_piece = None
 
         return
+    
+    @property
+    def square_col(self)->str:
+        """
+        Return's piece's occupied square column letter as a string.
+        Args:
+            None
+
+        Returns:
+            square_col: piece's occupied square column letter as a string ("A", "B", "C"...)    
+        """
+        return self.name[0]
+    
+    @property
+    def square_row(self)->int:
+        """
+        Return's piece's occupied square row number as an int.
+        Args:
+            None
+
+        Returns:
+            square_row: piece's occupied square row number as an int (1, 2, 3...)    
+        """
+        return int(self.name[1])    
 
     def draw_square(self):
         """
@@ -132,7 +156,7 @@ class Piece(ABC):
         elif int(self.occupied_square.name[1]) >= 7:
             self.color = constants.PlayerColor.BLACK
 
-        return
+        return    
     
     def update_space(self, space: Board_Space):
         """

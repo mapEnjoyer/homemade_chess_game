@@ -393,8 +393,8 @@ class Board():
                     direction = -1 # negative means "forward" is decrementing row count
 
                 # Move is technically valid. Next steps depend on if pawn is move vertically or diagonally
-                cur_col = pawn.occupied_square.name[0]
-                cur_row = int(pawn.occupied_square.name[1])
+                cur_col = pawn.occupied_square.square_col
+                cur_row = pawn.occupied_square.square_row
                 next_col = next_space[0]
                 next_row = int(next_space[1])
                 if  cur_col == next_col :
