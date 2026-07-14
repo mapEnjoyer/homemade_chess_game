@@ -22,8 +22,6 @@ class Pawn(piece.Piece):
                   Requires a valid texture path.
 
         - image_width: Width in pixels of the image used in the sprite.
-        - color: Because pawns are the only piece that can move 1 direction, they need
-                 to know what color they are for move validity checks.
     """
     def __init__(self, space: piece.Board_Space, texture_path:str, image_width:int):
         """
@@ -42,12 +40,6 @@ class Pawn(piece.Piece):
 
         # Run parent class init
         super().__init__(space, texture_path, image_width)
-
-        # Use row the pawn was created on (2 = white, 7 = black) to determine color
-        if int(self.occupied_square.name[1]) == 2:
-            self.color = constants.PlayerColor.WHITE
-        elif int(self.occupied_square.name[1]) == 7:
-            self.color = constants.PlayerColor.BLACK
 
         return
 

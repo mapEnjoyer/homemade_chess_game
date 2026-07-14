@@ -96,6 +96,7 @@ class Piece(ABC):
         - image_width: Width in pixels of the image used in the sprite.
 
         - has_moved: Boolean indicator indicating if piece has moved before.
+        - color: Color of piece. Can either be black or white depending on which row the piece is created on
     """
     def __init__(self, space: Board_Space, texture_path:str, image_width:int):
         """
@@ -124,6 +125,12 @@ class Piece(ABC):
 
         # Set the occupying space
         self.update_space(space)
+
+        # Use row the piece was created on (<=2 = white, >=7 = black) to determine color
+        if int(self.occupied_square.name[1]) <= 2:
+            self.color = constants.PlayerColor.WHITE
+        elif int(self.occupied_square.name[1]) >= 7:
+            self.color = constants.PlayerColor.BLACK
 
         return
     
