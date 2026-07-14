@@ -341,6 +341,8 @@ class Board():
         if piece_moved:
             piece.has_moved = True
 
+            # TODO: Check for king checks
+
         return piece_moved
     
     def __capture_piece(self, piece:piece.Piece):
