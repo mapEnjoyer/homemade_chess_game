@@ -307,7 +307,6 @@ class Board():
                 # TODO: raise exception
                 raise Exception                
 
-
             # Check that starting square is valid
             if start_space not in constants.space_names:
                 # TODO: raise exception
@@ -317,14 +316,17 @@ class Board():
             if next_space not in constants.space_names:
                 # TODO: raise exception
                 raise Exception
+            
+            # Set piece we are working with
+            piece = self.board_spaces[start_space].occupying_piece
 
             # Check that the piece being moved is the right color
-            if self.board_spaces[start_space].occupying_piece.color != player_turn:
+            if piece.color != player_turn:
                 # TODO: raise exception
                 raise Exception
 
             # Run move handler for the piece type
-            match(type(self.board_spaces[start_space].occupying_piece)):
+            match(type(piece)):
                 case pawn.Pawn:
                     # Run pawn handler
                     piece_moved = self.__pawn_move_handler(self.board_spaces[start_space].occupying_piece, next_space, player_turn)
@@ -334,6 +336,10 @@ class Board():
 
         except:
             pass
+
+        # Update piece has moved indicator. Only updates to True, never back to False
+        if piece_moved:
+            piece.has_moved = True
 
         return piece_moved
     
