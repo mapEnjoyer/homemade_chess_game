@@ -57,49 +57,53 @@ class Knight(piece.Piece):
         valid_spaces = []
         move_is_valid = False
 
-        # Note that columns are indexed between 0-7 but row numbers are 1-8
+        # Note that rows and columns are indexed between 0-7
         col_idx = constants.board_col_labels.index(self.occupied_square.square_col)
-        row_num = self.occupied_square.square_row
+        row_num = constants.board_row_labels.index(self.occupied_square.square_row)
+        min_col = 0
+        max_col = len(constants.board_col_labels) - 1
+        min_row = 0
+        max_row = len(constants.board_row_labels) - 1        
         
         # Check 2 rows up and 1 left (white perspective)
-        if row_num < 7 and col_idx > 0:
+        if row_num < max_row - 1 and col_idx > min_col:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx-1] + str(row_num+2))
+            valid_spaces.append(constants.board_col_labels[col_idx-1] + constants.board_row_labels[row_num+2])
 
         # Check 2 rows up and 1 right (white perspective)
-        if row_num < 7 and col_idx < 8:
+        if row_num < max_row - 1 and col_idx < max_col:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx+1] + str(row_num+2))            
+            valid_spaces.append(constants.board_col_labels[col_idx+1] + constants.board_row_labels[row_num+2])           
 
         # Check 2 rows down and 1 left (white perspective)
-        if row_num > 2 and col_idx > 0:
+        if row_num > min_row + 1 and col_idx > min_col:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx-1] + str(row_num-2))
+            valid_spaces.append(constants.board_col_labels[col_idx-1] + constants.board_row_labels[row_num-2])
     
         # Check 2 rows down and 1 right (white perspective)
-        if row_num > 2 and col_idx < 8:
+        if row_num > min_row + 1 and col_idx < max_col:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx+1] + str(row_num-2))
+            valid_spaces.append(constants.board_col_labels[col_idx+1] + constants.board_row_labels[row_num-2])
 
         # Check 2 columns left and 1 up (white perspective)
-        if col_idx > 1 and row_num < 8:
+        if col_idx > min_col + 1 and row_num < max_row:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx-2] + str(row_num+1))
+            valid_spaces.append(constants.board_col_labels[col_idx-2] + constants.board_row_labels[row_num+1])
 
         # Check 2 columns left and 1 down (white perspective)
-        if col_idx > 1 and row_num > 1:
+        if col_idx > min_col + 1 and row_num > min_row:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx-2] + str(row_num-1))
+            valid_spaces.append(constants.board_col_labels[col_idx-2] + constants.board_row_labels[row_num-1])
 
         # Check 2 columns right and 1 up (white perspective)
-        if col_idx < 7 and row_num < 8:
+        if col_idx < max_col + 1 and row_num < max_row:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx+2] + str(row_num+1))
+            valid_spaces.append(constants.board_col_labels[col_idx+2] + constants.board_row_labels[row_num+1])
 
         # Check 2 columns right and 1 down (white perspective)
-        if col_idx < 7 and row_num > 1:
+        if col_idx < max_col + 1 and row_num > min_row:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx+2] + str(row_num-1))
+            valid_spaces.append(constants.board_col_labels[col_idx+2] + constants.board_row_labels[row_num-1])
 
         move_is_valid = space in valid_spaces
         return move_is_valid

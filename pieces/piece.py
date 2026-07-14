@@ -81,16 +81,16 @@ class Board_Space():
         return self.name[0]
     
     @property
-    def square_row(self)->int:
+    def square_row(self)->str:
         """
-        Return's piece's occupied square row number as an int.
+        Return's piece's occupied square row number as a str.
         Args:
             None
 
         Returns:
-            square_row: piece's occupied square row number as an int (1, 2, 3...)    
+            square_row: piece's occupied square row number as a str ("1", "2", "3"...)    
         """
-        return int(self.name[1])    
+        return self.name[1]    
 
     def draw_square(self):
         """

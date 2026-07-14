@@ -391,10 +391,7 @@ class Board():
         pawn_moved = False
 
         try:
-            # Run move validity check at the piece level
-            move_is_valid = pawn.is_move_valid(next_space)
-
-            if move_is_valid:
+            if pawn.is_move_valid(next_space) == True:
                 # Determine direction value based on color
                 if player_turn == constants.PlayerColor.WHITE:
                     direction = 1 # positive means "forward" is incrementing row count
@@ -403,7 +400,7 @@ class Board():
 
                 # Move is technically valid. Next steps depend on if pawn is move vertically or diagonally
                 cur_col = pawn.occupied_square.square_col
-                cur_row = pawn.occupied_square.square_row
+                cur_row = int(pawn.occupied_square.square_row)
                 next_col = next_space[0]
                 next_row = int(next_space[1])
                 if  cur_col == next_col :
@@ -459,10 +456,7 @@ class Board():
         knight_moved = False
 
         try:
-            # Run move validity check at the piece level
-            move_is_valid = knight.is_move_valid(next_space)
-
-            if move_is_valid:
+            if knight.is_move_valid(next_space) == True:
                 # Check for piece at the destination. If it is the opposite color, we can capture
                 if self.board_spaces[next_space].occupying_piece is None \
                    or knight.color != self.board_spaces[next_space].occupying_piece.color:

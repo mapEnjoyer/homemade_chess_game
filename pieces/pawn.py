@@ -63,10 +63,10 @@ class Pawn(piece.Piece):
         """
 
         # Intitialize variables for readability
-        new_col = space[0]
-        new_row = int(space[1])
-        cur_col = self.occupied_square.square_col
-        cur_row = self.occupied_square.square_row
+        new_col = constants.board_col_labels.index(space[0])
+        new_row = constants.board_row_labels.index(space[1])
+        cur_col = constants.board_col_labels.index(self.occupied_square.square_col)
+        cur_row = constants.board_row_labels.index(self.occupied_square.square_row)
         move_is_valid = False
         adj_col = []
         
@@ -83,16 +83,13 @@ class Pawn(piece.Piece):
                 move_is_valid = True
 
         else:
-            # Pawn could be moving on the diagonal, determine which columns are adjacent
-            col_idx = constants.board_col_labels.index(cur_col)
-
-            if col_idx-1 >= 0:
+            if cur_col-1 >= 0:
                 # There is a valid column to the left
-                adj_col.append(constants.board_col_labels[col_idx-1])
+                adj_col.append(cur_col-1)
 
-            if col_idx+1 <= len(constants.board_col_labels):
+            if cur_col+1 <= len(constants.board_col_labels):
                 # There is a valid column to the right
-                adj_col.append(constants.board_col_labels[col_idx+1])
+                adj_col.append(cur_col+1)
 
             for col in adj_col:
                 # Is the move targeting one square "forward" on the adjacent column?
