@@ -319,6 +319,10 @@ class Board():
             
             # Set piece we are working with
             piece = self.board_spaces[start_space].occupying_piece
+            
+            if piece is None:
+                # No piece to move on that square. Raise an exception
+                raise InvalidMoveException('No piece to move.')
 
             # Check that the piece being moved is the right color
             if piece.color != player_turn:
