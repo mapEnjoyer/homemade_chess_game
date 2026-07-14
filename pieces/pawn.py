@@ -61,41 +61,36 @@ class Pawn(piece.Piece):
         Returns:
             move_is_valid: True if the move is "theoretically" possible (not including pieces blocking the way/captures not being present)
         """
+        valid_spaces = []
 
         # Intitialize variables for readability
-        new_col = constants.board_col_labels.index(space[0])
-        new_row = constants.board_row_labels.index(space[1])
         cur_col = constants.board_col_labels.index(self.occupied_square.square_col)
         cur_row = constants.board_row_labels.index(self.occupied_square.square_row)
-        move_is_valid = False
-        adj_col = []
-        
+        max_col = len(constants.board_col_labels) - 1
+
         # Determine direction value based on color
         if self.color == constants.PlayerColor.WHITE:
             direction = 1 # positive means "forward" is incrementing row count
         else:
             direction = -1 # negative means "forward" is decrementing row count
- 
-        if new_col == cur_col:
-            # pawn can move "forward" 1 row always or 2 rows if it hasn't moved yet
-            if new_row == cur_row+direction or new_row == cur_row+2*direction and self.has_moved == False:
-                # Move is technically legal
-                move_is_valid = True
 
-        else:
-            if cur_col-1 >= 0:
-                # There is a valid column to the left
-                adj_col.append(cur_col-1)
+        # It is mandatory for a pawn to promote once it reaches either edge of the board.
+        # This code assumes no pawn would exist on the first or last row since it would promote. 
+        # Pawn can always move 1 space ahead or diagonally if they are capturing.
+        
+        # Add space immediately ahead
+        valid_spaces.append(constants.board_col_labels[cur_col] + constants.board_row_labels[cur_row + direction])
 
-            if cur_col+1 <= len(constants.board_col_labels):
-                # There is a valid column to the right
-                adj_col.append(cur_col+1)
+        if cur_col > 0:
+            # Add space diagonally towards A
+            valid_spaces.append(constants.board_col_labels[cur_col - 1] + constants.board_row_labels[cur_row + direction])
 
-            for col in adj_col:
-                # Is the move targeting one square "forward" on the adjacent column?
-                if new_col == col and new_row == cur_row+direction:
-                    # Move is technically legal assuming there is a capture
-                    move_is_valid = True
-                    break
+        if cur_col < max_col:
+            # Add space diagonally towards H
+            valid_spaces.append(constants.board_col_labels[cur_col + 1] + constants.board_row_labels[cur_row + direction])
 
-        return move_is_valid
+        # Pawn can move 2 spaces if it hasn't moved yet
+        if self.has_moved == False:
+            valid_spaces.append(constants.board_col_labels[cur_col] + constants.board_row_labels[cur_row+2*direction])
+
+        return space in valid_spaces
