@@ -49,7 +49,11 @@ class Pawn(piece.Piece):
         Valid pawn moves include:
             - Going 1 square "forward" (depends on color of pawn) in the same column
             - Going 1 square "forward" diagonally if capturing (requires the board to determine that).
-            - Going 2 squares "forward" if the pawn has not moved yet. 
+            - Going 2 squares "forward" if the pawn has not moved yet.
+
+        Because pawns can only move in one direction, we need to take special consideration on what
+        constitues as "forward" for a pawn. For white pawns, "forward" means incrementing row numbers.
+        For black pawns the opposite is true. 
 
         Args:
             space: Destination space for the pawn to move to

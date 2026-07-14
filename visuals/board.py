@@ -335,6 +335,10 @@ class Board():
                     # Run pawn handler
                     piece_moved = self.__pawn_move_handler(self.board_spaces[start_space].occupying_piece, next_space, player_turn)
                     pass
+                case knight.Knight:
+                    # Run knight handler
+                    piece_moved = self.__knight_move_handler(self.board_spaces[start_space].occupying_piece, next_space, player_turn)
+                    pass
                 case _:
                     pass
 
@@ -379,6 +383,7 @@ class Board():
         Args:
             pawn: Pawn object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
+            player_turn: Player turn indicator. Used for resolving captures.
 
         Returns:
             pawn_moved: Boolean True if pawn moved, False otherwise  
@@ -436,6 +441,54 @@ class Board():
             
         return pawn_moved
     
+    def __knight_move_handler(self, knight:knight.Knight, next_space:str, player_turn:constants.PlayerColor):
+        """
+        Handles knight moves by first checking if the move between the spaces is
+        technically viable per how the knight moves. If so, the destination space
+        is checked for captures. No collision detection needed as knights are the
+        only piece that can pass thorugh others.
+
+        Args:
+            knight: Pawn object being moved.
+            next_space: space to move to. Space must match one of the spaces found in constants.space_names
+            player_turn: Player turn indicator. Used for resolving captures.
+
+        Returns:
+            pawn_moved: Boolean True if pawn moved, False otherwise  
+        """
+        knight_moved = False
+
+        try:
+            # Run move validity check at the piece level
+            move_is_valid = knight.is_move_valid(next_space)
+
+            if move_is_valid:
+                # Check for piece at the destination. If it is the opposite color, we can capture
+                if self.board_spaces[next_space].occupying_piece is None \
+                   or knight.color != self.board_spaces[next_space].occupying_piece.color:
+                
+                    if self.board_spaces[next_space].occupying_piece is not None:
+                        # Resolve the capture
+                        self.__capture_piece(self.board_spaces[next_space].occupying_piece)
+
+                    # Move the knight to the new space
+                    knight.update_space(self.board_spaces[next_space])
+
+                    # Set knight moved indicator
+                    knight_moved = True
+                
+                else:
+                    # Space is occupied by a piece of the same color. Throw an exception.
+                    raise InvalidMoveException("There is another piece blocking the way.")
+
+            else:
+                # Knight move invalid. Raise an exception
+                raise InvalidMoveException("Knights can't move that way.")
+
+        except:
+            pass
+
+        return knight_moved      
 
 class InvalidMoveException(Exception):
     """
