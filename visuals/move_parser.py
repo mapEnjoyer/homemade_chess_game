@@ -27,7 +27,7 @@ class MoveParser():
         piece_type: Type of piece to be moved next. Will be 'None' if no move is to be processed.
         cur_space: Space next move is starting from. Will be 'None' if no move is to be processed.
         new_space: Space next move is moving to. Will be 'None' if no move is to be processed.
-        player_turn: Indicates which player's turn it is. Set to WHITE on startup.
+        _player_turn: Indicates which player's turn it is. Set to WHITE on startup.
     """
 
     def __init__(self, window:arcade.Window):
@@ -46,8 +46,6 @@ class MoveParser():
         self.piece_type = None
         self.cur_space = None
         self.new_space = None
-                
-        # Set player turn
         self.player_turn = constants.PlayerColor.WHITE
 
         # Text entry window
@@ -75,6 +73,38 @@ class MoveParser():
         window.push_handlers(self.text_entry)
 
         return
+    
+    @property
+    def player_turn(self):
+        """
+        Method to get player turn.
+
+        Args:
+            None
+
+        Returns:
+            player_turn: Color of the player who's turn it is. Can be WHITE or BLACK.              
+        """
+        return self._player_turn
+
+
+    @player_turn.setter
+    def player_turn(self, player_color:constants.PlayerColor):
+        """
+        Method to set which player's turn it is
+        
+        Args:
+            player_color: Color of the player who's turn it is. Can be WHITE or BLACK.
+
+        Returns:
+            None        
+        """
+        self._player_turn = player_color
+        if self._player_turn == constants.PlayerColor.WHITE:
+            print(f'Player turn: White')
+        else:
+            print(f'Player turn: Black')
+
     
     def draw_text_box(self):
         """

@@ -114,7 +114,7 @@ class GameView(arcade.Window):
             if self.chess_board.handle_move(self.move_parser.piece_type, 
                                             self.move_parser.cur_space, 
                                             self.move_parser.new_space,
-                                            self.move_parser.player_turn):
+                                            self.move_parser._player_turn):
             
                 # Update player turn based on if move was handled successfully
                 if self.move_parser.player_turn == constants.PlayerColor.WHITE:
