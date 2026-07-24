@@ -41,7 +41,7 @@ class Knight(piece.Piece):
 
         return
     
-    def is_move_valid(self, space):
+    def is_move_valid(self, space:str):
         """
         Method to determine if the knight object can "theoretically" move to the indicated square.
         Valid knight moves include:
@@ -49,7 +49,7 @@ class Knight(piece.Piece):
             - going horizontal 2 spaces then vertical 1
 
         Args:
-            space: Destination space for the knight to move to
+            space:  Destination space string name for the knight to move to ('A1', 'A2'...)
 
         Returns:
             move_is_valid: True if the move is "theoretically" possible (not including pieces blocking the way/captures not being present)

@@ -7,6 +7,7 @@ Date: 05/30/26
 @brief: 
     This file contains class/logic for bishops.
 """
+import constants
 from pieces import piece
 
 class Bishop(piece.Piece):
@@ -39,3 +40,25 @@ class Bishop(piece.Piece):
         super().__init__(space, texture_path, image_width)
 
         return
+
+    def is_move_valid(self, space:str):
+        """
+        Method to determine if the bishop object can "theoretically" move to the indicated square.
+        Valid bishop moves include:
+            - going diagonal in any direction
+
+        Args:
+            space: Destination space string name for the bishop to move to ('A1', 'A2'...)
+
+        Returns:
+            move_is_valid: True if the move is "theoretically" possible (not including pieces blocking the way/captures not being present)
+        """
+        cur_col_idx = constants.board_col_labels.index(self.occupied_square.square_col)
+        cur_row_idx = constants.board_row_labels.index(self.occupied_square.square_row)
+        nxt_col_idx = constants.board_col_labels.index(space[0])
+        nxt_row_idx = constants.board_row_labels.index(space[1])
+
+        # Bishop moves are valid if the change in row and column index
+        # between the start and the end square are the same.
+        return abs(cur_col_idx - nxt_col_idx) == abs(cur_row_idx - nxt_row_idx)
+    

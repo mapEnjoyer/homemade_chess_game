@@ -43,7 +43,7 @@ class Pawn(piece.Piece):
 
         return
 
-    def is_move_valid(self, space):
+    def is_move_valid(self, space:str):
         """
         Method to determine if the pawn object can "theoretically" move to the indicated square.
         Valid pawn moves include:
@@ -56,7 +56,7 @@ class Pawn(piece.Piece):
         For black pawns the opposite is true. 
 
         Args:
-            space: Destination space for the pawn to move to
+            space: Destination space string name for the pawn to move to ('A1', 'A2'...)
 
         Returns:
             move_is_valid: True if the move is "theoretically" possible (not including pieces blocking the way/captures not being present)

@@ -333,11 +333,15 @@ class Board():
             match(type(piece)):
                 case pawn.Pawn:
                     # Run pawn handler
-                    piece_moved = self.__pawn_move_handler(self.board_spaces[start_space].occupying_piece, next_space, player_turn)
+                    piece_moved = self.__pawn_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
                     pass
                 case knight.Knight:
                     # Run knight handler
-                    piece_moved = self.__knight_move_handler(self.board_spaces[start_space].occupying_piece, next_space, player_turn)
+                    piece_moved = self.__knight_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
+                    pass
+                case bishop.Bishop:
+                    # Run bishop handler
+                    piece_moved = self.__bishop_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
                     pass
                 case _:
                     pass
@@ -352,14 +356,41 @@ class Board():
             # TODO: Check for king checks
 
         return piece_moved
+
+    def __move_piece(self, piece:piece.Piece, next_space:str):
+        """
+        Moves a piece by performing the following steps:
+            - Resolving captures if necessary
+            - Updating piece's occupied space
+        Args:
+            piece: piece to move
+            next_space: space to move to. Space must match one of the spaces found in constants.space_names
+
+        Returns:
+            piece_moved: boolean True if piece moved, False otherwise     
+        """
+        piece_moved = False
+
+        if self.board_spaces[next_space].occupying_piece is None \
+            or piece.color != self.board_spaces[next_space].occupying_piece.color:
+            if self.board_spaces[next_space].occupying_piece is not None:
+                # Resolve the capture
+                self.__capture_piece(self.board_spaces[next_space].occupying_piece)
+
+            # Move the piece to the new space
+            piece.update_space(self.board_spaces[next_space])
+
+            # Indicate that piece has moved
+            piece_moved = True
+
+        return piece_moved
     
     def __capture_piece(self, piece:piece.Piece):
         """
         Clears a space for a capture by removing the piece from the square and
-        
         the pieces list, removing it from the game.
         Args:
-            space_name: Name of space to clear ("A1", "A2", etc...)
+            piece: piece to capture
 
         Returns:
             None          
@@ -372,7 +403,7 @@ class Board():
 
         return
 
-    def __pawn_move_handler(self, pawn:pawn.Pawn, next_space:str, player_turn:constants.PlayerColor):
+    def __pawn_move_handler(self, pawn:pawn.Pawn, next_space:str):
         """
         Handles pawn moves by first checking if the move between the spaces is
         technically viable per how the pawn moves. If so, then any spaces the 
@@ -383,7 +414,7 @@ class Board():
         Args:
             pawn: Pawn object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
-            player_turn: Player turn indicator. Used for resolving captures.
+            : Player turn indicator. Used for determining valid pawn direction.
 
         Returns:
             pawn_moved: Boolean True if pawn moved, False otherwise  
@@ -393,7 +424,7 @@ class Board():
         try:
             if pawn.is_move_valid(next_space) == True:
                 # Determine direction value based on color
-                if player_turn == constants.PlayerColor.WHITE:
+                if pawn.color == constants.PlayerColor.WHITE:
                     direction = 1 # positive means "forward" is incrementing row count
                 else:
                     direction = -1 # negative means "forward" is decrementing row count
@@ -408,7 +439,10 @@ class Board():
                     for row in range(cur_row+direction, next_row+direction, direction):
                         if self.board_spaces[cur_col+str(row)].occupying_piece is not None:
                             # A piece occupies the row(s) ahead of the pawn. Raise an exception
-                            raise InvalidMoveException('There is another piece blocking the way.')     
+                            raise InvalidMoveException('There is another piece blocking the way.')  
+
+                    # Assuming no exception was raised, the move is valid. Attempt to move the pawn
+                    pawn_moved = self.__move_piece(pawn, next_space)                       
 
                 else:
                     # Pawn is moving diagonally. Check destination for opposing color piece
@@ -418,14 +452,8 @@ class Board():
                         # There's no piece to capture. Raise an exception
                         raise InvalidMoveException('Pawns can only move diagonally when capturing.')     
                     else:
-                        # "Capture" the enemy piece by removing it from the list of pieces
-                        self.__capture_piece(self.board_spaces[next_space].occupying_piece)
-                        
-
-
-                # No pieces occupying the spaces ahead of the pawn. Move it to the new space
-                pawn.update_space(self.board_spaces[next_space])
-                pawn_moved = True
+                        # There is a piece to capture. Attempt to move the pawn
+                        pawn_moved = self.__move_piece(pawn, next_space)
 
                 # TODO: Pawn promotion
 
@@ -438,7 +466,7 @@ class Board():
             
         return pawn_moved
     
-    def __knight_move_handler(self, knight:knight.Knight, next_space:str, player_turn:constants.PlayerColor):
+    def __knight_move_handler(self, knight:knight.Knight, next_space:str):
         """
         Handles knight moves by first checking if the move between the spaces is
         technically viable per how the knight moves. If so, the destination space
@@ -446,32 +474,21 @@ class Board():
         only piece that can pass thorugh others.
 
         Args:
-            knight: Pawn object being moved.
+            knight: Knight object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
-            player_turn: Player turn indicator. Used for resolving captures.
+            : Player turn indicator. Used for resolving captures.
 
         Returns:
-            pawn_moved: Boolean True if pawn moved, False otherwise  
+            knight_moved: Boolean True if knight moved, False otherwise  
         """
         knight_moved = False
 
         try:
             if knight.is_move_valid(next_space) == True:
                 # Check for piece at the destination. If it is the opposite color, we can capture
-                if self.board_spaces[next_space].occupying_piece is None \
-                   or knight.color != self.board_spaces[next_space].occupying_piece.color:
+                knight_moved = self.__move_piece(knight, next_space)
                 
-                    if self.board_spaces[next_space].occupying_piece is not None:
-                        # Resolve the capture
-                        self.__capture_piece(self.board_spaces[next_space].occupying_piece)
-
-                    # Move the knight to the new space
-                    knight.update_space(self.board_spaces[next_space])
-
-                    # Set knight moved indicator
-                    knight_moved = True
-                
-                else:
+                if knight_moved == False:
                     # Space is occupied by a piece of the same color. Throw an exception.
                     raise InvalidMoveException("There is another piece blocking the way.")
 
@@ -482,8 +499,60 @@ class Board():
         except:
             pass
 
-        return knight_moved      
+        return knight_moved
 
+    def __bishop_move_handler(self, bishop:bishop.Bishop, next_space:str):
+        """
+        Handles bishop moves by first checking if the move between the spaces is
+        technically viable per how the bishop moves. If so, the destination space
+        is checked for captures. No collision detection needed as knights are the
+        only piece that can pass thorugh others.
+
+        Args:
+            bishop: Bishop object being moved.
+            next_space: space to move to. Space must match one of the spaces found in constants.space_names
+            : Player turn indicator. Used for resolving captures.
+
+        Returns:
+            bishop_moved: Boolean True if bishop moved, False otherwise  
+        """
+        bishop_moved = False
+        cur_col_idx = constants.board_col_labels.index(bishop.occupied_square.square_col)
+        cur_row_idx = constants.board_row_labels.index(bishop.occupied_square.square_row)
+        nxt_col_idx = constants.board_col_labels.index(next_space[0])
+        nxt_row_idx = constants.board_row_labels.index(next_space[1])
+        col_dir = 1
+        row_dir = 1
+
+        try:
+            # Check if any of the spaces between current and next space in the path are occupied
+            if bishop.is_move_valid(next_space) == True:
+
+                if cur_col_idx > nxt_col_idx:
+                    # Switch column direction to negative
+                    col_dir *= -1
+
+                if cur_row_idx > nxt_row_idx:
+                    # Switch row direction to negative
+                    row_dir *= -1
+
+                # Check for pieces in between the starting and destination square
+                for col, row in zip(range(cur_col_idx + col_dir, nxt_col_idx, col_dir), range(cur_row_idx + row_dir, nxt_row_idx, row_dir)):
+                    if self.board_spaces[constants.board_col_labels[col] + constants.board_row_labels[row]].occupying_piece is not None:
+                        # Bishop is trying to cut through an occupied square. Raise an exception
+                        raise InvalidMoveException("There is another piece blocking the way.")
+
+                # No pieces in the way. We can attempt to move
+                bishop_moved = self.__move_piece(bishop, next_space)
+
+            else:
+                # Knight move invalid. Raise an exception
+                raise InvalidMoveException("Bishops can't move that way.")
+                
+        except:
+            pass
+
+        return bishop_moved
 class InvalidMoveException(Exception):
     """
     Custom exception handler for when a move fails to execute.
