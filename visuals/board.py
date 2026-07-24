@@ -383,6 +383,10 @@ class Board():
             # Indicate that piece has moved
             piece_moved = True
 
+        if piece_moved == False:
+            # Space is occupied by a piece of the same color. Throw an exception.
+            raise InvalidMoveException("There is another piece blocking the way.")
+        
         return piece_moved
     
     def __capture_piece(self, piece:piece.Piece):
@@ -487,10 +491,6 @@ class Board():
             if knight.is_move_valid(next_space) == True:
                 # Check for piece at the destination. If it is the opposite color, we can capture
                 knight_moved = self.__move_piece(knight, next_space)
-                
-                if knight_moved == False:
-                    # Space is occupied by a piece of the same color. Throw an exception.
-                    raise InvalidMoveException("There is another piece blocking the way.")
 
             else:
                 # Knight move invalid. Raise an exception
