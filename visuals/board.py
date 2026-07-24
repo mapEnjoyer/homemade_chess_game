@@ -373,9 +373,14 @@ class Board():
 
         if self.board_spaces[next_space].occupying_piece is None \
             or piece.color != self.board_spaces[next_space].occupying_piece.color:
+
+            # Check for piece to capture
             if self.board_spaces[next_space].occupying_piece is not None:
-                # Resolve the capture
-                self.__capture_piece(self.board_spaces[next_space].occupying_piece)
+                # Remove the piece from the game
+                self.pieces.remove(self.board_spaces[next_space].occupying_piece)
+
+                # Remove the sprite from the list so it no longer is drawn
+                self.sprite_list.remove(self.board_spaces[next_space].occupying_piece.sprite)
 
             # Move the piece to the new space
             piece.update_space(self.board_spaces[next_space])
@@ -388,24 +393,6 @@ class Board():
             raise InvalidMoveException("There is another piece blocking the way.")
         
         return piece_moved
-    
-    def __capture_piece(self, piece:piece.Piece):
-        """
-        Clears a space for a capture by removing the piece from the square and
-        the pieces list, removing it from the game.
-        Args:
-            piece: piece to capture
-
-        Returns:
-            None          
-        """
-        # Pop the piece from the list to remove it from the game
-        self.pieces.remove(piece)
-
-        # Remove the sprite from the list so it no longer is drawn
-        self.sprite_list.remove(piece.sprite)
-
-        return
 
     def __pawn_move_handler(self, pawn:pawn.Pawn, next_space:str):
         """
