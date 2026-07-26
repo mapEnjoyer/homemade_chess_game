@@ -305,7 +305,7 @@ class Board():
             # Check that piece type is valid
             if piece_type not in constants.valid_piece_types:
                 # raise exception indicating the piece type is not valid
-                raise InvalidMoveException('Piece type does not exist.')                
+                raise InvalidMoveException('Piece type does not exist.')       
 
             # Check that starting square is valid
             if start_space not in constants.space_names:
@@ -323,6 +323,10 @@ class Board():
             if piece is None:
                 # No piece to move on that square. Raise an exception
                 raise InvalidMoveException('No piece to move.')
+            
+            if not isinstance(piece, piece_type):
+                # Piece on the square does not match the command. Raise an exception
+                raise InvalidMoveException('Wrong piece type.')
 
             # Check that the piece being moved is the right color
             if piece.color != player_turn:
