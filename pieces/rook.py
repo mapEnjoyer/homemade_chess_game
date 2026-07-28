@@ -31,6 +31,7 @@ class Rook(piece.Piece):
         Args:
             space: Board_Space object the piece occupies
             texture_path: str to image file used for piece sprite.
+            image_width: integer width of the image used for the sprite in pixels.
 
         Returns:
             None
