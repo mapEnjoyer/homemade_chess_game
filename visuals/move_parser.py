@@ -182,12 +182,16 @@ class MoveParser():
                 
             else:
                 # Move input too long. Raise exception
-                raise InvalidMoveEntry()
+                raise InvalidMoveEntry(f'Move entry is invalid. Length of move should be no longer than 3 characters (ex: KC3)')
 
                 
             # Now that we have determined piece type, attempt to determine current and new squares
             cur_space = text[-4:-2]
             new_space = text[-2:]
+
+            if cur_space == new_space:
+                # No piece is allowed to stay in the same space as a valid move
+                raise InvalidMoveEntry(f'Piece cannot move to the space it is already in!')
 
             if any(space not in constants.space_names for space in [cur_space, new_space]):
                 raise excpetions.InvalidSpaceError()
@@ -200,9 +204,8 @@ class MoveParser():
             # TODO: Show error message in game screen, not terminal
             print (f'Space does not exist on board! Use the row/column labels to determine square piece is moving to. Column letter always comes before row number (ex: E4).')
 
-        except InvalidMoveEntry:
-            # TODO: Show error message in game screen, not terminal
-            print (f'Move entry is invalid. Length of move should be no longer than 3 characters (ex: KC3)')
+        except:
+            pass
 
         else:
             # Assign piece type and space to move parser so they can be used by the window
@@ -222,16 +225,17 @@ class InvalidMoveEntry(Exception):
     invalid piece type or space reference.
     """
     
-    def __init__(self):
+    def __init__(self, msg:str):
 
         """
         Notifies the player that the move they have entered is invalid for reasons 
         other than invalid piece type or space reference.
 
         Args:
-            None
+            msg: Message to display indicating why move could not complete
 
         Returns:
             None
         """
         super().__init__()
+        print(f'Move failed! {msg}')
