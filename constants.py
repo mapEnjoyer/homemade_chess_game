@@ -30,3 +30,32 @@ board_row_labels:Final = ["1", "2", "3", "4", "5", "6", "7", "8"]
 WINDOW_WIDTH = 1920
 WINDOW_HEIGHT = 1080
 WINDOW_TITLE = "EAK's Chess Game"
+
+# Piece texture image constants
+white_pawn_image_name = "white_pawn.png"
+white_rook_image_name = "white_rook.png"
+white_knight_image_name = "white_knight.png"
+white_bishop_image_name = "white_bishop.png"
+white_queen_image_name = "white_queen.png"
+white_king_image_name = "white_king.png"
+
+black_pawn_image_name = "black_pawn.png"
+black_rook_image_name = "black_rook.png"
+black_knight_image_name = "black_knight.png"
+black_bishop_image_name = "black_bishop.png"
+black_queen_image_name = "black_queen.png"
+black_king_image_name = "black_king.png"
+
+# Piece image size constants
+pawn_image_width = 110
+pawn_image_height = 110
+rook_image_width = 110
+rook_image_height = 110
+knight_image_width = 110
+knight_image_height = 110
+bishop_image_width = 120
+bishop_image_height = 125
+queen_image_width = 125
+queen_image_height = 125
+king_image_width = 125
+king_image_height = 125

@@ -55,11 +55,6 @@ class GameView(arcade.Window):
         # Chess board object
         self.chess_board = board.Board()
 
-        # Set path to visuals
-        visuals_path = Path(__file__).parent
-
-        # TODO: Load textures and sprites
-
         # Run setup
         self.setup()
 
@@ -169,6 +164,14 @@ class GameView(arcade.Window):
                 # Shifting over to the next column. Reset y position and shift x
                 y_pos = y_start
                 x_pos += square_size
+
+        # After space positions are determined, piece sprite locations need updated to match those square locations
+        # To do this, call the update_space method of each piece using the square it's already in
+        for piece in self.chess_board.white_pieces:
+            piece.update_space(piece.occupied_square)
+
+        for piece in self.chess_board.black_pieces:
+            piece.update_space(piece.occupied_square)            
 
         # Determine row/column label font size (1/4th square size seemed good from testing)
         font_size = square_size / 4 

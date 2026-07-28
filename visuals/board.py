@@ -11,7 +11,9 @@ Date: 05/30/26
 
 import arcade
 import constants
-
+from visuals import board_space
+from pieces import pawn, rook, knight, bishop, queen, king
+from pathlib import Path
 class Board():
     """
     Board class. Used to access all spaces on the board.
@@ -20,6 +22,8 @@ class Board():
         - board_spaces: Dictionary containing all 64 board space objects
         - col_labels: Dictonary containing 8 column label text objects
         - row_labels: Dictionary containing 8 row label text objects
+        - white_pieces: List of all white pieces currently on the board. As pieces are removed, they are popped from the list.
+        - black_pieces: List of all black pieces currently on the board. As pieces are removed, they are popped from the list.
     """
 
     def __init__(self):
@@ -35,8 +39,8 @@ class Board():
         """
 
         # Dictonary containing all board spaces.
-        # {"A1" : _Board_Space A1; "A2": _Board_Space A2; ...}
-        self.board_spaces:dict[str, _Board_Space] = {}
+        # {"A1" : board_space.Board_Space A1; "A2": board_space.Board_Space A2; ...}
+        self.board_spaces:dict[str, board_space.Board_Space] = {}
 
         # Dictionary containing all column label text objects
         # {"A": Text A; "B": Text B; ...}
@@ -46,11 +50,26 @@ class Board():
         # {"1": Text 1; "2": Text 2; ...}
         self.row_labels:dict[str, arcade.Text] = {}
 
+        # List containing all white pieces on board
+        self.white_pieces = []
+
+        # List containing all black pieces on board
+        self.black_pieces = []
+
+        # Sprite list containing all sprites on the board
+        self.sprite_list = arcade.SpriteList()
+
         # Initialize chess board squares
         self.__init_squares()
 
         # Initialize the chess board labels
         self.__init_labels()
+
+        # Initialize white pieces
+        self.__init_white_pieces()
+
+        # TODO: Init black pieces
+        self.__init_black_pieces()
 
         return
 
@@ -77,7 +96,7 @@ class Board():
             row_count = int(name[-1])
 
             # Create a space class for each space
-            self.board_spaces[name] = _Board_Space(color = space_color)
+            self.board_spaces[name] = board_space.Board_Space(color = space_color)
 
             if row_count != 8:
                 if space_color == arcade.color.BISTRE:
@@ -116,6 +135,118 @@ class Board():
 
         return
     
+    def __init_white_pieces(self):
+        """
+        Initializes the white pieces by creating objects for each piece inside the associated piece list.
+
+        Args: 
+            None
+
+        Returns:
+            None         
+        """
+        # Create the A2-H2 pawns
+        text_file_path = str(Path(__file__).parent / "textures" / constants.white_pawn_image_name)
+        
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["A2"], text_file_path, constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["B2"], text_file_path, constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["C2"], text_file_path, constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["D2"], text_file_path, constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["E2"], text_file_path, constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["F2"], text_file_path, constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["G2"], text_file_path, constants.pawn_image_width))
+        self.white_pieces.append(pawn.Pawn(self.board_spaces["H2"], text_file_path, constants.pawn_image_width))
+
+        # Create A1/H1 rooks
+        text_file_path = Path(__file__).parent / "textures" / constants.white_rook_image_name
+
+        self.white_pieces.append(rook.Rook(self.board_spaces["A1"], text_file_path, constants.rook_image_width))
+        self.white_pieces.append(rook.Rook(self.board_spaces["H1"], text_file_path, constants.rook_image_width))
+
+        # Create B1/G1 knights
+        text_file_path = Path(__file__).parent / "textures" / constants.white_knight_image_name
+
+        self.white_pieces.append(knight.Knight(self.board_spaces["B1"], text_file_path, constants.knight_image_width))
+        self.white_pieces.append(knight.Knight(self.board_spaces["G1"], text_file_path, constants.knight_image_width))
+
+        # Create C1/F1 bishops
+        text_file_path = Path(__file__).parent / "textures" / constants.white_bishop_image_name
+
+        self.white_pieces.append(bishop.Bishop(self.board_spaces["C1"], text_file_path, constants.bishop_image_width))
+        self.white_pieces.append(bishop.Bishop(self.board_spaces["F1"], text_file_path, constants.bishop_image_width))
+
+        # Create D1 queen
+        text_file_path = Path(__file__).parent / "textures" / constants.white_queen_image_name
+
+        self.white_pieces.append(queen.Queen(self.board_spaces["D1"], text_file_path, constants.queen_image_width))
+
+        # Create E1 king
+        text_file_path = Path(__file__).parent / "textures" / constants.white_king_image_name
+
+        self.white_pieces.append(king.King(self.board_spaces["E1"], text_file_path, constants.king_image_width))
+
+        # After each piece is created, add its sprite to the sprite list so they can be drawn each frame
+        for piece in self.white_pieces:
+            self.sprite_list.append(piece.sprite)
+
+        return
+    
+    def __init_black_pieces(self):
+        """
+        Initializes the black pieces by creating objects for each piece inside the associated piece list.
+
+        Args: 
+            None
+
+        Returns:
+            None         
+        """
+        # Create the A7-H7 pawns
+        text_file_path = str(Path(__file__).parent / "textures" / constants.black_pawn_image_name)
+
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["A7"], text_file_path, constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["B7"], text_file_path, constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["C7"], text_file_path, constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["D7"], text_file_path, constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["E7"], text_file_path, constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["F7"], text_file_path, constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["G7"], text_file_path, constants.pawn_image_width))
+        self.black_pieces.append(pawn.Pawn(self.board_spaces["H7"], text_file_path, constants.pawn_image_width))
+
+        # Create A8/H8 rooks
+        text_file_path = Path(__file__).parent / "textures" / constants.black_rook_image_name
+
+        self.black_pieces.append(rook.Rook(self.board_spaces["A8"], text_file_path, constants.rook_image_width))
+        self.black_pieces.append(rook.Rook(self.board_spaces["H8"], text_file_path, constants.rook_image_width))
+
+        # Create B8/G8 knights
+        text_file_path = Path(__file__).parent / "textures" / constants.black_knight_image_name
+
+        self.black_pieces.append(knight.Knight(self.board_spaces["B8"], text_file_path, constants.knight_image_width))
+        self.black_pieces.append(knight.Knight(self.board_spaces["G8"], text_file_path, constants.knight_image_width))
+
+        # Create C8/F8 bishops
+        text_file_path = Path(__file__).parent / "textures" / constants.black_bishop_image_name
+
+        self.black_pieces.append(bishop.Bishop(self.board_spaces["C8"], text_file_path, constants.bishop_image_width))
+        self.black_pieces.append(bishop.Bishop(self.board_spaces["F8"], text_file_path, constants.bishop_image_width))   
+
+        # Create D8 queen
+        text_file_path = Path(__file__).parent / "textures" / constants.black_queen_image_name
+
+        self.black_pieces.append(queen.Queen(self.board_spaces["D8"], text_file_path, constants.queen_image_width))
+
+        # Create E8 king
+        text_file_path = Path(__file__).parent / "textures" / constants.black_king_image_name
+        
+        self.black_pieces.append(king.King(self.board_spaces["E8"], text_file_path, constants.king_image_width))        
+
+        # After each piece is created, add its sprite to the sprite list so they can be drawn each frame
+        for piece in self.black_pieces:
+            self.sprite_list.append(piece.sprite)
+
+        return
+    
     def draw_board(self):
         """ 
         Draws the chess board on screen by drawing each square,
@@ -137,52 +268,9 @@ class Board():
 
         # Draw the row labels
         for row in self.row_labels:
-            self.row_labels[row].draw()        
-        
-class _Board_Space():
-    """
-    Board space class. Manages each space on the board, 
-    and allows pieces to know where they are on the board.
+            self.row_labels[row].draw()
 
-    Attributes:
-        - center_x: Square's center x position in the window
-        - center_y: Square's center y position in the window
-        - length: Length of the sqaure edge
-        - color: Color of the sqaure
-    """
-    
-    def __init__(self, center_x: float = 0, center_y: float = 0, length: float = 0, color: arcade.color = arcade.color.WHITE):
-        """
-        Initializes space object
-        
-        Args:
-            center_x: Center x position of the space
-            center_y: Center y position of the space
-            length:   Length of square
-            color:    Color of the square
+        # Draw the pieces
+        self.sprite_list.draw()
 
-        Returns:
-            None
-        """
-        
-        # Assign property values
-        self.center_x = center_x
-        self.center_y = center_y
-        self.length = length
-        self.color = color
-
-        return
-
-    def draw_square(self):
-        """
-        Draws the square at its position values
-
-        Args:,
-            None
-
-        Returns:
-            None
-        """
-        # self.length used as both height and width args to ensure square shape
-        arcade.draw_rect_filled(arcade.rect.XYWH(self.center_x, self.center_y, self.length, self.length), self.color)
         return
