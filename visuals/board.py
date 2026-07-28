@@ -347,6 +347,10 @@ class Board():
                     # Run bishop handler
                     piece_moved = self.__bishop_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
                     pass
+                case rook.Rook:
+                    # Run rook handler
+                    piece_moved = self.__rook_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
+                    pass
                 case _:
                     pass
 
@@ -409,7 +413,6 @@ class Board():
         Args:
             pawn: Pawn object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
-            : Player turn indicator. Used for determining valid pawn direction.
 
         Returns:
             pawn_moved: Boolean True if pawn moved, False otherwise  
@@ -471,7 +474,6 @@ class Board():
         Args:
             knight: Knight object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
-            : Player turn indicator. Used for resolving captures.
 
         Returns:
             knight_moved: Boolean True if knight moved, False otherwise  
@@ -502,7 +504,6 @@ class Board():
         Args:
             bishop: Bishop object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
-            : Player turn indicator. Used for resolving captures.
 
         Returns:
             bishop_moved: Boolean True if bishop moved, False otherwise  
@@ -544,6 +545,75 @@ class Board():
             pass
 
         return bishop_moved
+
+    def __rook_move_handler(self, rook:rook.Rook, next_space:str):
+        """
+        Handles rook moves by first checking if the move between the spaces is
+        technically viable per how the rook moves. If so, the destination space
+        is checked for captures. No collision detection needed as knights are the
+        only piece that can pass thorugh others.
+
+        Args:
+            rook: Rook object being moved.
+            next_space: space to move to. Space must match one of the spaces found in constants.space_names
+
+        Returns:
+            rook_moved: Boolean True if rook moved, False otherwise  
+        """
+        rook_moved = False
+        cur_col_idx = constants.board_col_labels.index(rook.occupied_square.square_col)
+        cur_row_idx = constants.board_row_labels.index(rook.occupied_square.square_row)
+        nxt_col_idx = constants.board_col_labels.index(next_space[0])
+        nxt_row_idx = constants.board_row_labels.index(next_space[1])
+
+        # Direction variables init to 0, will be set according to if the rook moves verically or horizontally
+        col_dir = 0
+        row_dir = 0
+
+        try:
+            # Check if any of the spaces between current and next space in the path are occupied
+            if rook.is_move_valid(next_space) == True:
+
+                if cur_col_idx < nxt_col_idx:
+                    # Rook is moving towards H column
+                    col_dir = 1
+
+                elif cur_col_idx > nxt_col_idx:
+                    # Rook is moving towards A column
+                    col_dir = -1
+
+                elif cur_row_idx < nxt_row_idx:
+                    # Rook is moving towards row 8
+                    row_dir = 1
+
+                elif cur_row_idx > nxt_row_idx:
+                    # Rook is moving towards row 1
+                    row_dir = -1 
+
+                # Check for pieces in between the starting and destination square
+                if col_dir:
+                    # Check along column up to but not including target square
+                    for col in range(cur_col_idx + col_dir, nxt_col_idx, col_dir):
+                        if self.board_spaces[constants.board_col_labels[col] + constants.board_row_labels[cur_row_idx]].occupying_piece is not None:
+                            raise InvalidMoveException("There is another piece blocking the way.")
+
+                elif row_dir:
+                    # Check along row up to but not including target square
+                    for row in range(cur_row_idx + row_dir, nxt_row_idx, row_dir):
+                        if self.board_spaces[constants.board_col_labels[cur_col_idx] + constants.board_row_labels[row]].occupying_piece is not None:
+                            raise InvalidMoveException("There is another piece blocking the way.")
+
+                # No pieces in the way. We can attempt to move
+                rook_moved = self.__move_piece(rook, next_space)
+
+            else:
+                # Knight move invalid. Raise an exception
+                raise InvalidMoveException("Rooks can't move that way.")
+                
+        except:
+            pass
+
+        return rook_moved
 class InvalidMoveException(Exception):
     """
     Custom exception handler for when a move fails to execute.
