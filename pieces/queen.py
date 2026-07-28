@@ -7,6 +7,7 @@ Date: 05/30/26
 @brief: 
     This file contains class/logic for queens.
 """
+import constants
 from pieces import piece
 
 class Queen(piece.Piece):
@@ -40,3 +41,30 @@ class Queen(piece.Piece):
         super().__init__(space, texture_path, image_width)
 
         return
+
+    def is_move_valid(self, space:str):
+        """
+        Method to determine if the queen object can "theoretically" move to the indicated square.
+        Valid queen moves include:
+            - going diagonal in any direction
+            - going vertical or horizontal in any direction
+
+        Args:
+            space: Destination space string name for the queen to move to ('A1', 'A2'...)
+
+        Returns:
+            move_is_valid: True if the move is "theoretically" possible (not including pieces blocking the way/captures not being present)
+        """
+        cur_col_idx = constants.board_col_labels.index(self.occupied_square.square_col)
+        cur_row_idx = constants.board_row_labels.index(self.occupied_square.square_row)
+        nxt_col_idx = constants.board_col_labels.index(space[0])
+        nxt_row_idx = constants.board_row_labels.index(space[1])
+
+        move_is_valid = False
+
+        # Queen moves are valid if they are either vertical, horizontal or diagonal
+        move_is_valid |= abs(cur_col_idx - nxt_col_idx) == abs(cur_row_idx - nxt_row_idx) # Diagonal check
+        move_is_valid |= cur_col_idx == nxt_col_idx and cur_row_idx != nxt_row_idx # Vertical check
+        move_is_valid |= cur_col_idx != nxt_col_idx and cur_row_idx == nxt_row_idx # Horizontal check
+
+        return move_is_valid

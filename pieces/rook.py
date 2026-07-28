@@ -46,7 +46,7 @@ class Rook(piece.Piece):
         """
         Method to determine if the rook object can "theoretically" move to the indicated square.
         Valid rook moves include:
-            - going diagonal in any direction
+            - going vertical or horizontal in any direction
 
         Args:
             space: Destination space string name for the rook to move to ('A1', 'A2'...)
