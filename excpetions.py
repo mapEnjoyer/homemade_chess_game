@@ -12,35 +12,37 @@ class InvalidPieceTypeError(Exception):
     Custom exception handler for when user tries to move piece of a type that doesn't exist
     """
     
-    def __init__(self):
+    def __init__(self, msg:str):
 
         """
         Notifies the player that the move they have entered references a piece type
         that does not exist.
 
         Args:
-            None
+            msg: Message to display indicating why move could not complete
 
         Returns:
             None
         """
         super().__init__()
+        print(f'Move failed! {msg}')
 
 class InvalidSpaceError(Exception):
     """
     Custom exception handler for when user tries to move piece to a square that doesn't exist
     """
     
-    def __init__(self):
+    def __init__(self, msg:str):
 
         """
         Notifies the player that the move they have entered references a piece type
         that does not exist.
 
         Args:
-            None
+            msg: Message to display indicating why move could not complete
             
         Returns:
             None
         """
         super().__init__()
+        print(f'Move failed! {msg}')

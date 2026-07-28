@@ -178,7 +178,7 @@ class MoveParser():
 
                 else:
                     # Invalid move entry, notify
-                    raise excpetions.InvalidPieceTypeError()
+                    raise excpetions.InvalidPieceTypeError(f'Invalid piece type! Valid piece types include "R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King. Pawn moves do not include a "P" (ex: E4).')
                 
             else:
                 # Move input too long. Raise exception
@@ -194,15 +194,7 @@ class MoveParser():
                 raise InvalidMoveEntry(f'Piece cannot move to the space it is already in!')
 
             if any(space not in constants.space_names for space in [cur_space, new_space]):
-                raise excpetions.InvalidSpaceError()
-
-        except excpetions.InvalidPieceTypeError: 
-            # TODO: Show error message in game screen, not terminal
-            print (f'Invalid piece type! Valid piece types include "R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King. Pawn moves do not include a "P" (ex: E4).')
-
-        except excpetions.InvalidSpaceError:
-            # TODO: Show error message in game screen, not terminal
-            print (f'Space does not exist on board! Use the row/column labels to determine square piece is moving to. Column letter always comes before row number (ex: E4).')
+                raise excpetions.InvalidSpaceError(f'Space does not exist on board! Use the row/column labels to determine square piece is moving to. Column letter always comes before row number (ex: E4).')
 
         except:
             pass
