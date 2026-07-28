@@ -422,26 +422,17 @@ class Board():
             pawn_moved: Boolean True if pawn moved, False otherwise  
         """
         pawn_moved = False
+        cur_col_idx = constants.board_col_labels.index(pawn.occupied_square.square_col)
+        cur_row_idx = constants.board_row_labels.index(pawn.occupied_square.square_row)
+        nxt_col_idx = constants.board_col_labels.index(next_space[0])
+        nxt_row_idx = constants.board_row_labels.index(next_space[1])
 
         try:
             if pawn.is_move_valid(next_space) == True:
-                # Determine direction value based on color
-                if pawn.color == constants.PlayerColor.WHITE:
-                    direction = 1 # positive means "forward" is incrementing row count
-                else:
-                    direction = -1 # negative means "forward" is decrementing row count
 
-                # Move is technically valid. Next steps depend on if pawn is move vertically or diagonally
-                cur_col = pawn.occupied_square.square_col
-                cur_row = int(pawn.occupied_square.square_row)
-                next_col = next_space[0]
-                next_row = int(next_space[1])
-                if  cur_col == next_col :
-                    # Pawn is staying in the same column. Check square(s) it is moving through.
-                    for row in range(cur_row+direction, next_row+direction, direction):
-                        if self.board_spaces[cur_col+str(row)].occupying_piece is not None:
-                            # A piece occupies the row(s) ahead of the pawn. Raise an exception
-                            raise InvalidMoveException('There is another piece blocking the way.')  
+                if  cur_col_idx == nxt_col_idx :
+                    # Pawn is staying in the same column. Run standard collision check
+                    self.__check_collisions(cur_col_idx, nxt_col_idx, cur_row_idx, nxt_row_idx)
 
                     # Assuming no exception was raised, the move is valid. Attempt to move the pawn
                     pawn_moved = self.__move_piece(pawn, next_space)                       
@@ -614,8 +605,8 @@ class Board():
 
     def __check_collisions(self, cur_col_idx:int, nxt_col_idx:int, cur_row_idx:int, nxt_row_idx:int):
         """
-        Checks for collisions for rook/bishops/queens moving along rows, columns or diagonals. 
-        An excpetion will be raised if a piece is in the way.
+        Checks for collisions for rook/bishops/queens moving along rows, columns or diagonals.
+        Also used for pawns moving forward. An excpetion will be raised if a piece is in the way.
 
         Args:
             cur_col_idx: current column index as an integer (0-7)
