@@ -192,7 +192,6 @@ class Piece(ABC):
 
         return
     
-    # TODO: Restore
-    # @abstractmethod
-    # def is_move_valid(space:str):
-    #     pass
+    @abstractmethod
+    def is_move_valid(space:str):
+        pass
