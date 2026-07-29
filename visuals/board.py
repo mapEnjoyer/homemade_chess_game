@@ -333,8 +333,6 @@ class Board():
                 # raise exception indicating the player is interacting with the wrong color pieces
                 raise InvalidMoveException('Wrong color piece.')
 
-            # TODO: Check that if the piece moved from its spot, would it put the king of the same color in check
-
             # Run move handler for the piece type
             match(type(piece)):
                 case pawn.Pawn:
@@ -366,9 +364,12 @@ class Board():
         except:
             pass
 
-        # Update piece has moved indicator. Only updates to True, never back to False
         if piece_moved:
-            # TODO: Check for king checks
+            # Run check handler for king of opposite color to notify next player their king is in check
+            for piece in self.pieces:
+                if isinstance(piece, king.King) and piece.color != player_turn:
+                    self.__determine_checks(piece.occupied_square.name)
+
             pass
 
         return piece_moved
@@ -641,7 +642,7 @@ class Board():
                     if king.has_moved:
                         raise InvalidMoveException(f'The king has already moved! It can no longer castle!')
 
-                    # King is attemption castle, check for collisions along the way
+                    # King is attempting castle, check for collisions along the way
                     self.__check_collisions(king.occupied_square.name, next_space)
                     if self.board_spaces[next_space].occupying_piece is not None:
                         raise InvalidMoveException(f'There is another piece blocking the way.')
@@ -678,7 +679,6 @@ class Board():
                     self.__move_piece(self.board_spaces[rook_start_square].occupying_piece, rook_end_squre)  
 
                 else:
-                    # TODO: Make sure king isn't moving into check
                     king_moved = self.__move_piece(king, next_space)
 
             else:
