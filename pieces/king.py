@@ -85,9 +85,8 @@ class King(piece.Piece):
         is_castleing = False
 
         # Casteling requires king to attempt to move to C/G column from starting square as its first move
-        is_castleing |= self.color == constants.PlayerColor.WHITE and (space == 'C1' or space == 'G1')
-        is_castleing |= self.color == constants.PlayerColor.BLACK and (space == 'C8' or space == 'G8')
-        is_castleing &= self.has_moved == False
+        is_castleing |= self.color == constants.PlayerColor.WHITE and (space == 'C1' or space == 'G1') and self.occupied_square.name == 'E1'
+        is_castleing |= self.color == constants.PlayerColor.BLACK and (space == 'C8' or space == 'G8') and self.occupied_square.name == 'E8'
 
         return is_castleing
       
