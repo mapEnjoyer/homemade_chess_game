@@ -423,16 +423,14 @@ class Board():
         """
         pawn_moved = False
         cur_col_idx = constants.board_col_labels.index(pawn.occupied_square.square_col)
-        cur_row_idx = constants.board_row_labels.index(pawn.occupied_square.square_row)
         nxt_col_idx = constants.board_col_labels.index(next_space[0])
-        nxt_row_idx = constants.board_row_labels.index(next_space[1])
 
         try:
             if pawn.is_move_valid(next_space) == True:
 
                 if  cur_col_idx == nxt_col_idx :
                     # Pawn is staying in the same column. Run standard collision check
-                    self.__check_collisions(cur_col_idx, nxt_col_idx, cur_row_idx, nxt_row_idx)
+                    self.__check_collisions(pawn.occupied_square.name, next_space)
 
                     # Assuming no exception was raised, the move is valid. Attempt to move the pawn
                     pawn_moved = self.__move_piece(pawn, next_space)                       
@@ -503,17 +501,13 @@ class Board():
             bishop_moved: Boolean True if bishop moved, False otherwise  
         """
         bishop_moved = False
-        cur_col_idx = constants.board_col_labels.index(bishop.occupied_square.square_col)
-        cur_row_idx = constants.board_row_labels.index(bishop.occupied_square.square_row)
-        nxt_col_idx = constants.board_col_labels.index(next_space[0])
-        nxt_row_idx = constants.board_row_labels.index(next_space[1])
 
         try:
             # Check if any of the spaces between current and next space in the path are occupied
             if bishop.is_move_valid(next_space) == True:
 
                 # Check for collisions
-                self.__check_collisions(cur_col_idx, nxt_col_idx, cur_row_idx, nxt_row_idx)     
+                self.__check_collisions(bishop.occupied_square.name, next_space)     
 
                 # No pieces in the way. We can attempt to move
                 bishop_moved = self.__move_piece(bishop, next_space)
@@ -541,17 +535,13 @@ class Board():
             rook_moved: Boolean True if rook moved, False otherwise  
         """
         rook_moved = False
-        cur_col_idx = constants.board_col_labels.index(rook.occupied_square.square_col)
-        cur_row_idx = constants.board_row_labels.index(rook.occupied_square.square_row)
-        nxt_col_idx = constants.board_col_labels.index(next_space[0])
-        nxt_row_idx = constants.board_row_labels.index(next_space[1])
 
         try:
             # Check if any of the spaces between current and next space in the path are occupied
             if rook.is_move_valid(next_space) == True:
 
                 # Check for collisions
-                self.__check_collisions(cur_col_idx, nxt_col_idx, cur_row_idx, nxt_row_idx)     
+                self.__check_collisions(rook.occupied_square.name, next_space)     
 
                 # No pieces in the way. We can attempt to move
                 rook_moved = self.__move_piece(rook, next_space)
@@ -579,17 +569,13 @@ class Board():
             queen_moved: Boolean True if queen moved, False otherwise  
         """
         queen_moved = False
-        cur_col_idx = constants.board_col_labels.index(queen.occupied_square.square_col)
-        cur_row_idx = constants.board_row_labels.index(queen.occupied_square.square_row)
-        nxt_col_idx = constants.board_col_labels.index(next_space[0])
-        nxt_row_idx = constants.board_row_labels.index(next_space[1])
 
         try:
             # Check if any of the spaces between current and next space in the path are occupied
             if queen.is_move_valid(next_space) == True:
 
                 # Check for collisions
-                self.__check_collisions(cur_col_idx, nxt_col_idx, cur_row_idx, nxt_row_idx)        
+                self.__check_collisions(queen.occupied_square.name, next_space)        
 
                 # No pieces in the way. We can attempt to move
                 queen_moved = self.__move_piece(queen, next_space)
@@ -603,38 +589,42 @@ class Board():
 
         return queen_moved
 
-    def __check_collisions(self, cur_col_idx:int, nxt_col_idx:int, cur_row_idx:int, nxt_row_idx:int):
+    def __check_collisions(self, cur_space:str, nxt_space:str):
         """
         Checks for collisions for rook/bishops/queens moving along rows, columns or diagonals.
         Also used for pawns moving forward. An excpetion will be raised if a piece is in the way.
 
         Args:
-            cur_col_idx: current column index as an integer (0-7)
-            nxt_col_idx: next column index as an integer (0-7)
-            cur_row_idx: current row index as an integer (0-7)
-            nxt_row_idx: next row index as an integer (0-7)
+            cur_space: string name of starting space ('A1', 'A2'...)
+            nxt_space: string name of ending space ('A1', 'A2'...)
 
         Returns:
             Exception if piece is in the way
         """
+
+        cur_col_idx = constants.board_col_labels.index(cur_space[0])
+        cur_row_idx = constants.board_row_labels.index(cur_space[1])
+        nxt_col_idx = constants.board_col_labels.index(nxt_space[0])
+        nxt_row_idx = constants.board_row_labels.index(nxt_space[1])
+
         # Direction variables init to 0, will be set according to if the queen moves verically, horizontally or diagonally
         col_dir = 0
         row_dir = 0
 
         if cur_col_idx < nxt_col_idx:
-            # Rook is moving towards H column
+            # Piece is moving towards H column
             col_dir = 1
 
         if cur_col_idx > nxt_col_idx:
-            # Rook is moving towards A column
+            # Piece is moving towards A column
             col_dir = -1
 
         if cur_row_idx < nxt_row_idx:
-            # Rook is moving towards row 8
+            # Piece is moving towards row 8
             row_dir = 1
 
         if cur_row_idx > nxt_row_idx:
-            # Rook is moving towards row 1
+            # Piece is moving towards row 1
             row_dir = -1
 
         if col_dir and not row_dir:
@@ -650,7 +640,7 @@ class Board():
                     raise InvalidMoveException("There is another piece blocking the way.")
 
         else:
-            # Check for pieces in between the starting and destination square
+            # Check along diagonal up to but not including target square
             for col, row in zip(range(cur_col_idx + col_dir, nxt_col_idx, col_dir), range(cur_row_idx + row_dir, nxt_row_idx, row_dir)):
                 if self.board_spaces[constants.board_col_labels[col] + constants.board_row_labels[row]].occupying_piece is not None:                    
                     raise InvalidMoveException("There is another piece blocking the way.")   
