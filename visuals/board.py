@@ -759,9 +759,6 @@ class Board():
             is_in_check: True if the space is in check, False otherwise 
         """
 
-        start_col_idx = constants.board_col_labels.index(king_space[0])
-        start_row_idx = constants.board_row_labels.index(king_space[1])
-
         # Overarching plan is to check rows, columns and diagonals from the square in question. 
         # If we hit a piece of the same color, we have a blocker and don't need to keep checking. 
         # If we hit a piece of the opposing color, we need to check if it has a valid move to the 
@@ -789,8 +786,16 @@ class Board():
             self.__directional_king_checks(king_space, col_dir=1, row_dir=-1)
 
             # Check diagonal towards column H row 8
-            self.__directional_king_checks(king_space, col_dir=1, row_dir=1)            
+            self.__directional_king_checks(king_space, col_dir=1, row_dir=1)
 
+            # Easier to brute for check specifically the enemy knights 
+            # for checks rather than check around the king's square
+            for piece in self.pieces:
+                if isinstance(piece, knight.Knight) and piece.color != self.board_spaces[king_space].occupying_piece.color:
+                    if piece.is_move_valid(king_space):
+                        # Enemy knight has eyes on the king. He is in check
+                        raise KingInCheckException(self.board_spaces[king_space].occupying_piece.color)
+            
         except:
             # TODO: Handle king in check
             return True
@@ -800,9 +805,6 @@ class Board():
             # TODO: Handle king not in check
             return False
             pass
-        
-        # Also need to check L shape squares from the square in question 
-        # for enemy knights. If there are enemy knights, the king is in check.
 
 
     def __directional_king_checks(self, king_space:str, col_dir:int, row_dir:int):
