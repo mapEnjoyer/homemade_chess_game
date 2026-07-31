@@ -21,8 +21,9 @@ class Board():
         - board_spaces: Dictionary containing all 64 board space objects
         - col_labels: Dictonary containing 8 column label text objects
         - row_labels: Dictionary containing 8 row label text objects
-        - white_pieces: List of all white pieces currently on the board. As pieces are removed, they are popped from the list.
-        - black_pieces: List of all black pieces currently on the board. As pieces are removed, they are popped from the list.
+        - pieces: List of all pieces in the game
+        - sprite_list: List of sprites to be drawn on screen
+        - king_checks: List of active king checks
     """
 
     def __init__(self):
@@ -54,6 +55,9 @@ class Board():
 
         # Sprite list containing all sprites on the board
         self.sprite_list = arcade.SpriteList()
+
+        # Create list of active king checks
+        self.king_checks = []
 
         # Initialize chess board squares
         self.__init_squares()
@@ -763,7 +767,11 @@ class Board():
         # If we hit a piece of the same color, we have a blocker and don't need to keep checking. 
         # If we hit a piece of the opposing color, we need to check if it has a valid move to the 
         # king's square. If it does, the king is in check.
+
         try:
+            # Clear list of king checks
+            self.king_checks = []
+
             # Start with spaces in same row towards A column
             self.__directional_king_checks(king_space, col_dir=-1, row_dir=0)
 
@@ -794,19 +802,18 @@ class Board():
                 if isinstance(piece, knight.Knight) and piece.color != self.board_spaces[king_space].occupying_piece.color:
                     if piece.is_move_valid(king_space):
                         # Enemy knight has eyes on the king. He is in check
-                        raise KingInCheckException(self.board_spaces[king_space].occupying_piece.color)
-            
+                        self.king_checks.append(KingCheck(self.board_spaces[king_space].occupying_piece, piece))
+
+            if len(self.king_checks):
+                # King is in check, raise exception for message to player
+                raise KingInCheckException(self.board_spaces[king_space].occupying_piece.color)
+
         except:
-            # TODO: Handle king in check
             return True
-            pass
 
         else:
-            # TODO: Handle king not in check
             return False
-            pass
-
-
+            
     def __directional_king_checks(self, king_space:str, col_dir:int, row_dir:int):
         """
         Helper method to __determine_checks() that checks directionally from the kings
@@ -894,7 +901,30 @@ class Board():
         """
         if self.board_spaces[piece_space].occupying_piece.color != self.board_spaces[king_space].occupying_piece.color and \
            self.board_spaces[piece_space].occupying_piece.is_move_valid(king_space):
-            raise KingInCheckException(self.board_spaces[king_space].occupying_piece.color)
+            # Create a king check and add it to the list of active checks
+            self.king_checks.append(KingCheck(self.board_spaces[king_space].occupying_piece, self.board_spaces[piece_space].occupying_piece))
+
+class KingCheck():
+    """
+    King check class. Contains the king object in check and the piece causing the check.
+
+    Attributes:
+        - king_piece: King object in check
+        - checking_piece: The piece causing the check
+    """
+    def __init__(self, king_piece:king.King, checking_piece:piece.Piece):
+        """
+        Initializes the king check object by storing the king in check and checking
+        piece objects as attributes.
+        
+        Args:
+            king_piece: King piece object
+            checking_piece: Checking piece object
+        Returns:
+            None    
+        """
+        self.king_piece = king_piece
+        self.checking_piece = checking_piece
 
 class InvalidMoveException(Exception):
     """
