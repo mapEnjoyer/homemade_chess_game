@@ -396,15 +396,15 @@ class Board():
 
         try:
             if piece_to_cap is None or piece_to_move.color != piece_to_cap.color:
+                if piece_to_cap is not None:
+                    # Remove the piece from the game
+                    self.pieces.remove(piece_to_cap)
+
+                    # Remove the sprite from the list so it no longer is drawn
+                    self.sprite_list.remove(piece_to_cap.sprite)
 
                 # Move the piece to the new space
                 piece_to_move.update_space(self.board_spaces[next_space])
-
-                if piece_to_cap is not None:
-                    # Momentarily move the capped piece off of the board
-                    # Its sprite and piece information still exist until
-                    # after king check handling runs.
-                    piece_to_cap.occupied_square = None
 
                 # Now that the piece has moved, run a check on the king of the same color.
                 # If the move would put the king into check, we have to reverse it and
@@ -412,23 +412,24 @@ class Board():
                 for piece in self.pieces:
                     if isinstance(piece, king.King) and piece.color == piece_to_move.color:
                         if self.__determine_checks(piece.occupied_square.name):
-                            # This move would put the king in check. Undo it by putting the moved piece 
-                            # back where it was and ensuring any piece that was booted is put back.
+                            # This move would put the king in check. Undo it by 
+                            # reverting the board state and throwing an exception
                             piece_to_move.update_space(original_space)
 
                             if piece_to_cap is not None:
-                                piece_to_cap.update_space(next_space)
+                                # Add the piece back to the list of pieces
+                                self.pieces.append(piece_to_cap)
 
+                                # Add the piece's sprite back to the sprite list
+                                self.sprite_list.append(piece_to_cap.sprite)
+
+                                # Update the piece's square to the space it already thinks it's on.
+                                # This is to ensure the references between space and piece match.
+                                piece_to_cap.update_space(piece_to_cap.occupied_square)
+                            
                             raise InvalidMoveException(f'This move would put your king in check!')
                         else:
                             break
-
-                if piece_to_cap is not None:
-                    # Remove the piece from the game
-                    self.pieces.remove(piece_to_cap)
-
-                    # Remove the sprite from the list so it no longer is drawn
-                    self.sprite_list.remove(piece_to_cap.sprite)
 
                 # Indicate that piece has moved
                 piece_moved = True
