@@ -343,13 +343,13 @@ class Board():
                     piece_moved = True
 
                     # Run check handler for king of opposite color to notify next player their king is in check
-                    for piece in self.pieces:
-                        if isinstance(piece, king.King) and piece.color != player_turn:
-                            if self.__game_over(piece):
-                                # TODO: Enemy king is in check. If there are no moves that can stop the check, the game is over.
-                                pass
-                            else:
-                                break
+                    # for piece in self.pieces:
+                    #     if isinstance(piece, king.King) and piece.color != player_turn:
+                    #         if self.__game_over(piece):
+                    #             # TODO: Enemy king is in check. If there are no moves that can stop the check, the game is over.
+                    #             pass
+                    #         else:
+                    #             break
 
         except:
             pass
