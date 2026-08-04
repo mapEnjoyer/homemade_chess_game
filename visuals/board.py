@@ -377,34 +377,39 @@ class Board():
             move_is_valid: boolean True if piece move is valid, False otherwise          
         """
         move_is_valid = False
+        moving_piece = self.board_spaces[start_space].occupying_piece
 
-        # Run move handler for the piece type
-        match(piece_type):
-            case pawn.Pawn:
-                # Run pawn handler
-                move_is_valid = self.__pawn_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
-                pass
-            case knight.Knight:
-                # Run knight handler
-                move_is_valid = self.__knight_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
-                pass
-            case bishop.Bishop:
-                # Run bishop handler
-                move_is_valid = self.__bishop_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
-                pass
-            case rook.Rook:
-                # Run rook handler
-                move_is_valid = self.__rook_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
-                pass
-            case queen.Queen:
-                # Run queen handler
-                move_is_valid = self.__queen_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
-                pass
-            case king.King:
-                # Run king handler
-                move_is_valid = self.__king_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
-            case _:
-                pass
+        try:
+            # Run move handler for the piece type
+            match(piece_type):
+                case pawn.Pawn:
+                    # Run pawn handler
+                    move_is_valid = self.__pawn_move_is_valid(moving_piece, next_space)
+                    pass
+                case knight.Knight:
+                    # Run knight handler
+                    move_is_valid = self.__knight_move_is_valid(moving_piece, next_space)
+                    pass
+                case bishop.Bishop:
+                    # Run bishop handler
+                    move_is_valid = self.__bishop_move_is_valid(moving_piece, next_space)
+                    pass
+                case rook.Rook:
+                    # Run rook handler
+                    move_is_valid = self.__rook_move_is_valid(moving_piece, next_space)
+                    pass
+                case queen.Queen:
+                    # Run queen handler
+                    move_is_valid = self.__queen_move_is_valid(moving_piece, next_space)
+                    pass
+                case king.King:
+                    # Run king handler
+                    move_is_valid = self.__king_move_is_valid(moving_piece, next_space)
+                case _:
+                    pass
+
+        except:
+            pass
 
         return move_is_valid
 
@@ -725,10 +730,30 @@ class Board():
             Exception if piece is in the way
         """
 
-        cur_col_idx = constants.board_col_labels.index(cur_space[0])
-        cur_row_idx = constants.board_row_labels.index(cur_space[1])
-        nxt_col_idx = constants.board_col_labels.index(nxt_space[0])
-        nxt_row_idx = constants.board_row_labels.index(nxt_space[1])
+        # Get spaces in between
+        spaces = self.__get_spaces_in_between(cur_space, nxt_space)
+        for space in spaces:
+            if self.board_spaces[space].occupying_piece is not None:
+                raise InvalidMoveException("There is another piece blocking the way.")   
+
+    def __get_spaces_in_between(self, space_1:str, space_2:str):
+        """
+        Method to retun a list of spaces between 2 spaces on the board.
+        Will return an empty list if the spaces are not connected on
+        row/col/diagonal.
+
+        Args:
+            space_1: string name of starting space ('A1', 'A2'...)
+            space_2: string name of ending space ('A1', 'A2'...)
+
+        Returns:
+            spaces_in_between: list spaces in between the 2 arguments    
+        """
+        spaces_in_between = []
+        cur_col_idx = constants.board_col_labels.index(space_1[0])
+        cur_row_idx = constants.board_row_labels.index(space_1[1])
+        nxt_col_idx = constants.board_col_labels.index(space_2[0])
+        nxt_row_idx = constants.board_row_labels.index(space_2[1])
 
         # Direction variables init to 0, will be set according to if the queen moves verically, horizontally or diagonally
         col_dir = 0
@@ -751,23 +776,22 @@ class Board():
             row_dir = -1
 
         if col_dir and not row_dir:
-            # Check along row up to but not including target square
+            # Check along row 
             for col in range(cur_col_idx + col_dir, nxt_col_idx, col_dir):
-                if self.board_spaces[constants.board_col_labels[col] + constants.board_row_labels[cur_row_idx]].occupying_piece is not None:
-                    raise InvalidMoveException("There is another piece blocking the way.")
+                spaces_in_between.append(constants.board_col_labels[col] + constants.board_row_labels[cur_row_idx])
 
         elif row_dir and not col_dir:
-            # Check along column up to but not including target square
+            # Check along column 
             for row in range(cur_row_idx + row_dir, nxt_row_idx, row_dir):
-                if self.board_spaces[constants.board_col_labels[cur_col_idx] + constants.board_row_labels[row]].occupying_piece is not None:
-                    raise InvalidMoveException("There is another piece blocking the way.")
+                spaces_in_between.append(constants.board_col_labels[cur_col_idx] + constants.board_row_labels[row])
 
-        else:
-            # Check along diagonal up to but not including target square
+        elif row_dir and col_dir:
+            # Check along diagonal
             for col, row in zip(range(cur_col_idx + col_dir, nxt_col_idx, col_dir), range(cur_row_idx + row_dir, nxt_row_idx, row_dir)):
-                if self.board_spaces[constants.board_col_labels[col] + constants.board_row_labels[row]].occupying_piece is not None:                    
-                    raise InvalidMoveException("There is another piece blocking the way.")   
+                spaces_in_between.append(constants.board_col_labels[col] + constants.board_row_labels[row])
 
+        return spaces_in_between
+    
     def __determine_checks(self, king_space:str):
         """
         Method to look for checks for a king of a specific color on a given square.
@@ -917,8 +941,7 @@ class Board():
         Returns:
             game_is_over: boolean True if game is over, false otherwise
         """
-        # Assume game is over until proven otherwise
-        game_is_over = True
+        game_is_over = False
 
         # Save the name of the space the king is on
         king_space_name = king.occupied_square.name
@@ -932,26 +955,43 @@ class Board():
             king.occupied_square.occupying_piece = None
             king.occupied_square = None
 
+            # Assume game is over until proven otherwise
+            game_is_over = True
+
             # King is in check. First look for a move to get out of the way
             for space in self.board_spaces[king_space_name].surrounding_spaces:
                 if self.board_spaces[space].occupying_piece is None or self.board_spaces[space].occupying_piece.color != king.color:
                     # King can move to this square. Look for checks on the new square
                     game_is_over &= len(self.__determine_checks(space)) != 0
 
+                    if not game_is_over:
+                        # No need to keep looking at other spaces
+                        break
+
             if game_is_over and len(active_checks) < 2:
                 # King has no valid moves out of check. See if a friendly piece can capture
                 for piece in self.pieces:
                     if piece.color == king.color:
                         game_is_over &= not self.__get_move_is_valid(type(piece), piece.occupied_square.name, active_checks[0].checking_piece.occupied_square.name)
-                
-                if not isinstance(active_checks[0].checking_piece, knight.Knight):
-                    # TODO: Only one piece checking the king and it is not a knight. See if a friendly piece can block
-                    pass
+
+                        if not game_is_over:
+                            # No need to keep looking at other pieces
+                            break
+              
+                if game_is_over and not isinstance(active_checks[0].checking_piece, knight.Knight):
+                    # Only one piece checking the king and it is not a knight. See if a friendly piece can block
+                    spaces = self.__get_spaces_in_between(king.occupied_square.name, active_checks[0].checking_piece.occupied_square.name)
+                    for space in spaces:
+                        for piece in self.pieces:
+                            if piece.color == king.color:
+                                game_is_over &= not self.__get_move_is_valid(type(piece), piece.occupied_square.name, space)
+
+                                if not game_is_over:
+                                    # No need to keep looking at other pieces
+                                    break 
              
             # Put the king back on the board
             king.update_space(self.board_spaces[king_space_name])
-
-
 
         return game_is_over
 
