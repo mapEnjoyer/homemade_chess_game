@@ -22,8 +22,9 @@ class Bishop(piece.Piece):
                   Requires a valid texture path.
 
         - image_width: Width in pixels of the image used in the sprite.
+        - color: Color of piece. Can either be black or white
     """
-    def __init__(self, space: piece.Board_Space, texture_path:str, image_width:int):
+    def __init__(self, space: piece.Board_Space, texture_path:str, image_width:int, color:constants.PlayerColor):
         """
         Initializes bishop object by performing the following steps:
             - Creating sprite
@@ -33,12 +34,12 @@ class Bishop(piece.Piece):
             space: Board_Space object the piece occupies
             texture_path: str to image file used for piece sprite.
             image_width: integer width of the image used for the sprite in pixels.
-
+            color: Color of piece. Can either be black or white
         Returns:
             None
         """
         # Run parent class init
-        super().__init__(space, texture_path, image_width)
+        super().__init__(space, texture_path, image_width, color)
 
         return
 

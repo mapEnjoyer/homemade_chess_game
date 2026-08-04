@@ -149,9 +149,9 @@ class Piece(ABC):
         - image_width: Width in pixels of the image used in the sprite.
 
         - has_moved: Boolean indicator indicating if piece has moved before.
-        - color: Color of piece. Can either be black or white depending on which row the piece is created on
+        - color: Color of piece. Can either be black or white
     """
-    def __init__(self, space: Board_Space, texture_path:str, image_width:int):
+    def __init__(self, space: Board_Space, texture_path:str, image_width:int, color:constants.PlayerColor):
         """
         Initializes piece object by performing the following steps:
             - Creating sprite
@@ -161,7 +161,7 @@ class Piece(ABC):
             space: Board_Space object the piece occupies
             texture_path: str to image file used for piece sprite.
             image_width: integer width of the image used for the sprite in pixels.
-
+            color: Color of piece. Can either be black or white
         Returns:
             None
         """
@@ -177,14 +177,11 @@ class Piece(ABC):
         # Set has moved indicator to false
         self.has_moved = False
 
+        # Set piece color
+        self.color = color
+
         # Set the occupying space
         self.update_space(space)
-
-        # Use row the piece was created on (<=2 = white, >=7 = black) to determine color
-        if int(self.occupied_square.name[1]) <= 2:
-            self.color = constants.PlayerColor.WHITE
-        elif int(self.occupied_square.name[1]) >= 7:
-            self.color = constants.PlayerColor.BLACK
 
         return    
     
