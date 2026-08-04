@@ -428,6 +428,9 @@ class Board():
         original_space = piece_to_move.occupied_square
 
         try:
+            # Save the board state before the move occurs
+            prev_board_state = self.save_board_state()
+
             if piece_to_cap is None or piece_to_move.color != piece_to_cap.color:
                 if piece_to_cap is not None:
                     # Remove the piece from the game
@@ -447,20 +450,9 @@ class Board():
                         if self.__determine_checks(piece.occupied_square.name):
                             # This move would put the king in check. Undo it by 
                             # reverting the board state and throwing an exception
-                            piece_to_move.update_space(original_space)
-
-                            if piece_to_cap is not None:
-                                # Add the piece back to the list of pieces
-                                self.pieces.append(piece_to_cap)
-
-                                # Add the piece's sprite back to the sprite list
-                                self.sprite_list.append(piece_to_cap.sprite)
-
-                                # Update the piece's square to the space it already thinks it's on.
-                                # This is to ensure the references between space and piece match.
-                                piece_to_cap.update_space(piece_to_cap.occupied_square)
-                            
+                            self.restore_board_state(prev_board_state)
                             raise InvalidMoveException(f'This move would put your king in check!')
+
                         else:
                             break
 
@@ -959,6 +951,55 @@ class Board():
 
         return game_is_over
 
+    #TODO: make board state a class?
+    def save_board_state(self):
+        """
+        Creates and returns a list of tuples containing each piece on the board and where 
+        it currently is located. Useful for returning the board to a previous state.
+
+        Args:
+            None
+
+        Returns:
+            board_positions: List of tuples containing piece objects and their occupied space name
+                             [(Pawn.pawn, piece.BoardSpace), (Pawn.pawn, piece.BoardSpace)...]
+        """
+        board_positions = []
+        for piece in self.pieces:
+            # Add the piece and its current square to the list as a tuple
+            board_positions.append((piece, piece.occupied_square))
+
+        return board_positions
+
+    def restore_board_state(self, board_state):
+        """
+        Restores a board state by moving pieces back to where they were at the time of the board state.
+
+        Args:
+            board_state: List of tuples containing pieces and spaces they were on at the time
+                         [(Pawn.pawn, piece.BoardSpace), (Pawn.pawn, piece.BoardSpace)...]
+
+        Returns:
+            None
+        """
+
+        # Clear piece and sprite lists
+        self.pieces = []
+        self.sprite_list = arcade.SpriteList()
+                
+        for entry in board_state:
+            piece = entry[0]
+            space = entry[1]
+
+            # Update space for each piece
+            piece.update_space(space)
+
+            # Add back any missing pieces from the pieces list
+            self.pieces.append(piece)
+
+            # Add back any missing sprites from the sprite list
+            self.sprite_list.append(piece.sprite)
+    
 
 class KingCheck():
     """
