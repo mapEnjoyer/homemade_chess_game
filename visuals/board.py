@@ -334,46 +334,79 @@ class Board():
                 # raise exception indicating the player is interacting with the wrong color pieces
                 raise InvalidMoveException('Wrong color piece.')
 
-            # Run move handler for the piece type
-            match(type(piece)):
-                case pawn.Pawn:
-                    # Run pawn handler
-                    piece_moved = self.__pawn_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
-                    pass
-                case knight.Knight:
-                    # Run knight handler
-                    piece_moved = self.__knight_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
-                    pass
-                case bishop.Bishop:
-                    # Run bishop handler
-                    piece_moved = self.__bishop_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
-                    pass
-                case rook.Rook:
-                    # Run rook handler
-                    piece_moved = self.__rook_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
-                    pass
-                case queen.Queen:
-                    # Run queen handler
-                    piece_moved = self.__queen_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
-                    pass
-                case king.King:
-                    # Run king handler
-                    piece_moved = self.__king_move_handler(self.board_spaces[start_space].occupying_piece, next_space)
-                case _:
-                    pass
+            # Check if move is valid 
+            move_is_valid = self.__get_move_is_valid(piece_type, start_space, next_space)
+
+            if move_is_valid:
+                # Move the piece
+                if self.__move_piece(self.board_spaces[start_space].occupying_piece, next_space):
+
+                    # Set piece_moved flag
+                    piece_moved = True
+
+                    # Run check handler for king of opposite color to notify next player their king is in check
+                    for piece in self.pieces:
+                        if isinstance(piece, king.King) and piece.color != player_turn:
+                            if self.__game_over(piece):
+                                # TODO: Enemy king is in check. If there are no moves that can stop the check, the game is over.
+                                pass
+                            else:
+                                break
 
         except:
             pass
 
-        if piece_moved:
-            # Check for game over
-            for piece in self.pieces:
-                if isinstance(piece, king.King) and piece.color != player_turn:
-                    if self.__game_over(piece):
-                        # TODO: Game is over!
-                        pass
-
         return piece_moved
+
+    def __get_move_is_valid(self, piece_type, start_space:str, next_space:str):
+        """
+        Method to determine if a piece's move is valid taking chess movement and collisions into account. 
+        Calls handlers for each piece type.
+        Args:
+            piece_type: type of piece being moved. Valid piece tpyes include:
+                - Pawn
+                - Rook
+                - Knight
+                - Bishop
+                - Queen
+                - King
+            start_space: space to start from. Space must match one of the spaces found in constants.space_names
+            next_space: space to move to. Space must match one of the spaces found in constants.space_names
+
+        Returns:
+            move_is_valid: boolean True if piece move is valid, False otherwise          
+        """
+        move_is_valid = False
+
+        # Run move handler for the piece type
+        match(piece_type):
+            case pawn.Pawn:
+                # Run pawn handler
+                move_is_valid = self.__pawn_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
+                pass
+            case knight.Knight:
+                # Run knight handler
+                move_is_valid = self.__knight_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
+                pass
+            case bishop.Bishop:
+                # Run bishop handler
+                move_is_valid = self.__bishop_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
+                pass
+            case rook.Rook:
+                # Run rook handler
+                move_is_valid = self.__rook_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
+                pass
+            case queen.Queen:
+                # Run queen handler
+                move_is_valid = self.__queen_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
+                pass
+            case king.King:
+                # Run king handler
+                move_is_valid = self.__king_move_is_valid(self.board_spaces[start_space].occupying_piece, next_space)
+            case _:
+                pass
+
+        return move_is_valid
 
     def __move_piece(self, piece_to_move:piece.Piece, next_space:str):
         """
@@ -441,7 +474,7 @@ class Board():
         
         return piece_moved
 
-    def __pawn_move_handler(self, pawn:pawn.Pawn, next_space:str):
+    def __pawn_move_is_valid(self, pawn:pawn.Pawn, next_space:str):
         """
         Handles pawn moves by first checking if the move between the spaces is
         technically viable per how the pawn moves. If so, then any spaces the 
@@ -454,9 +487,9 @@ class Board():
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
-            pawn_moved: Boolean True if pawn moved, False otherwise  
+            move_is_valid: Boolean True if move is valid  
         """
-        pawn_moved = False
+        move_is_valid = False
         cur_col_idx = constants.board_col_labels.index(pawn.occupied_square.square_col)
         nxt_col_idx = constants.board_col_labels.index(next_space[0])
 
@@ -468,7 +501,7 @@ class Board():
                     self.__check_collisions(pawn.occupied_square.name, next_space)
 
                     # Assuming no exception was raised, the move is valid. Attempt to move the pawn
-                    pawn_moved = self.__move_piece(pawn, next_space)                       
+                    move_is_valid = True                     
 
                 else:
                     # Pawn is moving diagonally. Check destination for opposing color piece
@@ -479,7 +512,7 @@ class Board():
                         raise InvalidMoveException('Pawns can only move diagonally when capturing.')     
                     else:
                         # There is a piece to capture. Attempt to move the pawn
-                        pawn_moved = self.__move_piece(pawn, next_space)
+                        move_is_valid = True
 
                 # TODO: Pawn promotion
 
@@ -490,52 +523,39 @@ class Board():
         except:
             pass
             
-        return pawn_moved
+        return move_is_valid
     
-    def __knight_move_handler(self, knight:knight.Knight, next_space:str):
+    def __knight_move_is_valid(self, knight:knight.Knight, next_space:str):
         """
         Handles knight moves by first checking if the move between the spaces is
-        technically viable per how the knight moves. If so, the destination space
-        is checked for captures. No collision detection needed as knights are the
-        only piece that can pass thorugh others.
+        technically viable per how the knight moves. No collision detection needed 
+        as knights are the only piece that can pass thorugh others.
 
         Args:
             knight: Knight object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
-            knight_moved: Boolean True if knight moved, False otherwise  
+            move_is_valid: Boolean True if move is valid  
         """
-        knight_moved = False
+       
+        # Only needed to check if the knight can move to the space
+        return knight.is_move_valid(next_space)
 
-        try:
-            if knight.is_move_valid(next_space) == True:
-                # Check for piece at the destination. If it is the opposite color, we can capture
-                knight_moved = self.__move_piece(knight, next_space)
-
-            else:
-                # Knight move invalid. Raise an exception
-                raise InvalidMoveException("Knights can't move that way.")
-
-        except:
-            pass
-
-        return knight_moved
-
-    def __bishop_move_handler(self, bishop:bishop.Bishop, next_space:str):
+    def __bishop_move_is_valid(self, bishop:bishop.Bishop, next_space:str):
         """
         Handles bishop moves by first checking if the move between the spaces is
-        technically viable per how the bishop moves. If so, the destination space
-        and spaces in between are checked for captures. 
+        technically viable per how the bishop moves. If so, the spaces in between 
+        are checked for collisions. 
 
         Args:
             bishop: Bishop object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
-            bishop_moved: Boolean True if bishop moved, False otherwise  
+            move_is_valid: Boolean True if move is valid  
         """
-        bishop_moved = False
+        move_is_valid = False
 
         try:
             if bishop.is_move_valid(next_space) == True:
@@ -543,9 +563,8 @@ class Board():
                 # Check for collisions
                 self.__check_collisions(bishop.occupied_square.name, next_space)     
 
-                # No pieces in the way. We can attempt to move
-                bishop_moved = self.__move_piece(bishop, next_space)
-
+                # No pieces in the way. Move is valid
+                move_is_valid = True
             else:
                 # Bishop move invalid. Raise an exception
                 raise InvalidMoveException("Bishops can't move that way.")
@@ -553,22 +572,22 @@ class Board():
         except:
             pass
 
-        return bishop_moved
+        return move_is_valid
 
-    def __rook_move_handler(self, rook:rook.Rook, next_space:str):
+    def __rook_move_is_valid(self, rook:rook.Rook, next_space:str):
         """
         Handles rook moves by first checking if the move between the spaces is
-        technically viable per how the rook moves. If so, the destination space
-        and spaces in between are checked for captures. 
+        technically viable per how the rook moves. If so, the spaces in between 
+        are checked for collisions. 
 
         Args:
             rook: Rook object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
-            rook_moved: Boolean True if rook moved, False otherwise  
+            move_is_valid: Boolean True if move is valid  
         """
-        rook_moved = False
+        move_is_valid = False
 
         try:
             if rook.is_move_valid(next_space) == True:
@@ -577,7 +596,7 @@ class Board():
                 self.__check_collisions(rook.occupied_square.name, next_space)     
 
                 # No pieces in the way. We can attempt to move
-                rook_moved = self.__move_piece(rook, next_space)
+                move_is_valid = True
 
             else:
                 # Rook move invalid. Raise an exception
@@ -586,22 +605,22 @@ class Board():
         except:
             pass
 
-        return rook_moved
+        return move_is_valid
 
-    def __queen_move_handler(self, queen:queen.Queen, next_space:str):
+    def __queen_move_is_valid(self, queen:queen.Queen, next_space:str):
         """
         Handles queen moves by first checking if the move between the spaces is
-        technically viable per how the queen moves. If so, the destination space
-        and spaces in between are checked for captures. 
+        technically viable per how the queen moves. If so, the spaces in between 
+        are checked for collisions.  
 
         Args:
             queen: Queen object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
-            queen_moved: Boolean True if queen moved, False otherwise  
+            move_is_valid: Boolean True if move is valid  
         """
-        queen_moved = False
+        move_is_valid = False
 
         try:
             if queen.is_move_valid(next_space) == True:
@@ -610,7 +629,7 @@ class Board():
                 self.__check_collisions(queen.occupied_square.name, next_space)        
 
                 # No pieces in the way. We can attempt to move
-                queen_moved = self.__move_piece(queen, next_space)
+                move_is_valid = True
 
             else:
                 # Queen move invalid. Raise an exception
@@ -619,22 +638,22 @@ class Board():
         except:
             pass
 
-        return queen_moved
+        return move_is_valid
 
-    def __king_move_handler(self, king:king.King, next_space:str):
+    def __king_move_is_valid(self, king:king.King, next_space:str):
         """
         Handles king moves by first checking if the move between the spaces is
-        technically viable per how the king moves. If so, the destination space
-        and spaces in between are checked for captures. 
+        technically viable per how the king moves. If so, the spaces in between 
+        are checked for collisions. 
 
         Args:
             king: King object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
-            king_moved: Boolean True if king moved, False otherwise  
+            move_is_valid: Boolean True if move is valid  
         """
-        king_moved = False
+        move_is_valid = False
 
         try:
             if king.is_move_valid(next_space) == True:
@@ -676,12 +695,13 @@ class Board():
                     if self.board_spaces[rook_start_square].occupying_piece is None or self.board_spaces[rook_start_square].occupying_piece.has_moved:
                         raise InvalidMoveException(f'Cannot castle, the rook on {rook_start_square} has moved!')
 
-                    # Move the king and rook to complete the castle
-                    king_moved = self.__move_piece(king, next_space)
-                    self.__move_piece(self.board_spaces[rook_start_square].occupying_piece, rook_end_squre)  
+                    # Castleing is valid. We have to move the rook here and the king will be moved further down the chain
+                    self.__move_piece(self.board_spaces[rook_start_square].occupying_piece, rook_end_squre)
+                    move_is_valid = True
 
                 else:
-                    king_moved = self.__move_piece(king, next_space)
+                    # Normal king move is valid
+                    move_is_valid = True
 
             else:
                 # King move invalid. Raise an exception
@@ -690,7 +710,7 @@ class Board():
         except:
             pass
 
-        return king_moved
+        return move_is_valid
     
     def __check_collisions(self, cur_space:str, nxt_space:str):
         """
@@ -897,16 +917,18 @@ class Board():
         Returns:
             game_is_over: boolean True if game is over, false otherwise
         """
-        game_is_over = False
+        # Assume game is over until proven otherwise
+        game_is_over = True
+
+        # Save the name of the space the king is on
         king_space_name = king.occupied_square.name
 
         # Look for checks on the king
         active_checks = self.__determine_checks(king_space_name)
 
         if active_checks:
-
-            # Momentarily take the king off the board so that it can't be seen
-            # as its own blocker in future check determinations
+            # Momentarily take the king off the board so that it can't
+            # be seen as its own blocker in future check determinations
             king.occupied_square.occupying_piece = None
             king.occupied_square = None
 
@@ -914,10 +936,18 @@ class Board():
             for space in self.board_spaces[king_space_name].surrounding_spaces:
                 if self.board_spaces[space].occupying_piece is None or self.board_spaces[space].occupying_piece.color != king.color:
                     # King can move to this square. Look for checks on the new square
-                    if self.__determine_checks(space) is None:
-                        # King has a valid move to get out of check. Game is not over
-                        break
+                    game_is_over &= len(self.__determine_checks(space)) != 0
 
+            if game_is_over and len(active_checks) < 2:
+                # King has no valid moves out of check. See if a friendly piece can capture
+                for piece in self.pieces:
+                    if piece.color == king.color:
+                        game_is_over &= not self.__get_move_is_valid(type(piece), piece.occupied_square.name, active_checks[0].checking_piece.occupied_square.name)
+                
+                if not isinstance(active_checks[0].checking_piece, knight.Knight):
+                    # TODO: Only one piece checking the king and it is not a knight. See if a friendly piece can block
+                    pass
+             
             # Put the king back on the board
             king.update_space(self.board_spaces[king_space_name])
 
