@@ -335,9 +335,7 @@ class Board():
                 raise InvalidMoveException('Wrong color piece.')
 
             # Check if move is valid 
-            move_is_valid = self.__get_move_is_valid(piece_type, start_space, next_space)
-
-            if move_is_valid:
+            if self.__get_move_is_valid(piece_type, start_space, next_space):
                 # Move the piece
                 if self.__move_piece(self.board_spaces[start_space].occupying_piece, next_space):
 
@@ -950,48 +948,14 @@ class Board():
         active_checks = self.__determine_checks(king_space_name)
 
         if active_checks:
-            # Momentarily take the king off the board so that it can't
-            # be seen as its own blocker in future check determinations
-            king.occupied_square.occupying_piece = None
-            king.occupied_square = None
-
             # Assume game is over until proven otherwise
             game_is_over = True
 
             # King is in check. First look for a move to get out of the way
-            for space in self.board_spaces[king_space_name].surrounding_spaces:
-                if self.board_spaces[space].occupying_piece is None or self.board_spaces[space].occupying_piece.color != king.color:
-                    # King can move to this square. Look for checks on the new square
-                    game_is_over &= len(self.__determine_checks(space)) != 0
 
-                    if not game_is_over:
-                        # No need to keep looking at other spaces
-                        break
+            # Only 1 piece checking the king has no valid moves out of check. See if a friendly piece can capture
 
-            if game_is_over and len(active_checks) < 2:
-                # King has no valid moves out of check. See if a friendly piece can capture
-                for piece in self.pieces:
-                    if piece.color == king.color:
-                        game_is_over &= not self.__get_move_is_valid(type(piece), piece.occupied_square.name, active_checks[0].checking_piece.occupied_square.name)
-
-                        if not game_is_over:
-                            # No need to keep looking at other pieces
-                            break
-              
-                if game_is_over and not isinstance(active_checks[0].checking_piece, knight.Knight):
-                    # Only one piece checking the king and it is not a knight. See if a friendly piece can block
-                    spaces = self.__get_spaces_in_between(king.occupied_square.name, active_checks[0].checking_piece.occupied_square.name)
-                    for space in spaces:
-                        for piece in self.pieces:
-                            if piece.color == king.color:
-                                game_is_over &= not self.__get_move_is_valid(type(piece), piece.occupied_square.name, space)
-
-                                if not game_is_over:
-                                    # No need to keep looking at other pieces
-                                    break 
-             
-            # Put the king back on the board
-            king.update_space(self.board_spaces[king_space_name])
+            # Only one piece checking the king and it is not a knight. See if a friendly piece can block
 
         return game_is_over
 
