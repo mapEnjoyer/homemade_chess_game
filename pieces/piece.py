@@ -66,7 +66,36 @@ class Board_Space():
         # Initialize the occupying piece
         self.occupying_piece = None
 
+        # Determine surrounding spaces
+        self.__init_surrounding_spaces()
+
         return
+
+    def __init_surrounding_spaces(self):
+        """
+        Builds a list of surrounding spaces based on name.
+        
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        self.surrounding_spaces = []
+
+        for space in constants.space_names:
+            space_col = space[0]
+            space_row = space[1]
+
+            # Assign to variables for readibility
+            col_delta = abs(constants.board_col_labels.index(space_col) - constants.board_col_labels.index(self.square_col))
+            row_delta = abs(constants.board_row_labels.index(space_row) - constants.board_row_labels.index(self.square_row))
+
+            if space != self.name and col_delta <= 1 and row_delta <= 1:
+               
+                # Space is adjacent. Add it to the list
+                self.surrounding_spaces.append(space)
+
     
     @property
     def square_col(self)->str:
