@@ -354,7 +354,7 @@ class Board():
                     for piece in self.pieces:
                         if isinstance(piece, king.King) and piece.color != player_turn:
                             # Get active checks for this king
-                            active_checks = self.__determine_checks(piece.occupied_square.name)
+                            active_checks = self.__determine_checks(piece.occupied_square.name, piece)
 
                             if self.__game_over(piece, active_checks):
                                 # TODO: Enemy king is in check. If there are no moves that can stop the check, the game is over.
@@ -461,7 +461,7 @@ class Board():
                 # deny the move.
                 for piece in self.pieces:
                     if isinstance(piece, king.King) and piece.color == piece_to_move.color:
-                        if self.__determine_checks(piece.occupied_square.name):
+                        if self.__determine_checks(piece.occupied_square.name, piece):
                             # This move would put the king in check. Undo it by 
                             # reverting the board state and throwing an exception
                             self.restore_board_state(prev_board_state)
@@ -680,7 +680,7 @@ class Board():
                         raise InvalidMoveException(f'There is another piece blocking the way.', self.player_move_in_prog)
 
                     # Make sure king cannot castle out of check
-                    if self.__determine_checks(king.occupied_square.name):
+                    if self.__determine_checks(king.occupied_square.name, king):
                         raise InvalidMoveException(f'You cannot castle while in check!', self.player_move_in_prog)
 
                     # TODO: No collisions, look for checks on the squares the king is passing through and the destination
@@ -802,15 +802,15 @@ class Board():
 
         return spaces_in_between
     
-    def __determine_checks(self, king_space:str):
+    def __determine_checks(self, king_space:str, king:king.King):
         """
         Method to look for checks for a king of a specific color on a given square.
-        This method is intended to be a used for both king moves going to new squares
-        and for pieces moving to other squares that could lead to a check.
+        A square is considered "in check" if a piece of the opposite color has a valid
+        move to that square. 
 
         Args:
             king_space: string name of the space to look for checks ('A1', 'A2'...)
-
+            king: King object to check for
         Returns:
             king_checks: list of active checks
         """
@@ -824,21 +824,10 @@ class Board():
             # Clear list of king checks
             king_checks = []
 
-            for col_dir in range (-1, 2):
-                for row_dir in range(-1, 2):
-                    # Check for king check going along indicated row/col/diagonal
-                    king_check = self.__directional_king_checks(king_space, col_dir, row_dir)
-                    if king_check:
-                        # Add it to the list
-                        king_checks.append(king_check)
-
-            # Easier to brute for check specifically the enemy knights 
-            # for checks rather than check around the king's square
             for piece in self.pieces:
-                if isinstance(piece, knight.Knight) and piece.color != self.board_spaces[king_space].occupying_piece.color:
-                    if piece.is_move_valid(king_space):
-                        # Enemy knight has eyes on the king. He is in check
-                        king_checks.append(KingCheck(self.board_spaces[king_space].occupying_piece, piece))
+                if piece.color != king.color and self.__get_move_is_valid(type(piece), piece.occupied_square.name, king_space):
+                    # Create a king check and add it to the list
+                    king_checks.append(KingCheck(king, piece))
 
             if len(king_checks):
                 # King is in check, raise exception for message to player
@@ -848,94 +837,6 @@ class Board():
             pass
         
         return king_checks
-            
-    def __directional_king_checks(self, king_space:str, col_dir:int, row_dir:int):
-        """
-        Helper method to __determine_checks() that checks directionally from the kings
-        square looking for checks. If there is a check found, an exception will
-        be raised.
-
-        Args:
-            king_space: string name of the space to look for checks ('A1', 'A2'...)
-            col_dir: column direction. -1 to check towards A, +1 to check towards H, and 0 to stay in the current column
-            row_dir: row direction. -1 to check towards 1, +1 to check towards 8, and 0 to stay in the current row
-
-        Returns:
-            king_check: KingCheck object created if king is in check 
-        """
-        cur_col_idx = constants.board_col_labels.index(king_space[0])
-        cur_row_idx = constants.board_row_labels.index(king_space[1])
-        king_check  = None
-
-        # Determine starting and ending column
-        match col_dir:
-            case -1:
-                col_end = -1
-
-            case 1: 
-                col_end = len(constants.board_col_labels)
-
-            case _:
-                pass
-
-        # Determine starting and ending row
-        match row_dir:
-            case -1:
-                row_end = -1
-
-            case 1: 
-                row_end = len(constants.board_row_labels)
-
-            case _:
-                pass
-
-        if col_dir and not row_dir:
-            # Check along row up to edge of board or first piece we hit, whichever is first
-            for col in range(cur_col_idx + col_dir, col_end, col_dir):
-                next_space = constants.board_col_labels[col] + constants.board_row_labels[cur_row_idx]
-                if self.board_spaces[next_space].occupying_piece is not None:
-                    # There is a piece on this space. Look for check, exception will be raised if there is one
-                    king_check = self.__space_to_space_king_check(king_space, next_space)
-                    break
-
-        elif row_dir and not col_dir:
-            # Check along columm up to edge of board or first piece we hit, whichever is first
-            for row in range(cur_row_idx + row_dir, row_end, row_dir):
-                next_space = constants.board_col_labels[cur_col_idx] + constants.board_row_labels[row]
-                if self.board_spaces[next_space].occupying_piece is not None:
-                    # There is a piece on this space. Look for check, exception will be raised if there is one
-                    king_check = self.__space_to_space_king_check(king_space, next_space)
-                    break
-
-        elif row_dir and col_dir:
-            # Check along diagonal up to edge of board or first piece we hit, whichever is first
-            for col, row in zip(range(cur_col_idx + col_dir, col_end, col_dir), range(cur_row_idx + row_dir, row_end, row_dir)):
-                next_space = constants.board_col_labels[col] + constants.board_row_labels[row]
-                if self.board_spaces[next_space].occupying_piece is not None:
-                    # There is a piece on this space. Look for check, exception will be raised if there is one
-                    king_check = self.__space_to_space_king_check(king_space, next_space)
-                    break
-
-        return king_check
-
-    def __space_to_space_king_check(self, king_space:str, piece_space:str):
-        """
-        Helper method to __directional_king_checks() that checks from king space
-        to a piece's space if the king is in check. If there is a check found, an 
-        exception will be raised.
-
-        Args:
-            king_space: string name of the king space ('A1', 'A2'...)
-            piece_space: string name of the piece potentially checking the king('A1', 'A2'...)
-
-        Returns:
-            Raises excpetion if king is in check        
-        """
-        if self.board_spaces[piece_space].occupying_piece.color != self.board_spaces[king_space].occupying_piece.color and \
-           self.board_spaces[piece_space].occupying_piece.is_move_valid(king_space):
-            # Create a king check and return it
-            return KingCheck(self.board_spaces[king_space].occupying_piece, self.board_spaces[piece_space].occupying_piece)
-
     def __game_over(self, king:king.King, active_checks:KingCheck):
         """
         Method to check for game over on the king who is actively in check. The game is considered over if the following
