@@ -24,8 +24,7 @@ class Board():
         - pieces: List of all pieces in the game
         - sprite_list: List of sprites to be drawn on screen
         - king_checks: List of active king checks
-        - print_msgs: Boolean flag indicating a player is making a move. Used
-        to send messages to the display.
+        - end_move_msg: Message to send to console once move is parsed
     """
 
     def __init__(self):
@@ -58,8 +57,8 @@ class Board():
         # Sprite list containing all sprites on the board
         self.sprite_list = arcade.SpriteList()
 
-        # Initialize player move in progress flag
-        self.print_msgs = False
+        # Initialize move end message
+        self.end_move_msg = ''
 
         # Initialize chess board squares
         self.__init_squares()
@@ -308,39 +307,42 @@ class Board():
         piece_moved = False
         
         try:
-            # Indicate a player move is in progress and we should send messages to players
-            self.print_msgs = True
-
             # Check that piece type is valid
             if piece_type not in constants.valid_piece_types:
                 # raise exception indicating the piece type is not valid
-                raise InvalidMoveException('Piece type does not exist.', self.print_msgs)       
+                self.end_move_msg = f'Piece type does not exist.'
+                raise InvalidMoveException()       
 
             # Check that starting square is valid
             if start_space not in constants.space_names:
                 # raise exception indicating the starting space does not exist
-                raise InvalidMoveException('Starting space does not exist.', self.print_msgs)     
+                self.end_move_msg = f'Starting space does not exist.'
+                raise InvalidMoveException()     
 
             # Check that next square is valid
             if next_space not in constants.space_names:
                 # raise exception indicating destination space does not exist
-                raise InvalidMoveException('Destination space does not exist.', self.print_msgs)     
+                self.end_move_msg = f'Destination space does not exist.'
+                raise InvalidMoveException()     
             
             # Set piece we are working with
             piece = self.board_spaces[start_space].occupying_piece
             
             if piece is None:
                 # No piece to move on that square. Raise an exception
-                raise InvalidMoveException('No piece to move.', self.print_msgs)
+                self.end_move_msg = f'No piece to move.'
+                raise InvalidMoveException()
             
             if not isinstance(piece, piece_type):
                 # Piece on the square does not match the command. Raise an exception
-                raise InvalidMoveException('Wrong piece type.', self.print_msgs)
+                self.end_move_msg = f'Wrong piece type.'
+                raise InvalidMoveException()
 
             # Check that the piece being moved is the right color
             if piece.color != player_turn:
                 # raise exception indicating the player is interacting with the wrong color pieces
-                raise InvalidMoveException('Wrong color piece.', self.print_msgs)
+                self.end_move_msg = f'Wrong color piece.'
+                raise InvalidMoveException()
 
             # Check if move is valid 
             if self.__get_move_is_valid(piece_type, start_space, next_space):
@@ -348,11 +350,7 @@ class Board():
                 if self.__move_piece(self.board_spaces[start_space].occupying_piece, next_space):
 
                     # Set piece_moved flag for both the function return and the piece
-                    piece_moved = piece.has_moved = True      
-
-                    # Stop console messages. This is to prevent game over checking from spamming the console
-                    self.print_msgs = False              
-
+                    piece_moved = piece.has_moved = True
                     # Run check handler for king of opposite color to notify next player their king is in check
                     for piece in self.pieces:
                         if isinstance(piece, king.King) and piece.color != player_turn:
@@ -363,14 +361,24 @@ class Board():
                                 # TODO: Enemy king is in check. If there are no moves that can stop the check, the game is over.
                                 pass
 
+                            elif active_checks:
+                                # Game is still going but the king is in check. Notify the next player
+                                if piece.color == constants.PlayerColor.WHITE:
+                                    self.end_move_msg = f'The white king is in check!'
+                                else:
+                                    self.end_move_msg = f'The black king is in check!'
+
                             # No need to look for another king
                             break
         except:
             pass
 
         finally:
-            # Indicate player is no longer making a move
-            self.print_msgs = False
+            # Print a message to the user regarding how the move went
+            print(self.end_move_msg)
+
+            # Clear the msg
+            self.end_move_msg = ''
 
         return piece_moved
 
@@ -468,7 +476,8 @@ class Board():
                             # This move would put the king in check. Undo it by 
                             # reverting the board state and throwing an exception
                             self.restore_board_state(prev_board_state)
-                            raise InvalidMoveException(f'This move would put your king in check!', self.print_msgs)
+                            self.end_move_msg = f'This move would put your king in check!'
+                            raise InvalidMoveException()
 
                         else:
                             break
@@ -481,7 +490,8 @@ class Board():
 
             else:
                 # Space is occupied by a piece of the same color. Throw an exception.
-                raise InvalidMoveException("There is another piece blocking the way.", self.print_msgs)
+                self.end_move_msg = f'There is another piece blocking the way.'
+                raise InvalidMoveException()
 
         except:
             pass
@@ -523,7 +533,8 @@ class Board():
                     if self.board_spaces[next_space].occupying_piece is None \
                     or pawn.color == self.board_spaces[next_space].occupying_piece.color:
                         # There's no piece to capture. Raise an exception
-                        raise InvalidMoveException('Pawns can only move diagonally when capturing.', self.print_msgs)     
+                        self.end_move_msg = f'Pawns can only move diagonally when capturing.'
+                        raise InvalidMoveException()     
                     else:
                         # There is a piece to capture. Attempt to move the pawn
                         move_is_valid = True
@@ -532,7 +543,8 @@ class Board():
 
             else:
                 # Pawn move invalid. Raise an exception
-                InvalidMoveException("Pawns can't move that way.", self.print_msgs)
+                self.end_move_msg = f'Pawns cannot move that way.'
+                InvalidMoveException()
 
         except:
             pass
@@ -552,9 +564,20 @@ class Board():
         Returns:
             move_is_valid: Boolean True if move is valid  
         """
-       
-        # Only needed to check if the knight can move to the space
-        return knight.is_move_valid(next_space)
+
+        try:
+            # Only needed to check if the knight can move to the space
+            move_is_valid = knight.is_move_valid(next_space)
+
+            if not move_is_valid:
+                # Knights can't move like that
+                self.end_move_msg = f'Knights cannot move that way.'
+                raise InvalidMoveException()
+
+        except:
+            pass
+
+        return move_is_valid
 
     def __bishop_move_is_valid(self, bishop:bishop.Bishop, next_space:str):
         """
@@ -581,7 +604,8 @@ class Board():
                 move_is_valid = True
             else:
                 # Bishop move invalid. Raise an exception
-                raise InvalidMoveException("Bishops can't move that way.", self.print_msgs)
+                self.end_move_msg = f'Bishops cannot move that way'
+                raise InvalidMoveException()
                 
         except:
             pass
@@ -614,7 +638,8 @@ class Board():
 
             else:
                 # Rook move invalid. Raise an exception
-                raise InvalidMoveException("Rooks can't move that way.", self.print_msgs)
+                self.end_move_msg = f'Rooks cannot move that way.'
+                raise InvalidMoveException()
                 
         except:
             pass
@@ -647,7 +672,8 @@ class Board():
 
             else:
                 # Queen move invalid. Raise an exception
-                raise InvalidMoveException("Queens can't move that way.", self.print_msgs)
+                self.end_move_msg = 'Queens cannot move that way.'
+                raise InvalidMoveException()
                 
         except:
             pass
@@ -675,12 +701,14 @@ class Board():
                 if king.is_castleing(next_space):
                     # Raise an exception if the king has already moved this game
                     if king.has_moved:
-                        raise InvalidMoveException(f'The king has already moved! It can no longer castle!', self.print_msgs)
+                        self.end_move_msg = f'The king has already moved! It can no longer castle!'
+                        raise InvalidMoveException()
 
                     # King is attempting castle, check for collisions along the way
                     self.__check_collisions(king.occupied_square.name, next_space)
                     if self.board_spaces[next_space].occupying_piece is not None:
-                        raise InvalidMoveException(f'There is another piece blocking the way.', self.print_msgs)
+                        self.end_move_msg = f'There is another piece blocking the way.'
+                        raise InvalidMoveException()
 
                     # Determine rook square info based on which king is castleing in which direction
                     match (king.color, next_space):
@@ -701,15 +729,18 @@ class Board():
                             rook_end_squre = 'F8'
 
                         case _:
-                            raise InvalidMoveException(f'How did this even happen?', self.print_msgs)
+                            self.end_move_msg = f'How did this even happen?'
+                            raise InvalidMoveException()
 
                     # Make sure king cannot castle out of or intocheck
                     if self.__determine_checks(king.occupied_square.name, king) or self.__determine_checks(rook_end_squre, king) or self.__determine_checks(next_space, king):
-                        raise InvalidMoveException(f'You cannot castle out of or into check!', self.print_msgs)
+                        self.end_move_msg = 'You cannot castle out of or into check!'
+                        raise InvalidMoveException()
 
                     # Make sure there the rook on the starting square is still there and hasn't moved
                     if self.board_spaces[rook_start_square].occupying_piece is None or self.board_spaces[rook_start_square].occupying_piece.has_moved:
-                        raise InvalidMoveException(f'Cannot castle, the rook on {rook_start_square} has moved!', self.print_msgs)
+                        self.end_move_msg = f'Cannot castle, the rook on {rook_start_square} has moved!'
+                        raise InvalidMoveException()
 
                     # Castleing is valid. We have to move the rook here and the king will be moved further down the chain
                     self.__move_piece(self.board_spaces[rook_start_square].occupying_piece, rook_end_squre)
@@ -721,7 +752,8 @@ class Board():
 
             else:
                 # King move invalid. Raise an exception
-                raise InvalidMoveException("Kings can't move that way.", self.print_msgs)
+                self.end_move_msg = f'Kings cannot move that way.'
+                raise InvalidMoveException()
                 
         except:
             pass
@@ -745,7 +777,8 @@ class Board():
         spaces = self.__get_spaces_in_between(cur_space, nxt_space)
         for space in spaces:
             if self.board_spaces[space].occupying_piece is not None:
-                raise InvalidMoveException("There is another piece blocking the way.", self.print_msgs)   
+                self.end_move_msg = f'There is another piece blocking the way.'
+                raise InvalidMoveException()   
 
     def __get_spaces_in_between(self, space_1:str, space_2:str):
         """
@@ -818,12 +851,6 @@ class Board():
 
         # Overarching plan see if any enemy piece can get to the space in question
 
-        # Save flag state of message printout so we can restore it afterwards
-        prev_print_msgs = self.print_msgs
-
-        # Turn off output to console when looking for checks as it is "behind the scenes" to the players
-        self.print_msgs = False
-
         try:
             # Clear list of king checks
             king_checks = []
@@ -835,13 +862,10 @@ class Board():
 
             if len(king_checks):
                 # King is in check, raise exception for message to player
-                raise KingInCheckException(self.board_spaces[king_space].occupying_piece.color, self.print_msgs)
+                raise KingInCheckException()
 
         except:
             pass
-
-        # Reset message printout state
-        self.print_msgs = prev_print_msgs
         
         return king_checks
     def __game_over(self, king:king.King, active_checks:KingCheck):
@@ -984,7 +1008,7 @@ class InvalidMoveException(Exception):
     """
     Custom exception handler for when a move fails to execute.
     """
-    def __init__(self, msg:str, print_msg:bool):
+    def __init__(self):
 
         """
         Notifies the player why the move they tried to make has failed.
@@ -996,14 +1020,12 @@ class InvalidMoveException(Exception):
             None
         """
         super().__init__()
-        if print_msg:
-            print(f'Move failed! {msg}')
     
 class KingInCheckException(Exception):
     """
     Custom exception handler for when a king is in check
     """
-    def __init__(self, king_color:constants.PlayerColor, print_msg:bool):
+    def __init__(self):
 
         """
         Notifies the player their king is in check
@@ -1015,14 +1037,3 @@ class KingInCheckException(Exception):
             None
         """
         super().__init__()
-
-        if print_msg:
-            match king_color:
-                case constants.PlayerColor.WHITE:
-                    print(f'The white king is in check!')
-
-                case constants.PlayerColor.BLACK:
-                    print(f'The black king is in check!')
-
-                case _:
-                    print(f'What color is the king? How is he in check?')
