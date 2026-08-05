@@ -679,12 +679,6 @@ class Board():
                     if self.board_spaces[next_space].occupying_piece is not None:
                         raise InvalidMoveException(f'There is another piece blocking the way.', self.player_move_in_prog)
 
-                    # Make sure king cannot castle out of check
-                    if self.__determine_checks(king.occupied_square.name, king):
-                        raise InvalidMoveException(f'You cannot castle while in check!', self.player_move_in_prog)
-
-                    # TODO: No collisions, look for checks on the squares the king is passing through and the destination
-
                     # Determine rook square info based on which king is castleing in which direction
                     match (king.color, next_space):
                         case (constants.PlayerColor.WHITE, 'C1'):
@@ -705,6 +699,10 @@ class Board():
 
                         case _:
                             raise InvalidMoveException(f'How did this even happen?', self.player_move_in_prog)
+
+                    # Make sure king cannot castle out of or intocheck
+                    if self.__determine_checks(king.occupied_square.name, king) or self.__determine_checks(rook_end_squre, king) or self.__determine_checks(next_space, king):
+                        raise InvalidMoveException(f'You cannot castle out of or into check!', self.player_move_in_prog)
 
                     # Make sure there the rook on the starting square is still there and hasn't moved
                     if self.board_spaces[rook_start_square].occupying_piece is None or self.board_spaces[rook_start_square].occupying_piece.has_moved:
