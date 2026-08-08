@@ -13,6 +13,63 @@ import arcade
 import constants
 from pieces import piece, pawn, rook, knight, bishop, queen, king
 from pathlib import Path
+
+class KingCheck():
+    """
+    King check class. Contains the king object in check and the piece causing the check.
+
+    Attributes:
+        - king_piece: King object in check
+        - checking_piece: The piece causing the check
+    """
+    def __init__(self, king_piece:king.King, checking_piece:piece.Piece):
+        """
+        Initializes the king check object by storing the king in check and checking
+        piece objects as attributes.
+        
+        Args:
+            king_piece: King piece object
+            checking_piece: Checking piece object
+        Returns:
+            None    
+        """
+        self.king_piece = king_piece
+        self.checking_piece = checking_piece
+
+class InvalidMoveException(Exception):
+    """
+    Custom exception handler for when a move fails to execute.
+    """
+    def __init__(self):
+
+        """
+        Notifies the player why the move they tried to make has failed.
+
+        Args:
+            msg: Message to display indicating why move could not complete
+            print_msg: True to print message, False otherwise
+        Returns:
+            None
+        """
+        super().__init__()
+    
+class KingInCheckException(Exception):
+    """
+    Custom exception handler for when a king is in check
+    """
+    def __init__(self):
+
+        """
+        Notifies the player their king is in check
+
+        Args:
+            king_color: Color of the king in check. Modifies the displayed message.
+            print_msg: True to print message, False otherwise
+        Returns:
+            None
+        """
+        super().__init__()
+
 class Board():
     """
     Board class. Used to access all spaces on the board.
@@ -308,7 +365,7 @@ class Board():
         
         try:
             # Check that piece type is valid
-            if piece_type not in constants.valid_piece_types:
+            if piece_type not in [pawn.Pawn, rook.Rook, knight.Knight, bishop.Bishop, queen.Queen, king.King]:
                 # raise exception indicating the piece type is not valid
                 self.end_move_msg = f'Piece type does not exist.'
                 raise InvalidMoveException()       
@@ -368,17 +425,22 @@ class Board():
                                 else:
                                     self.end_move_msg = f'The black king is in check!'
 
+                            else:
+                                # No message to send to next player
+                                self.end_move_msg = ''
+
                             # No need to look for another king
                             break
         except:
             pass
 
         finally:
-            # Print a message to the user regarding how the move went
-            print(self.end_move_msg)
+            if self.end_move_msg:
+                # Print a message to the user regarding how the move went
+                print(self.end_move_msg)
 
-            # Clear the msg
-            self.end_move_msg = ''
+                # Clear the msg
+                self.end_move_msg = ''
 
         return piece_moved
 
@@ -980,60 +1042,3 @@ class Board():
 
             # Add back any missing sprites from the sprite list
             self.sprite_list.append(piece.sprite)
-    
-
-class KingCheck():
-    """
-    King check class. Contains the king object in check and the piece causing the check.
-
-    Attributes:
-        - king_piece: King object in check
-        - checking_piece: The piece causing the check
-    """
-    def __init__(self, king_piece:king.King, checking_piece:piece.Piece):
-        """
-        Initializes the king check object by storing the king in check and checking
-        piece objects as attributes.
-        
-        Args:
-            king_piece: King piece object
-            checking_piece: Checking piece object
-        Returns:
-            None    
-        """
-        self.king_piece = king_piece
-        self.checking_piece = checking_piece
-
-class InvalidMoveException(Exception):
-    """
-    Custom exception handler for when a move fails to execute.
-    """
-    def __init__(self):
-
-        """
-        Notifies the player why the move they tried to make has failed.
-
-        Args:
-            msg: Message to display indicating why move could not complete
-            print_msg: True to print message, False otherwise
-        Returns:
-            None
-        """
-        super().__init__()
-    
-class KingInCheckException(Exception):
-    """
-    Custom exception handler for when a king is in check
-    """
-    def __init__(self):
-
-        """
-        Notifies the player their king is in check
-
-        Args:
-            king_color: Color of the king in check. Modifies the displayed message.
-            print_msg: True to print message, False otherwise
-        Returns:
-            None
-        """
-        super().__init__()
