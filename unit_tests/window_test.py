@@ -12,7 +12,7 @@ from visuals import window
 import pytest
 
 # Game window to test on
-game_window = window.GameView()
+game_window = window.GameView(is_visible=False)
 
 def test_init_window():
     """

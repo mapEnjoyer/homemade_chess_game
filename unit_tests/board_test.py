@@ -15,7 +15,7 @@ import constants
 import pytest
 
 # Game window to test on
-game_window = window.GameView()
+game_window = window.GameView(is_visible=False)
 
 #TODO: Test will need updated if we add different colored themes
 @pytest.mark.parametrize('square_color_1', [arcade.color.BISTRE])
