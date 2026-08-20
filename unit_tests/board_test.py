@@ -247,7 +247,7 @@ def test_pawn_capture_A_side():
     # Black pawns on D5, E5
     # White king on E1
     # Black king on E8
-    game_window.chess_board.pieces = []
+    game_window.chess_board.clear_board()
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], constants.PlayerColor.WHITE))
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E4'], constants.PlayerColor.WHITE))
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], constants.PlayerColor.BLACK))
@@ -282,7 +282,7 @@ def test_pawn_capture_H_side():
     # Black pawns on D5, E5
     # White king on E1
     # Black king on E8
-    game_window.chess_board.pieces = []
+    game_window.chess_board.clear_board()
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], constants.PlayerColor.WHITE))
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E4'], constants.PlayerColor.WHITE))
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], constants.PlayerColor.BLACK))
@@ -320,8 +320,7 @@ def test_pawn_invalid_moves():
     # Black pawn on D5
     # White king on E1
     # Black king on E8
-    game_window.chess_board.pieces = []
-    game_window.chess_board.sprite_list = []
+    game_window.chess_board.clear_board()
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], constants.PlayerColor.WHITE))
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], constants.PlayerColor.BLACK))
     game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
@@ -351,4 +350,47 @@ def test_pawn_invalid_moves():
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'C5', constants.PlayerColor.WHITE) is False
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'E4', constants.PlayerColor.BLACK) is False
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'C4', constants.PlayerColor.BLACK) is False
+
+def test_knight_valid_moves():
+    "test moving knights to empty/valid spaces"
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black knights
+    w_knight_space = 'D4'
+    w_knight_end_spaces = ['B3', 'B5', 'C2', 'C6', 'E2', 'E6', 'F3', 'F5']
+    b_knight_space = 'D5'
+    b_knight_end_spaces = ['B4', 'B6', 'C3', 'C7', 'E3', 'E7', 'F4', 'F6']
+
+    # Clear all pieces except those needed in test:
+    # White knight on D4
+    # Black knight on D5
+    # White king on E1
+    # Black king on E8
+    game_window.chess_board.clear_board()
+    game_window.chess_board.pieces.append(knight.Knight(game_window.chess_board.board_spaces[w_knight_space], constants.PlayerColor.WHITE))
+    game_window.chess_board.pieces.append(knight.Knight(game_window.chess_board.board_spaces[b_knight_space], constants.PlayerColor.BLACK))
+    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
+    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))
+
+    # Re-initialize sprites
+    game_window.chess_board.init_sprites()
+
+    # Test white knight movement
+    for space in w_knight_end_spaces:
+        # Move the knight to the valid space
+        assert game_window.chess_board.handle_move(knight.Knight, w_knight_space, space, constants.PlayerColor.WHITE)
+
+        # Move the knight back
+        assert game_window.chess_board.handle_move(knight.Knight, space, w_knight_space, constants.PlayerColor.WHITE)
+
+    # Test black knight movement
+    for space in b_knight_end_spaces:
+        # Move the knight to the valid space
+        assert game_window.chess_board.handle_move(knight.Knight, b_knight_space, space, constants.PlayerColor.BLACK)
+
+        # Move the knight back
+        assert game_window.chess_board.handle_move(knight.Knight, space, b_knight_space, constants.PlayerColor.BLACK)
+
+
 
