@@ -233,6 +233,25 @@ class Board():
         for piece in self.pieces:
             self.sprite_list.append(piece.sprite)
 
+    def clear_board(self):
+        """
+        Clears the board post initialization by performing the following steps:
+            - Clearing all pieces from the piece list
+            - removing all references to pieces from each space
+
+        Args: 
+            None
+
+        Returns:
+            None    
+        """
+        # Clear pieces list
+        self.pieces = []
+
+        # Set all board space "occupying piece" attributes to None
+        for space in constants.space_names:
+            self.board_spaces[space].occupying_piece = None
+
     def draw_board(self):
         """ 
         Draws the chess board on screen by drawing each square,
