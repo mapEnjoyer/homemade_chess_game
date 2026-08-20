@@ -248,7 +248,6 @@ def test_pawn_capture_A_side():
     # White king on E1
     # Black king on E8
     game_window.chess_board.pieces = []
-    game_window.chess_board.sprite_list = []
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], constants.PlayerColor.WHITE))
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E4'], constants.PlayerColor.WHITE))
     game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], constants.PlayerColor.BLACK))
@@ -256,16 +255,100 @@ def test_pawn_capture_A_side():
     game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
     game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))
 
-    for piece in game_window.chess_board.pieces:
-        # Add sprite back to sprite list
-        game_window.chess_board.sprite_list.append(piece.sprite)
+    # Re-initialize sprites
+    game_window.chess_board.init_sprites()
 
-    # White pawn on D4 captures black pawn on E5
+    # White pawn on E4 captures black pawn on D5
     assert game_window.chess_board.handle_move(pawn.Pawn, 'E4', 'D5', constants.PlayerColor.WHITE) is True
     assert game_window.chess_board.board_spaces['E4'].occupying_piece is None
     assert isinstance(game_window.chess_board.board_spaces['D5'].occupying_piece, pawn.Pawn)
     assert game_window.chess_board.board_spaces['D5'].occupying_piece.color == constants.PlayerColor.WHITE
 
+    # Black pawn on E5 captures white pawn on D4
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'E5', 'D4', constants.PlayerColor.BLACK) is True
+    assert game_window.chess_board.board_spaces['E5'].occupying_piece is None
+    assert isinstance(game_window.chess_board.board_spaces['D4'].occupying_piece, pawn.Pawn)
+    assert game_window.chess_board.board_spaces['D4'].occupying_piece.color == constants.PlayerColor.BLACK    
+    
+def test_pawn_capture_H_side():
+    """
+    test both white and black pawns capturing towards H side
+    """
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Clear all pieces except those needed in test:
+    # White pawns on D4, E4
+    # Black pawns on D5, E5
+    # White king on E1
+    # Black king on E8
+    game_window.chess_board.pieces = []
+    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], constants.PlayerColor.WHITE))
+    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E4'], constants.PlayerColor.WHITE))
+    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], constants.PlayerColor.BLACK))
+    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E5'], constants.PlayerColor.BLACK))
+    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
+    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))
+
+    # Re-initialize sprites
+    game_window.chess_board.init_sprites()
+
+    # White pawn on D4 captures black pawn on E5
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'E5', constants.PlayerColor.WHITE) is True
+    assert game_window.chess_board.board_spaces['D4'].occupying_piece is None
+    assert isinstance(game_window.chess_board.board_spaces['E5'].occupying_piece, pawn.Pawn)
+    assert game_window.chess_board.board_spaces['E5'].occupying_piece.color == constants.PlayerColor.WHITE
+
     # Black pawn on D5 captures white pawn on E4
-    
-    
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'E4', constants.PlayerColor.BLACK) is True
+    assert game_window.chess_board.board_spaces['D5'].occupying_piece is None
+    assert isinstance(game_window.chess_board.board_spaces['E4'].occupying_piece, pawn.Pawn)
+    assert game_window.chess_board.board_spaces['E4'].occupying_piece.color == constants.PlayerColor.BLACK
+
+#TODO: pawn promotion test
+#TODO: en passante test
+
+def test_pawn_invalid_moves():
+    """
+    try moving both white and black pawn in directions and spaces it cannot move 
+    """
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Clear all pieces except those needed in test:
+    # White pawn on D4
+    # Black pawn on D5
+    # White king on E1
+    # Black king on E8
+    game_window.chess_board.pieces = []
+    game_window.chess_board.sprite_list = []
+    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], constants.PlayerColor.WHITE))
+    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], constants.PlayerColor.BLACK))
+    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
+    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))
+
+    # Re-initialize sprites
+    game_window.chess_board.init_sprites()
+
+    # Try moving both pawns horizontally towards A rank, checking for failure
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'C4', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'C5', constants.PlayerColor.BLACK) is False
+
+    # Try moving both pawns horizontally towards H rank, checking for failure
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'E4', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'E5', constants.PlayerColor.BLACK) is False
+
+    # Try moving both pawns backwards, checking for failure
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'D3', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'D6', constants.PlayerColor.BLACK) is False
+
+    # Try moving both pawns forwards, checking for failure since they cannot capture pieces in front of them
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'D5', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'D4', constants.PlayerColor.BLACK) is False
+
+    # Try moving pawns diagonally with no pieces to capture, checking for failure
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'E5', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'C5', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'E4', constants.PlayerColor.BLACK) is False
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'C4', constants.PlayerColor.BLACK) is False
+

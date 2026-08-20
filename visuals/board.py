@@ -54,9 +54,6 @@ class Board():
         # List containing all pieces on board
         self.pieces = []
 
-        # Sprite list containing all sprites on the board
-        self.sprite_list = arcade.SpriteList()
-
         # Initialize move end message
         self.end_move_msg = ''
 
@@ -73,7 +70,7 @@ class Board():
         self.__init_black_pieces()
 
         # Initialize sprites
-        self.__init_sprites()
+        self.init_sprites()
 
         return
 
@@ -219,7 +216,7 @@ class Board():
 
         return
     
-    def __init_sprites(self):
+    def init_sprites(self):
         """
         Initializes the sprite list by adding all piece sprites to the sprite list.
 
@@ -229,6 +226,10 @@ class Board():
         Returns:
             None    
         """
+        # Clear the sprite list
+        self.sprite_list = arcade.SpriteList()
+
+        # Add each piece's sprite 
         for piece in self.pieces:
             self.sprite_list.append(piece.sprite)
 
@@ -500,8 +501,9 @@ class Board():
                     # Pawn is staying in the same column. Run standard collision check
                     self.__check_collisions(pawn.occupied_square.name, next_space)
 
-                    # Assuming no exception was raised, the move is valid. Attempt to move the pawn
-                    move_is_valid = True                     
+                    # Assuming no exception was raised, we must now check the destination. Pawns cannot capture moving forwards
+                    if self.board_spaces[next_space].occupying_piece is None:
+                        move_is_valid = True                     
 
                 else:
                     # Pawn is moving diagonally. Check destination for opposing color piece
