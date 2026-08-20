@@ -242,11 +242,6 @@ def test_pawn_capture_A_side():
     # Game window to test on
     game_window = window.GameView(is_visible=False)
 
-    white_pawn_path = str(Path(__file__).parent.parent / "visuals//textures" / constants.white_pawn_image_name)
-    black_pawn_path = str(Path(__file__).parent.parent / "visuals//textures" / constants.black_pawn_image_name)
-    white_king_path = str(Path(__file__).parent.parent / "visuals//textures" / constants.white_king_image_name)
-    black_king_path = str(Path(__file__).parent.parent / "visuals//textures" / constants.black_king_image_name)
-
     # Clear all pieces except those needed in test:
     # White pawns on D4, E4
     # Black pawns on D5, E5
@@ -254,30 +249,12 @@ def test_pawn_capture_A_side():
     # Black king on E8
     game_window.chess_board.pieces = []
     game_window.chess_board.sprite_list = []
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], 
-                                                    white_pawn_path, 
-                                                    constants.pawn_image_width, 
-                                                    constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E4'], 
-                                                    white_pawn_path, 
-                                                    constants.pawn_image_width, 
-                                                    constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], 
-                                                    black_pawn_path, 
-                                                    constants.pawn_image_width, 
-                                                    constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E5'], 
-                                                    black_pawn_path, 
-                                                    constants.pawn_image_width, 
-                                                    constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'],
-                                                    white_king_path,
-                                                    constants.king_image_width,
-                                                    constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'],
-                                                    black_king_path,
-                                                    constants.king_image_width,
-                                                    constants.PlayerColor.BLACK))
+    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], constants.PlayerColor.WHITE))
+    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E4'], constants.PlayerColor.WHITE))
+    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], constants.PlayerColor.BLACK))
+    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E5'], constants.PlayerColor.BLACK))
+    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
+    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))
 
     for piece in game_window.chess_board.pieces:
         # Add sprite back to sprite list
