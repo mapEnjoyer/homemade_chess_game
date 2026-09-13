@@ -13,6 +13,32 @@ import arcade
 import constants
 from pieces import piece, pawn, rook, knight, bishop, queen, king
 from pathlib import Path
+
+# List of valid piece types
+valid_piece_types = [pawn.Pawn, rook.Rook, knight.Knight, bishop.Bishop, queen.Queen, king.King]
+
+class KingCheck():
+    """
+    King check class. Contains the king object in check and the piece causing the check.
+
+    Attributes:
+        - king_piece: King object in check
+        - checking_piece: The piece causing the check
+    """
+    def __init__(self, king_piece:king.King, checking_piece:piece.Piece):
+        """
+        Initializes the king check object by storing the king in check and checking
+        piece objects as attributes.
+        
+        Args:
+            king_piece: King piece object
+            checking_piece: Checking piece object
+        Returns:
+            None    
+        """
+        self.king_piece = king_piece
+        self.checking_piece = checking_piece
+        
 class Board():
     """
     Board class. Used to access all spaces on the board.
@@ -304,7 +330,7 @@ class Board():
         
         try:
             # Check that piece type is valid
-            if piece_type not in constants.valid_piece_types:
+            if piece_type not in valid_piece_types:
                 # raise exception indicating the piece type is not valid
                 self.end_move_msg = f'Piece type does not exist.'
                 raise InvalidMoveException()       
@@ -865,6 +891,7 @@ class Board():
             pass
         
         return king_checks
+    
     def __game_over(self, king:king.King, active_checks:KingCheck):
         """
         Method to check for game over on the king who is actively in check. The game is considered over if the following
@@ -977,29 +1004,7 @@ class Board():
 
             # Add back any missing sprites from the sprite list
             self.sprite_list.append(piece.sprite)
-    
 
-class KingCheck():
-    """
-    King check class. Contains the king object in check and the piece causing the check.
-
-    Attributes:
-        - king_piece: King object in check
-        - checking_piece: The piece causing the check
-    """
-    def __init__(self, king_piece:king.King, checking_piece:piece.Piece):
-        """
-        Initializes the king check object by storing the king in check and checking
-        piece objects as attributes.
-        
-        Args:
-            king_piece: King piece object
-            checking_piece: Checking piece object
-        Returns:
-            None    
-        """
-        self.king_piece = king_piece
-        self.checking_piece = checking_piece
 
 class InvalidMoveException(Exception):
     """
