@@ -8,12 +8,36 @@ Date: 08/06/26
     This file contains unit tests for the methods/function in board.py
 """
 
-from visuals import window
+from visuals import window, board
 from pieces import piece, pawn, rook, knight, bishop, queen, king
 from pathlib import Path
 import arcade
 import constants
 import pytest
+
+def setup_board(chess_board:board.Board, pieces:list[tuple]):
+    """
+    Helper function to allow for tests to setup the board in a particular state.
+    Note that this function does not automatically put kings on the board even
+    though they are always necessary.  
+
+    Args:
+        - chess_board: chess board to work on
+        - pieces: tuple with the following elements (piece_type_to_add, space_as_string, piece_color)
+                  example: (pawn.Pawn, 'E4', constants.PlayerColor.WHITE)
+
+    Returns:
+        - None
+    """
+    # Clear all pieces except those needed in test
+    chess_board.clear_board()
+
+    for piece in pieces:
+        # Append the piece to the piece list
+        chess_board.pieces.append(piece[0](chess_board.board_spaces[piece[1]], piece[2]))
+
+    # Init sprites
+    chess_board.init_sprites()
 
 #TODO: Test will need updated if we add different colored themes
 @pytest.mark.parametrize('square_color_1', [arcade.color.BISTRE])
@@ -242,21 +266,20 @@ def test_pawn_capture_A_side():
     # Game window to test on
     game_window = window.GameView(is_visible=False)
 
-    # Clear all pieces except those needed in test:
     # White pawns on D4, E4
     # Black pawns on D5, E5
     # White king on E1
     # Black king on E8
-    game_window.chess_board.clear_board()
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E4'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E5'], constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))
+    pieces = []
+    pieces.append((pawn.Pawn, 'D4', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'E4', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.BLACK))
+    pieces.append((pawn.Pawn, 'E5', constants.PlayerColor.BLACK))
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
 
-    # Re-initialize sprites
-    game_window.chess_board.init_sprites()
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
 
     # White pawn on E4 captures black pawn on D5
     assert game_window.chess_board.handle_move(pawn.Pawn, 'E4', 'D5', constants.PlayerColor.WHITE) is True
@@ -277,21 +300,20 @@ def test_pawn_capture_H_side():
     # Game window to test on
     game_window = window.GameView(is_visible=False)
 
-    # Clear all pieces except those needed in test:
     # White pawns on D4, E4
     # Black pawns on D5, E5
     # White king on E1
     # Black king on E8
-    game_window.chess_board.clear_board()
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E4'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['E5'], constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))
+    pieces = []
+    pieces.append((pawn.Pawn, 'D4', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'E4', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.BLACK))
+    pieces.append((pawn.Pawn, 'E5', constants.PlayerColor.BLACK))
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
 
-    # Re-initialize sprites
-    game_window.chess_board.init_sprites()
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
 
     # White pawn on D4 captures black pawn on E5
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'E5', constants.PlayerColor.WHITE) is True
@@ -315,19 +337,18 @@ def test_pawn_invalid_moves():
     # Game window to test on
     game_window = window.GameView(is_visible=False)
 
-    # Clear all pieces except those needed in test:
     # White pawn on D4
     # Black pawn on D5
     # White king on E1
     # Black king on E8
-    game_window.chess_board.clear_board()
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D4'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces['D5'], constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))
+    pieces = []
+    pieces.append((pawn.Pawn, 'D4', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.BLACK))
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
 
-    # Re-initialize sprites
-    game_window.chess_board.init_sprites()
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
 
     # Try moving both pawns horizontally towards A rank, checking for failure
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'C4', constants.PlayerColor.WHITE) is False
@@ -362,19 +383,18 @@ def test_knight_valid_moves():
     b_knight_space = 'D5'
     b_knight_end_spaces = ['B4', 'B6', 'C3', 'C7', 'E3', 'E7', 'F4', 'F6']
 
-    # Clear all pieces except those needed in test:
     # White knight on D4
     # Black knight on D5
     # White king on E1
     # Black king on E8
-    game_window.chess_board.clear_board()
-    game_window.chess_board.pieces.append(knight.Knight(game_window.chess_board.board_spaces[w_knight_space], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(knight.Knight(game_window.chess_board.board_spaces[b_knight_space], constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))
+    pieces = []
+    pieces.append((knight.Knight, w_knight_space, constants.PlayerColor.WHITE))
+    pieces.append((knight.Knight, b_knight_space, constants.PlayerColor.BLACK))
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
 
-    # Re-initialize sprites
-    game_window.chess_board.init_sprites()
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
 
     # Test white knight movement
     for space in w_knight_end_spaces:
@@ -401,19 +421,18 @@ def test_knight_invalid_moves():
     w_knight_space = 'D4'
     b_knight_space = 'E5'
 
-    # Clear all pieces except those needed in test:
     # White knight on D4
-    # Black knight on D5
+    # Black knight on E5
     # White king on E1
     # Black king on E8
-    game_window.chess_board.clear_board()
-    game_window.chess_board.pieces.append(knight.Knight(game_window.chess_board.board_spaces[w_knight_space], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(knight.Knight(game_window.chess_board.board_spaces[b_knight_space], constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))
+    pieces = []
+    pieces.append((knight.Knight, w_knight_space, constants.PlayerColor.WHITE))
+    pieces.append((knight.Knight, b_knight_space, constants.PlayerColor.BLACK))
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
 
-    # Re-initialize sprites
-    game_window.chess_board.init_sprites()
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
 
     # Try moving white knight straight forward
     assert game_window.chess_board.handle_move(knight.Knight, w_knight_space, 'D5', constants.PlayerColor.WHITE) is False
@@ -456,23 +475,22 @@ def test_knight_capture():
     b_knight_space = 'D5'
     b_pawn_space = 'C6'
 
-    # Clear all pieces except those needed in test:
     # White knight on D4
     # White pawn on C3
     # Black knight on D5
     # Black pawn on C6
     # White king on E1
     # Black king on E8
-    game_window.chess_board.clear_board()
-    game_window.chess_board.pieces.append(knight.Knight(game_window.chess_board.board_spaces[w_knight_space], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces[w_pawn_space], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(knight.Knight(game_window.chess_board.board_spaces[b_knight_space], constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(pawn.Pawn(game_window.chess_board.board_spaces[b_pawn_space], constants.PlayerColor.BLACK))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E1'], constants.PlayerColor.WHITE))
-    game_window.chess_board.pieces.append(king.King(game_window.chess_board.board_spaces['E8'], constants.PlayerColor.BLACK))   
+    pieces = []
+    pieces.append((knight.Knight, w_knight_space, constants.PlayerColor.WHITE))
+    pieces.append((knight.Knight, b_knight_space, constants.PlayerColor.BLACK))
+    pieces.append((pawn.Pawn, w_pawn_space, constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, b_pawn_space, constants.PlayerColor.BLACK))    
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
 
-    # Re-initialize sprites
-    game_window.chess_board.init_sprites()
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
 
     # Capture black pawn using white knight
     assert game_window.chess_board.handle_move(knight.Knight, w_knight_space, b_pawn_space, constants.PlayerColor.WHITE)
