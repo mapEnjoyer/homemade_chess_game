@@ -372,6 +372,34 @@ def test_pawn_invalid_moves():
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'E4', constants.PlayerColor.BLACK) is False
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'C4', constants.PlayerColor.BLACK) is False
 
+def test_pawn_collision():
+    """Test trying to move pawn through another piece"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # White pawn on D2
+    # White pawn on D3
+    # Black pawn on D7
+    # Black pawn on D6
+    # White king on E1
+    # Black king on E8
+    pieces = []
+    pieces.append((pawn.Pawn, 'D2', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'D3', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'D6', constants.PlayerColor.BLACK))
+    pieces.append((pawn.Pawn, 'D7', constants.PlayerColor.BLACK))
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Try moving D2 pawn to D4
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D2', 'D4', constants.PlayerColor.WHITE) is False
+
+    # Try moving D7 pawn to D5
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D7', 'D5', constants.PlayerColor.BLACK) is False
+
 def test_knight_valid_moves():
     "test moving knights to empty/valid spaces"
     # Game window to test on
