@@ -622,3 +622,40 @@ def test_bishop_collision():
 
     # Try moving C8 bishop through D7 pawn
     assert game_window.chess_board.handle_move(bishop.Bishop, 'C8', 'E6', constants.PlayerColor.BLACK) is False
+
+def test_bishop_captures():
+    """Test capturing a piece with a bishop"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black bishops
+    w_bishop_space = 'D4'
+    b_bishop_space = 'E4'
+
+    # White bishop on D4
+    # Black bishop on E4
+    # White pawn on D5
+    # Black pawn on E5
+    # White king on E1
+    # Black king on E8
+    pieces = []
+    pieces.append((bishop.Bishop, w_bishop_space, constants.PlayerColor.WHITE))
+    pieces.append((bishop.Bishop, b_bishop_space, constants.PlayerColor.BLACK)) 
+    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'E5', constants.PlayerColor.BLACK)) 
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Capture the black pawn with the white bishop
+    assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'E5', constants.PlayerColor.WHITE)
+    assert game_window.chess_board.board_spaces[w_bishop_space].occupying_piece is None
+    assert isinstance(game_window.chess_board.board_spaces['E5'].occupying_piece, bishop.Bishop)
+
+    # Capture the white pawn with the black bishop
+    assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'D5', constants.PlayerColor.BLACK)
+    assert game_window.chess_board.board_spaces[b_bishop_space].occupying_piece is None
+    assert isinstance(game_window.chess_board.board_spaces['D5'].occupying_piece, bishop.Bishop)
+     
