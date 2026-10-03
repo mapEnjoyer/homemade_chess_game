@@ -469,28 +469,24 @@ class Board():
                 case pawn.Pawn:
                     # Run pawn handler
                     move_is_valid = self.__pawn_move_is_valid(moving_piece, next_space)
-                    pass
                 case knight.Knight:
                     # Run knight handler
                     move_is_valid = self.__knight_move_is_valid(moving_piece, next_space)
-                    pass
                 case bishop.Bishop:
                     # Run bishop handler
                     move_is_valid = self.__bishop_move_is_valid(moving_piece, next_space)
-                    pass
                 case rook.Rook:
                     # Run rook handler
                     move_is_valid = self.__rook_move_is_valid(moving_piece, next_space)
-                    pass
                 case queen.Queen:
                     # Run queen handler
                     move_is_valid = self.__queen_move_is_valid(moving_piece, next_space)
-                    pass
                 case king.King:
                     # Run king handler
                     move_is_valid = self.__king_move_is_valid(moving_piece, next_space)
                 case _:
-                    pass
+                    # An unexpected piece type was somehow passed in
+                    raise Exception
 
         except Exception:
             pass
