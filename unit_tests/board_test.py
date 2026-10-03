@@ -205,7 +205,7 @@ def test_pawn_move_1_space_forward(col):
     black_start_space = col + str(7)
     black_end_space = col + str(6)
 
-    # Move white E2 pawn to E3
+    # Move white pawn on row 2 to row 3
     assert game_window.chess_board.handle_move(pawn.Pawn,
                                                start_space=white_start_space,
                                                next_space=white_end_space,
@@ -215,7 +215,7 @@ def test_pawn_move_1_space_forward(col):
     assert game_window.chess_board.board_spaces[white_start_space].occupying_piece is None
     assert isinstance(game_window.chess_board.board_spaces[white_end_space].occupying_piece, pawn.Pawn)
 
-    # Move black E7 pawn to E6
+    # Move black pawn on row 7 to row 6
     assert game_window.chess_board.handle_move(pawn.Pawn,
                                                start_space=black_start_space,
                                                next_space=black_end_space,
@@ -239,7 +239,7 @@ def test_pawn_move_2_space_forward(col):
     black_start_space = col + str(7)
     black_end_space = col + str(5)
 
-    # Move white E2 pawn to E3
+    # Move white pawn on row 2 to row 4
     assert game_window.chess_board.handle_move(pawn.Pawn,
                                                start_space=white_start_space,
                                                next_space=white_end_space,
@@ -249,7 +249,7 @@ def test_pawn_move_2_space_forward(col):
     assert game_window.chess_board.board_spaces[white_start_space].occupying_piece is None
     assert isinstance(game_window.chess_board.board_spaces[white_end_space].occupying_piece, pawn.Pawn)
 
-    # Move black E7 pawn to E6
+    # Move black pawn on row 7 to row 5
     assert game_window.chess_board.handle_move(pawn.Pawn,
                                                start_space=black_start_space,
                                                next_space=black_end_space,
@@ -371,6 +371,34 @@ def test_pawn_invalid_moves():
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'C5', constants.PlayerColor.WHITE) is False
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'E4', constants.PlayerColor.BLACK) is False
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'C4', constants.PlayerColor.BLACK) is False
+
+def test_pawn_collision():
+    """Test trying to move pawn through another piece"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # White pawn on D2
+    # White pawn on D3
+    # Black pawn on D7
+    # Black pawn on D6
+    # White king on E1
+    # Black king on E8
+    pieces = []
+    pieces.append((pawn.Pawn, 'D2', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'D3', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'D6', constants.PlayerColor.BLACK))
+    pieces.append((pawn.Pawn, 'D7', constants.PlayerColor.BLACK))
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Try moving D2 pawn to D4
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D2', 'D4', constants.PlayerColor.WHITE) is False
+
+    # Try moving D7 pawn to D5
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D7', 'D5', constants.PlayerColor.BLACK) is False
 
 def test_knight_valid_moves():
     "test moving knights to empty/valid spaces"
@@ -501,3 +529,133 @@ def test_knight_capture():
     assert game_window.chess_board.handle_move(knight.Knight, b_knight_space, w_pawn_space, constants.PlayerColor.BLACK)
     assert game_window.chess_board.board_spaces[b_knight_space].occupying_piece is None
     assert isinstance(game_window.chess_board.board_spaces[w_pawn_space].occupying_piece, knight.Knight)
+
+
+def test_bishop_valid_moves():
+    """
+    test moving bishops diagonally in all directions
+    """
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black bishops
+    w_bishop_space = 'D4'
+    b_bishop_space = 'E4'
+
+    # Bishop destination squares
+    w_bishop_squares = ['A7', 'H8', 'A1', 'G1']
+    b_bishop_squares = ['A8', 'H7', 'B1', 'H1']
+
+    # White bishop on D4
+    # Black bishop on E5
+    # White king on E1
+    # Black king on E8
+    pieces = []
+    pieces.append((bishop.Bishop, w_bishop_space, constants.PlayerColor.WHITE))
+    pieces.append((bishop.Bishop, b_bishop_space, constants.PlayerColor.BLACK))  
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    for end_space in w_bishop_squares:
+        # Move white bishop
+        assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, end_space, constants.PlayerColor.WHITE)
+
+        # Move the bishop back to the starting square
+        assert game_window.chess_board.handle_move(bishop.Bishop, end_space, w_bishop_space, constants.PlayerColor.WHITE)
+
+    for end_space in b_bishop_squares:
+        # Move white bishop
+        assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, end_space, constants.PlayerColor.BLACK)
+
+        # Move the bishop back to the starting square
+        assert game_window.chess_board.handle_move(bishop.Bishop, end_space, b_bishop_space, constants.PlayerColor.BLACK)
+
+def test_bishop_invalid_moves():
+    """Test invalid bishop moves are ignored"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black bishops
+    w_bishop_space = 'D4'
+    b_bishop_space = 'E5'
+
+    # White bishop on D4
+    # Black bishop on E5
+    # White king on E1
+    # Black king on E8
+    pieces = []
+    pieces.append((bishop.Bishop, w_bishop_space, constants.PlayerColor.WHITE))
+    pieces.append((bishop.Bishop, b_bishop_space, constants.PlayerColor.BLACK))  
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Try moving bishops towards row 7 veritically
+    assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'D7', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'E7', constants.PlayerColor.BLACK) is False
+
+    # Try moving bishops towards row 2 vertically
+    assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'D2', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'E2', constants.PlayerColor.BLACK) is False
+
+    # Try moving bishops towards column A horizontally
+    assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'A4', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'A5', constants.PlayerColor.BLACK) is False
+
+    # Try moving bishops towards column H horizontally
+    assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'H4', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'H5', constants.PlayerColor.BLACK) is False
+
+def test_bishop_collision():
+    """Test trying to move bishops through other pieces"""
+
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Try moving C1 bishop through D2 pawn
+    assert game_window.chess_board.handle_move(bishop.Bishop, 'C1', 'E3', constants.PlayerColor.WHITE) is False
+
+    # Try moving C8 bishop through D7 pawn
+    assert game_window.chess_board.handle_move(bishop.Bishop, 'C8', 'E6', constants.PlayerColor.BLACK) is False
+
+def test_bishop_captures():
+    """Test capturing a piece with a bishop"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black bishops
+    w_bishop_space = 'D4'
+    b_bishop_space = 'E4'
+
+    # White bishop on D4
+    # Black bishop on E4
+    # White pawn on D5
+    # Black pawn on E5
+    # White king on E1
+    # Black king on E8
+    pieces = []
+    pieces.append((bishop.Bishop, w_bishop_space, constants.PlayerColor.WHITE))
+    pieces.append((bishop.Bishop, b_bishop_space, constants.PlayerColor.BLACK)) 
+    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'E5', constants.PlayerColor.BLACK)) 
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Capture the black pawn with the white bishop
+    assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'E5', constants.PlayerColor.WHITE)
+    assert game_window.chess_board.board_spaces[w_bishop_space].occupying_piece is None
+    assert isinstance(game_window.chess_board.board_spaces['E5'].occupying_piece, bishop.Bishop)
+
+    # Capture the white pawn with the black bishop
+    assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'D5', constants.PlayerColor.BLACK)
+    assert game_window.chess_board.board_spaces[b_bishop_space].occupying_piece is None
+    assert isinstance(game_window.chess_board.board_spaces['D5'].occupying_piece, bishop.Bishop)
+     
