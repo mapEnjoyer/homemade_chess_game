@@ -46,8 +46,7 @@ class InvalidMoveException(Exception):
         Notifies the player why the move they tried to make has failed.
 
         Args:
-            msg: Message to display indicating why move could not complete
-            print_msg: True to print message, False otherwise
+            None
         Returns:
             None
         """
@@ -63,8 +62,7 @@ class KingInCheckException(Exception):
         Notifies the player their king is in check
 
         Args:
-            king_color: Color of the king in check. Modifies the displayed message.
-            print_msg: True to print message, False otherwise
+            None
         Returns:
             None
         """
