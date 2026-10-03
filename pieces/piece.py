@@ -125,7 +125,7 @@ class Board_Space():
         """
         Draws the square at its position values
 
-        Args:,
+        Args:
             None
 
         Returns:
