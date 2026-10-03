@@ -96,7 +96,7 @@ class Pawn(piece.Piece):
             valid_spaces.append(constants.board_col_labels[cur_col + 1] + constants.board_row_labels[cur_row + direction])
 
         # Pawn can move 2 spaces if it hasn't moved yet
-        if self.has_moved == False:
+        if not self.has_moved:
             valid_spaces.append(constants.board_col_labels[cur_col] + constants.board_row_labels[cur_row+2*direction])
 
         return space in valid_spaces

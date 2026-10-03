@@ -33,7 +33,8 @@ class MoveParser():
     def __init__(self, window:arcade.Window):
         """
         Initializes the move parser by performing the following steps:
-            TBD
+            - Create a text box widget that allows user to type in moves
+            - Sets which method gets called on text box enter
 
         Args:
             window: arcade window object the text entry is apart of. This is to 
@@ -130,14 +131,16 @@ class MoveParser():
         
         Examples:
             - Pawn on E2 -> E4: E2E4
-            - Knight on B1 -> C3: KB1C3
+            - Knight on B1 -> C3: NB1C3
 
         This method is called whenever the user hits "enter" on the move
         entry text box.
 
         Args:
-            None
-
+            widget: Unused in our version of the method, but a necessary arg to self.text_entry.on_commit
+                    which this method is referencing. 
+            
+            text: Text string entered by player
         Returns:
             None          
         """
@@ -182,7 +185,7 @@ class MoveParser():
                 
             else:
                 # Move input too long. Raise exception
-                raise InvalidMoveEntry(f'Move entry is invalid. Length of move should be no longer than 3 characters (ex: KC3)')
+                raise InvalidMoveEntry(f'Move entry is invalid. Length of move should be between 4-5characters (ex: NB1C3)')
 
                 
             # Now that we have determined piece type, attempt to determine current and new squares
@@ -196,7 +199,7 @@ class MoveParser():
             if any(space not in constants.space_names for space in [cur_space, new_space]):
                 raise excpetions.InvalidSpaceError(f'Space does not exist on board! Use the row/column labels to determine square piece is moving to. Column letter always comes before row number (ex: E4).')
 
-        except:
+        except Exception:
             pass
 
         else:

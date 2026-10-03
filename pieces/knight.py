@@ -66,50 +66,50 @@ class Knight(piece.Piece):
 
         # Note that rows and columns are indexed between 0-7
         col_idx = constants.board_col_labels.index(self.occupied_square.square_col)
-        row_num = constants.board_row_labels.index(self.occupied_square.square_row)
+        row_idx = constants.board_row_labels.index(self.occupied_square.square_row)
         min_col = 0
         max_col = len(constants.board_col_labels) - 1
         min_row = 0
         max_row = len(constants.board_row_labels) - 1        
         
         # Check 2 rows towards row 8 and 1 towards A
-        if row_num < max_row - 1 and col_idx > min_col:
+        if row_idx < max_row - 1 and col_idx > min_col:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx-1] + constants.board_row_labels[row_num+2])
+            valid_spaces.append(constants.board_col_labels[col_idx-1] + constants.board_row_labels[row_idx+2])
 
         # Check 2 rows towards row 8 and 1 towards H
-        if row_num < max_row - 1 and col_idx < max_col:
+        if row_idx < max_row - 1 and col_idx < max_col:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx+1] + constants.board_row_labels[row_num+2])           
+            valid_spaces.append(constants.board_col_labels[col_idx+1] + constants.board_row_labels[row_idx+2])           
 
         # Check 2 rows towards row 1 and 1 towards A
-        if row_num > min_row + 1 and col_idx > min_col:
+        if row_idx > min_row + 1 and col_idx > min_col:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx-1] + constants.board_row_labels[row_num-2])
+            valid_spaces.append(constants.board_col_labels[col_idx-1] + constants.board_row_labels[row_idx-2])
     
         # Check 2 rows towards row 1 and 1 towards H
-        if row_num > min_row + 1 and col_idx < max_col:
+        if row_idx > min_row + 1 and col_idx < max_col:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx+1] + constants.board_row_labels[row_num-2])
+            valid_spaces.append(constants.board_col_labels[col_idx+1] + constants.board_row_labels[row_idx-2])
 
         # Check 2 columns towards A and 1 towards row 8 
-        if col_idx > min_col + 1 and row_num < max_row:
+        if col_idx > min_col + 1 and row_idx < max_row:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx-2] + constants.board_row_labels[row_num+1])
+            valid_spaces.append(constants.board_col_labels[col_idx-2] + constants.board_row_labels[row_idx+1])
 
         # Check 2 columns towards A and 1 towards row 1
-        if col_idx > min_col + 1 and row_num > min_row:
+        if col_idx > min_col + 1 and row_idx > min_row:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx-2] + constants.board_row_labels[row_num-1])
+            valid_spaces.append(constants.board_col_labels[col_idx-2] + constants.board_row_labels[row_idx-1])
 
         # Check 2 columns towards H and 1 towards row 8
-        if col_idx < max_col - 1 and row_num < max_row:
+        if col_idx < max_col - 1 and row_idx < max_row:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx+2] + constants.board_row_labels[row_num+1])
+            valid_spaces.append(constants.board_col_labels[col_idx+2] + constants.board_row_labels[row_idx+1])
 
         # Check 2 columns towards H and 1 towards row 1
-        if col_idx < max_col - 1 and row_num > min_row:
+        if col_idx < max_col - 1 and row_idx > min_row:
             # Space is valid, add it to the list
-            valid_spaces.append(constants.board_col_labels[col_idx+2] + constants.board_row_labels[row_num-1])
+            valid_spaces.append(constants.board_col_labels[col_idx+2] + constants.board_row_labels[row_idx-1])
 
         return space in valid_spaces
