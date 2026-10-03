@@ -208,11 +208,11 @@ class Board():
         text_file_path = str(Path(__file__).parent / "textures" / constants.white_pawn_image_name)
         
         self.pieces.append(pawn.Pawn(self.board_spaces["A2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
+        self.pieces.append(pawn.Pawn(self.board_spaces["B2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
         self.pieces.append(pawn.Pawn(self.board_spaces["C2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
         self.pieces.append(pawn.Pawn(self.board_spaces["D2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
         self.pieces.append(pawn.Pawn(self.board_spaces["E2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
         self.pieces.append(pawn.Pawn(self.board_spaces["F2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(pawn.Pawn(self.board_spaces["B2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
         self.pieces.append(pawn.Pawn(self.board_spaces["G2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
         self.pieces.append(pawn.Pawn(self.board_spaces["H2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
 
