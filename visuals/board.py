@@ -503,6 +503,7 @@ class Board():
                     move_is_valid = self.__king_move_is_valid(moving_piece, next_space)
                 case _:
                     # An unexpected piece type was somehow passed in
+                    print('unexpected piece type in __get_move_is_valid')
                     raise Exception
 
         except Exception:
@@ -587,7 +588,7 @@ class Board():
         nxt_col_idx = constants.board_col_labels.index(next_space[0])
 
         try:
-            if pawn_piece.is_move_valid(next_space) == True:
+            if pawn_piece.is_move_valid(next_space):
 
                 if  cur_col_idx == nxt_col_idx :
                     # Pawn is staying in the same column. Run standard collision check
@@ -664,7 +665,7 @@ class Board():
         move_is_valid = False
 
         try:
-            if bishop_piece.is_move_valid(next_space) == True:
+            if bishop_piece.is_move_valid(next_space):
 
                 # Check for collisions
                 self.__check_collisions(bishop_piece.occupied_square.name, next_space)     
@@ -697,7 +698,7 @@ class Board():
         move_is_valid = False
 
         try:
-            if rook_piece.is_move_valid(next_space) == True:
+            if rook_piece.is_move_valid(next_space):
 
                 # Check for collisions
                 self.__check_collisions(rook_piece.occupied_square.name, next_space)     
@@ -731,7 +732,7 @@ class Board():
         move_is_valid = False
 
         try:
-            if queen_piece.is_move_valid(next_space) == True:
+            if queen_piece.is_move_valid(next_space):
 
                 # Check for collisions
                 self.__check_collisions(queen_piece.occupied_square.name, next_space)        
@@ -765,7 +766,7 @@ class Board():
         move_is_valid = False
 
         try:
-            if king_piece.is_move_valid(next_space) == True:
+            if king_piece.is_move_valid(next_space):
 
                 if king_piece.is_castleing(next_space):
                     # Raise an exception if the king has already moved this game
@@ -801,7 +802,7 @@ class Board():
                             self.end_move_msg = f'How did this even happen?'
                             raise InvalidMoveException()
 
-                    # Make sure king cannot castle out of or intocheck
+                    # Make sure king cannot castle out of or into check
                     if self.__determine_checks(king_piece.occupied_square.name, king_piece) or self.__determine_checks(rook_end_squre, king_piece) or self.__determine_checks(next_space, king_piece):
                         self.end_move_msg = 'You cannot castle out of or into check!'
                         raise InvalidMoveException()
@@ -929,10 +930,6 @@ class Board():
                     # Create a king check and add it to the list
                     king_checks.append(KingCheck(king_piece, piece))
 
-            if len(king_checks):
-                # King is in check, raise exception for message to player
-                raise KingInCheckException()
-
         except Exception:
             pass
         
@@ -948,6 +945,7 @@ class Board():
 
         Args:
             king: King object to check game over for
+            active_checks: List of active king checks on the king in question
 
         Returns:
             game_is_over: boolean True if game is over, false otherwise
