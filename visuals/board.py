@@ -567,7 +567,7 @@ class Board():
         
         return piece_moved
 
-    def __pawn_move_is_valid(self, pawn:pawn.Pawn, next_space:str):
+    def __pawn_move_is_valid(self, pawn_piece:pawn.Pawn, next_space:str):
         """
         Handles pawn moves by first checking if the move between the spaces is
         technically viable per how the pawn moves. If so, then any spaces the 
@@ -576,22 +576,22 @@ class Board():
         the opposing color.
 
         Args:
-            pawn: Pawn object being moved.
+            pawn_piece: Pawn object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
             move_is_valid: Boolean True if move is valid  
         """
         move_is_valid = False
-        cur_col_idx = constants.board_col_labels.index(pawn.occupied_square.square_col)
+        cur_col_idx = constants.board_col_labels.index(pawn_piece.occupied_square.square_col)
         nxt_col_idx = constants.board_col_labels.index(next_space[0])
 
         try:
-            if pawn.is_move_valid(next_space) == True:
+            if pawn_piece.is_move_valid(next_space) == True:
 
                 if  cur_col_idx == nxt_col_idx :
                     # Pawn is staying in the same column. Run standard collision check
-                    self.__check_collisions(pawn.occupied_square.name, next_space)
+                    self.__check_collisions(pawn_piece.occupied_square.name, next_space)
 
                     # Assuming no exception was raised, the move is valid. Attempt to move the pawn
                     move_is_valid = True                     
@@ -600,7 +600,7 @@ class Board():
                     # Pawn is moving diagonally. Check destination for opposing color piece
                     # TODO: En passant
                     if self.board_spaces[next_space].occupying_piece is None \
-                    or pawn.color == self.board_spaces[next_space].occupying_piece.color:
+                    or pawn_piece.color == self.board_spaces[next_space].occupying_piece.color:
                         # There's no piece to capture. Raise an exception
                         self.end_move_msg = f'Pawns can only move diagonally when capturing.'
                         raise InvalidMoveException()     
@@ -620,7 +620,7 @@ class Board():
             
         return move_is_valid
     
-    def __knight_move_is_valid(self, knight:knight.Knight, next_space:str):
+    def __knight_move_is_valid(self, knight_piece:knight.Knight, next_space:str):
         """
         Handles knight moves by first checking if the move between the spaces is
         technically viable per how the knight moves. No collision detection needed 
@@ -636,7 +636,7 @@ class Board():
 
         try:
             # Only needed to check if the knight can move to the space
-            move_is_valid = knight.is_move_valid(next_space)
+            move_is_valid = knight_piece.is_move_valid(next_space)
 
             if not move_is_valid:
                 # Knights can't move like that
@@ -648,14 +648,14 @@ class Board():
 
         return move_is_valid
 
-    def __bishop_move_is_valid(self, bishop:bishop.Bishop, next_space:str):
+    def __bishop_move_is_valid(self, bishop_piece:bishop.Bishop, next_space:str):
         """
         Handles bishop moves by first checking if the move between the spaces is
         technically viable per how the bishop moves. If so, the spaces in between 
         are checked for collisions. 
 
         Args:
-            bishop: Bishop object being moved.
+            bishop_piece: Bishop object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
@@ -664,10 +664,10 @@ class Board():
         move_is_valid = False
 
         try:
-            if bishop.is_move_valid(next_space) == True:
+            if bishop_piece.is_move_valid(next_space) == True:
 
                 # Check for collisions
-                self.__check_collisions(bishop.occupied_square.name, next_space)     
+                self.__check_collisions(bishop_piece.occupied_square.name, next_space)     
 
                 # No pieces in the way. Move is valid
                 move_is_valid = True
@@ -681,14 +681,14 @@ class Board():
 
         return move_is_valid
 
-    def __rook_move_is_valid(self, rook:rook.Rook, next_space:str):
+    def __rook_move_is_valid(self, rook_piece:rook.Rook, next_space:str):
         """
         Handles rook moves by first checking if the move between the spaces is
         technically viable per how the rook moves. If so, the spaces in between 
         are checked for collisions. 
 
         Args:
-            rook: Rook object being moved.
+            rook_piece: Rook object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
@@ -697,10 +697,10 @@ class Board():
         move_is_valid = False
 
         try:
-            if rook.is_move_valid(next_space) == True:
+            if rook_piece.is_move_valid(next_space) == True:
 
                 # Check for collisions
-                self.__check_collisions(rook.occupied_square.name, next_space)     
+                self.__check_collisions(rook_piece.occupied_square.name, next_space)     
 
                 # No pieces in the way. We can attempt to move
                 move_is_valid = True
@@ -715,14 +715,14 @@ class Board():
 
         return move_is_valid
 
-    def __queen_move_is_valid(self, queen:queen.Queen, next_space:str):
+    def __queen_move_is_valid(self, queen_piece:queen.Queen, next_space:str):
         """
         Handles queen moves by first checking if the move between the spaces is
         technically viable per how the queen moves. If so, the spaces in between 
         are checked for collisions.  
 
         Args:
-            queen: Queen object being moved.
+            queen_piece: Queen object being moved.
             next_space: space to move to. Space must match one of the spaces found in constants.space_names
 
         Returns:
@@ -731,10 +731,10 @@ class Board():
         move_is_valid = False
 
         try:
-            if queen.is_move_valid(next_space) == True:
+            if queen_piece.is_move_valid(next_space) == True:
 
                 # Check for collisions
-                self.__check_collisions(queen.occupied_square.name, next_space)        
+                self.__check_collisions(queen_piece.occupied_square.name, next_space)        
 
                 # No pieces in the way. We can attempt to move
                 move_is_valid = True
