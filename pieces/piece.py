@@ -212,7 +212,7 @@ class Piece(ABC):
         # Update the sprite's scale to always fit in the square
         try:
             self.sprite.scale = self.occupied_square.length/self.image_width
-        except:
+        except Exception:
             # Probably tried to divide by 0
             self.sprite.scale = 1
 

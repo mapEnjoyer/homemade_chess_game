@@ -196,7 +196,7 @@ class MoveParser():
             if any(space not in constants.space_names for space in [cur_space, new_space]):
                 raise excpetions.InvalidSpaceError(f'Space does not exist on board! Use the row/column labels to determine square piece is moving to. Column letter always comes before row number (ex: E4).')
 
-        except:
+        except Exception:
             pass
 
         else:

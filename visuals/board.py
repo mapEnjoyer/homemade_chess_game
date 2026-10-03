@@ -429,7 +429,7 @@ class Board():
 
                             # No need to look for another king
                             break
-        except:
+        except Exception:
             pass
 
         finally:
@@ -492,7 +492,7 @@ class Board():
                 case _:
                     pass
 
-        except:
+        except Exception:
             pass
 
         return move_is_valid
@@ -553,7 +553,7 @@ class Board():
                 self.end_move_msg = f'There is another piece blocking the way.'
                 raise InvalidMoveException()
 
-        except:
+        except Exception:
             pass
         
         return piece_moved
@@ -606,7 +606,7 @@ class Board():
                 self.end_move_msg = f'Pawns cannot move that way.'
                 InvalidMoveException()
 
-        except:
+        except Exception:
             pass
             
         return move_is_valid
@@ -634,7 +634,7 @@ class Board():
                 self.end_move_msg = f'Knights cannot move that way.'
                 raise InvalidMoveException()
 
-        except:
+        except Exception:
             pass
 
         return move_is_valid
@@ -667,7 +667,7 @@ class Board():
                 self.end_move_msg = f'Bishops cannot move that way'
                 raise InvalidMoveException()
                 
-        except:
+        except Exception:
             pass
 
         return move_is_valid
@@ -701,7 +701,7 @@ class Board():
                 self.end_move_msg = f'Rooks cannot move that way.'
                 raise InvalidMoveException()
                 
-        except:
+        except Exception:
             pass
 
         return move_is_valid
@@ -735,7 +735,7 @@ class Board():
                 self.end_move_msg = 'Queens cannot move that way.'
                 raise InvalidMoveException()
                 
-        except:
+        except Exception:
             pass
 
         return move_is_valid
@@ -815,7 +815,7 @@ class Board():
                 self.end_move_msg = f'Kings cannot move that way.'
                 raise InvalidMoveException()
                 
-        except:
+        except Exception:
             pass
 
         return move_is_valid
@@ -924,7 +924,7 @@ class Board():
                 # King is in check, raise exception for message to player
                 raise KingInCheckException()
 
-        except:
+        except Exception:
             pass
         
         return king_checks
