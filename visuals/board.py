@@ -213,6 +213,7 @@ class Board():
         # Create the A2-H2 pawns        
         self.pieces.append(pawn.Pawn(self.board_spaces["A2"], constants.PlayerColor.WHITE))
         self.pieces.append(pawn.Pawn(self.board_spaces["B2"], constants.PlayerColor.WHITE))
+        self.pieces.append(pawn.Pawn(self.board_spaces["C2"], constants.PlayerColor.WHITE))
         self.pieces.append(pawn.Pawn(self.board_spaces["D2"], constants.PlayerColor.WHITE))
         self.pieces.append(pawn.Pawn(self.board_spaces["E2"], constants.PlayerColor.WHITE))
         self.pieces.append(pawn.Pawn(self.board_spaces["F2"], constants.PlayerColor.WHITE))
@@ -236,7 +237,7 @@ class Board():
 
         # Create E1 king
         # Save white king to reference for easy access
-        self.white_king = king.King(king.King(self.board_spaces["E1"], constants.PlayerColor.WHITE))
+        self.white_king = king.King(self.board_spaces["E1"], constants.PlayerColor.WHITE)
         self.pieces.append(self.white_king)
 
         return

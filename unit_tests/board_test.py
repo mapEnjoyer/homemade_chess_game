@@ -658,4 +658,7 @@ def test_bishop_captures():
     assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'D5', constants.PlayerColor.BLACK)
     assert game_window.chess_board.board_spaces[b_bishop_space].occupying_piece is None
     assert isinstance(game_window.chess_board.board_spaces['D5'].occupying_piece, bishop.Bishop)
-     
+
+#TODO: Rook tests
+#TODO: Queen tests
+#TODO: King tests
