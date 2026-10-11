@@ -320,6 +320,10 @@ class Board():
         for space in constants.space_names:
             self.board_spaces[space].occupying_piece = None
 
+        # Clear king references
+        self.white_king = None
+        self.black_king = None
+
     def draw_board(self):
         """ 
         Draws the chess board on screen by drawing each square,
