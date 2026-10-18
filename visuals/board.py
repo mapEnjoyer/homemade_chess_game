@@ -940,6 +940,7 @@ class Board():
             pass
         
         return king_checks
+
     def __game_over(self, king_piece:king.King, active_checks:KingCheck):
         """
         Method to check for game over on the king who is actively in check. The game is considered over if the following

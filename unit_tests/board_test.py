@@ -916,6 +916,241 @@ def test_queen_captures():
     assert game_window.chess_board.board_spaces[b_queen_space].occupying_piece is None
     assert isinstance(game_window.chess_board.board_spaces['B5'].occupying_piece, queen.Queen)
 
+def test_king_valid_moves():
+    """
+    test moving kings in all directions
+    """
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
 
-#TODO: Queen tests
-#TODO: King tests
+    # Starting spaces for the white and black kings
+    w_king_space = 'E1'
+    b_king_space = 'E8'
+
+    # King destination squares
+    w_king_squares = ['E2', 'D2', 'E2', 'D3', 'E2', 'F3', 'E2', 'E1']
+    b_king_squares = ['E7', 'D7', 'E7', 'D6', 'E7', 'F6', 'E7', 'E8']
+
+
+    # White king on E1
+    # Black king on E8
+    pieces = []
+    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
+    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    for w_space, b_space in zip(w_king_squares, b_king_squares):
+        # Move white king
+        assert game_window.chess_board.handle_move(king.King, w_king_space, w_space, constants.PlayerColor.WHITE)
+
+        # Move the black king
+        assert game_window.chess_board.handle_move(king.King, b_king_space, b_space, constants.PlayerColor.BLACK)
+
+        # Save new spaces for next pass
+        w_king_space = w_space
+        b_king_space = b_space
+
+def test_king_invalid_moves():
+    """Test invalid king moves are ignored"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black kings
+    w_king_space = 'E1'
+    b_king_space = 'E8'
+
+    # White king on E1
+    # Black king on E8
+    pieces = []
+    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
+    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))  
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Try moving kings in knight shape
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'D3', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(king.King, b_king_space, 'D6', constants.PlayerColor.BLACK) is False
+
+    # Try moving kings like bishop
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'H4', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(king.King, b_king_space, 'H5', constants.PlayerColor.BLACK) is False
+
+    # Try moving kings like rooks
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'A1', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(king.King, b_king_space, 'A8', constants.PlayerColor.BLACK) is False    
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'H1', constants.PlayerColor.WHITE) is False
+    assert game_window.chess_board.handle_move(king.King, b_king_space, 'H8', constants.PlayerColor.BLACK) is False
+
+def test_king_captures():
+    """Test capturing a piece with a king"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black kings
+    w_king_space = 'E1'
+    b_king_space = 'E8'
+
+    # White pawn on E7
+    # Black pawn on E2
+    # White king on E1
+    # Black king on E8
+    pieces = []
+    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
+    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK)) 
+    pieces.append((pawn.Pawn, 'E7', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'E2', constants.PlayerColor.BLACK)) 
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Capture the black pawn with the white king
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'E2', constants.PlayerColor.WHITE)
+    assert game_window.chess_board.board_spaces[w_king_space].occupying_piece is None
+    assert isinstance(game_window.chess_board.board_spaces['E2'].occupying_piece, king.King)
+
+    # Capture the white pawn with the black king
+    assert game_window.chess_board.handle_move(king.King, b_king_space, 'E7', constants.PlayerColor.BLACK)
+    assert game_window.chess_board.board_spaces[b_king_space].occupying_piece is None
+    assert isinstance(game_window.chess_board.board_spaces['E7'].occupying_piece, king.King)
+
+def test_king_side_castling_success():
+    """Test castling king side successfully"""
+
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black kings
+    w_king_space = 'E1'
+    b_king_space = 'E8'
+
+    # White king on E1
+    # Black king on E8
+    # White rook on H1
+    # Black rook on H8
+    # All pawns on rows 2 and 7
+    pieces = []
+    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
+    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
+    pieces.append((rook.Rook, 'H1', constants.PlayerColor.WHITE))
+    pieces.append((rook.Rook, 'H8', constants.PlayerColor.BLACK))
+
+    for col_idx in range(0, len(constants.board_col_labels)):
+        pieces.append((pawn.Pawn, constants.board_col_labels[col_idx]+'2', constants.PlayerColor.WHITE))
+        pieces.append((pawn.Pawn, constants.board_col_labels[col_idx]+'7', constants.PlayerColor.BLACK))
+
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Castle white king kingside
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE)
+    assert game_window.chess_board.board_spaces[w_king_space].occupying_piece is None
+    assert game_window.chess_board.board_spaces['G1'].occupying_piece is game_window.chess_board.white_king
+    assert isinstance(game_window.chess_board.board_spaces['F1'].occupying_piece, rook.Rook)
+    assert game_window.chess_board.board_spaces['H1'].occupying_piece is None
+
+    # Castle black king kingside
+    assert game_window.chess_board.handle_move(king.King, b_king_space, 'G8', constants.PlayerColor.BLACK)
+    assert game_window.chess_board.board_spaces[b_king_space].occupying_piece is None
+    assert game_window.chess_board.board_spaces['G8'].occupying_piece is game_window.chess_board.black_king
+    assert isinstance(game_window.chess_board.board_spaces['F8'].occupying_piece, rook.Rook)
+    assert game_window.chess_board.board_spaces['H8'].occupying_piece is None
+
+def test_king_side_castling_fail_out_of_check():
+    """test that castling king out of check results in failure"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black kings
+    w_king_space = 'E1'
+    b_king_space = 'E8'
+
+    # White king on E1
+    # Black king on E8
+    # White rook on H1
+    # Black rook on H8
+    # White queen on E5 to put black king in check
+    # Black queen on E4 to put black king in check
+    pieces = []
+    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
+    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
+    pieces.append((rook.Rook, 'H1', constants.PlayerColor.WHITE))
+    pieces.append((rook.Rook, 'H8', constants.PlayerColor.BLACK))
+    pieces.append((queen.Queen, 'E5', constants.PlayerColor.WHITE))
+    pieces.append((queen.Queen, 'E4', constants.PlayerColor.BLACK))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Try castling white side king which should result in failure
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE) is False
+
+    # Try castling black side king which should result in failure
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'G8', constants.PlayerColor.WHITE) is False
+
+def test_king_side_castling_fail_through_check():
+    """test that castling king through a check results in failure"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black kings
+    w_king_space = 'E1'
+    b_king_space = 'E8'
+
+    # White king on E1
+    # Black king on E8
+    # White rook on H1
+    # Black rook on H8
+    # White rook on F5 to put F8 in check
+    # Black rook on F4 to put F1 in check
+    pieces = []
+    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
+    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
+    pieces.append((rook.Rook, 'H1', constants.PlayerColor.WHITE))
+    pieces.append((rook.Rook, 'H8', constants.PlayerColor.BLACK))
+    pieces.append((rook.Rook, 'F5', constants.PlayerColor.WHITE))
+    pieces.append((rook.Rook, 'F4', constants.PlayerColor.BLACK))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Try castling white side king which should result in failure
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE) is False
+
+    # Try castling black side king which should result in failure
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'G8', constants.PlayerColor.WHITE) is False
+
+def test_king_side_castling_fail_into_check():
+    """test that castling king into check results in failure"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black kings
+    w_king_space = 'E1'
+    b_king_space = 'E8'
+
+    # White king on E1
+    # Black king on E8
+    # White rook on H1
+    # Black rook on H8
+    # White rook on G5 to put G8 in check
+    # Black rook on G4 to put G1 in check
+    pieces = []
+    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
+    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
+    pieces.append((rook.Rook, 'H1', constants.PlayerColor.WHITE))
+    pieces.append((rook.Rook, 'H8', constants.PlayerColor.BLACK))
+    pieces.append((rook.Rook, 'G5', constants.PlayerColor.WHITE))
+    pieces.append((rook.Rook, 'G4', constants.PlayerColor.BLACK))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Try castling white side king which should result in failure
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE) is False
+
+    # Try castling black side king which should result in failure
+    assert game_window.chess_board.handle_move(king.King, w_king_space, 'G8', constants.PlayerColor.WHITE) is False
