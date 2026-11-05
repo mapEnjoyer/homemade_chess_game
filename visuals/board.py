@@ -373,6 +373,9 @@ class Board():
             piece_moved: Boolean indicator True if piece moved, False otherwise   
         """
         piece_moved = False
+
+        # Clear the msg
+        self.end_move_msg = ''
         
         try:
             # Check that piece type is valid
@@ -458,9 +461,6 @@ class Board():
             if self.end_move_msg:
                 # Print a message to the user regarding how the move went
                 print(self.end_move_msg)
-
-                # Clear the msg
-                self.end_move_msg = ''
 
         return piece_moved
 
@@ -601,7 +601,11 @@ class Board():
 
                     # Assuming no exception was raised, we must now check the destination. Pawns cannot capture moving forwards
                     if self.board_spaces[next_space].occupying_piece is None:
-                        move_is_valid = True                     
+                        move_is_valid = True
+
+                    else:
+                        # There is a piece in the way
+                        self.end_move_msg = f'There is another piece blocking the way.'
 
                 else:
                     # Pawn is moving diagonally. Check destination for opposing color piece
@@ -680,7 +684,7 @@ class Board():
                 move_is_valid = True
             else:
                 # Bishop move invalid. Raise an exception
-                self.end_move_msg = f'Bishops cannot move that way'
+                self.end_move_msg = f'Bishops cannot move that way.'
                 raise InvalidMoveException()
                 
         except Exception:
