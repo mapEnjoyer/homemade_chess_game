@@ -1383,3 +1383,56 @@ def test_queen_side_castling_fail_into_check():
     # Try castling black side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'C8', constants.PlayerColor.BLACK) is False
     assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
+
+
+def test_game_over_white():
+    """Test checking black king and ending the game"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black kings
+    w_king_space = 'A1'
+    b_king_space = 'H8'
+
+    # White king on A1
+    # Black king on H8
+    # White rook on G1
+    # White rook on F2
+    pieces = []
+    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
+    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
+    pieces.append((rook.Rook, 'G1', constants.PlayerColor.WHITE))
+    pieces.append((rook.Rook, 'F2', constants.PlayerColor.WHITE))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Slide the F2 rook to H2 which will ladder mate the black king
+    assert game_window.chess_board.handle_move(rook.Rook, 'F2', 'H2', constants.PlayerColor.WHITE)
+    assert game_window.chess_board.game_is_over
+
+def test_game_over_black():
+    """Test checking black king and ending the game"""
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # Starting spaces for the white and black kings
+    w_king_space = 'A1'
+    b_king_space = 'H8'
+
+    # White king on A1
+    # Black king on H8
+    # Black rook on B8
+    # Black rook on C7
+    pieces = []
+    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
+    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
+    pieces.append((rook.Rook, 'B8', constants.PlayerColor.BLACK))
+    pieces.append((rook.Rook, 'C7', constants.PlayerColor.BLACK))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Slide the C7 rook to A7 which will ladder mate the black king
+    assert game_window.chess_board.handle_move(rook.Rook, 'C7', 'A7', constants.PlayerColor.BLACK)
+    assert game_window.chess_board.game_is_over

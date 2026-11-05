@@ -85,6 +85,7 @@ class Board():
         - end_move_msg: Message to send to console once move is parsed
         - white_king: reference to white king in pieces list
         - black_king: reference to black king in pieces list
+        - game_is_over: boolean indicator on if game is over
     """
 
     def __init__(self):
@@ -120,6 +121,9 @@ class Board():
         # Initialize king references (updated in __init_white_pieces/__init_black_pieces)
         self.white_king = None
         self.black_king = None
+
+        # Initialize game over flag
+        self.game_is_over:bool = False
 
         # Initialize chess board squares
         self.__init_squares()
@@ -439,9 +443,8 @@ class Board():
 
                     if self.__game_over(king_piece, active_checks):
                         # TODO: Enemy king is in check. If there are no moves that can stop the check, the game is over.
+                        self.game_is_over = True
                         print('game over!')
-                        while(1):
-                            pass
 
                     elif active_checks and king_piece.color == constants.PlayerColor.WHITE:
                         # Set end of move msg 
