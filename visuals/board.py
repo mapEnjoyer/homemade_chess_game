@@ -86,6 +86,7 @@ class Board():
         - white_king: reference to white king in pieces list
         - black_king: reference to black king in pieces list
         - game_is_over: boolean indicator on if game is over
+        - prev_board_states: list of previous board states, newest states at the end of the list.
     """
 
     def __init__(self):
@@ -124,6 +125,9 @@ class Board():
 
         # Initialize game over flag
         self.game_is_over:bool = False
+
+        # Initialize previous board states
+        self.prev_board_states = []
 
         # Initialize chess board squares
         self.__init_squares()
@@ -566,6 +570,9 @@ class Board():
                 # are making moves.
                 piece_moved = True
 
+                # Save the previous board state to the list
+                self.prev_board_states.append(prev_board_state)
+
             else:
                 # Space is occupied by a piece of the same color. Throw an exception.
                 self.end_move_msg = f'There is another piece blocking the way.'
@@ -611,16 +618,29 @@ class Board():
                         self.end_move_msg = f'There is another piece blocking the way.'
 
                 else:
-                    # Pawn is moving diagonally. Check destination for opposing color piece
-                    # TODO: En passant
-                    if self.board_spaces[next_space].occupying_piece is None \
-                    or pawn_piece.color == self.board_spaces[next_space].occupying_piece.color:
-                        # There's no piece to capture. Raise an exception
-                        self.end_move_msg = f'Pawns can only move diagonally when capturing.'
-                        raise InvalidMoveException()     
-                    else:
-                        # There is a piece to capture. Attempt to move the pawn
+                    # Check for en passant
+                    en_passant_square = self.__is_move_en_passant(pawn_piece, next_space, self.prev_board_states[-1])
+                    
+                    if en_passant_square:
+                        # We need to manually remove the pawn being captured by en passant here
+                        self.pieces.remove(self.board_spaces[en_passant_square].occupying_piece)
+
+                        # Remove the sprite from the list so it no longer is drawn
+                        self.sprite_list.remove(self.board_spaces[en_passant_square].occupying_piece.sprite)
+
+                        # Set valid flag
                         move_is_valid = True
+
+                    else:
+                        # Pawn is moving diagonally. Check destination for opposing color piece
+                        if self.board_spaces[next_space].occupying_piece is None \
+                        or pawn_piece.color == self.board_spaces[next_space].occupying_piece.color:
+                            # There's no piece to capture. Raise an exception
+                            self.end_move_msg = f'Pawns can only move diagonally when capturing.'
+                            raise InvalidMoveException()     
+                        else:
+                            # There is a piece to capture. Attempt to move the pawn
+                            move_is_valid = True
 
                 # TODO: Pawn promotion
 
@@ -1031,33 +1051,83 @@ class Board():
             case _:
                 return None
 
-    #TODO: make board state a class?
+    def __is_move_en_passant(self, pawn_piece:pawn.Pawn, next_space:str, prev_board_state:dict):
+        """
+        Returns space name  to remove pawn from if a move is a valid instance of "En Passant". 
+        En passant is a valid move under the following circumstances.
+            - Previous move was a pawn move forward 2 squares.
+            - Now moving pawn is trying to move diagonally to capture it. 
+
+        Args:
+            pawn_piece: pawn that is trying to perform en passant.
+            next_space: space the pawn is trying to move to
+            prev_board_state: previous board state from save_board_state()
+        """
+
+        direction = 0
+        enemy_curr_space = ''
+        enemy_prev_space = ''
+
+        if prev_board_state == []:
+            # It's the firt turn. En passant is not possible.
+            return None
+
+        if next_space[1] != '3' and next_space[1] != '6':
+            # En passant can only occur on rows 3 and 6
+            return None
+
+        # Determine direction based on pawn color
+        if pawn_piece.color == constants.PlayerColor.WHITE:
+            direction = 1
+
+        else:
+            direction = -1
+
+        # Determine which squares needs checked for oppossing pawn
+        enemy_curr_space = next_space[0] + str(int(next_space[1]) - direction)
+        enemy_prev_space = next_space[0] + str(int(next_space[1]) + direction)
+
+        # En passant check logic:
+        #   1. There is an enemy pawn currently 1 space forward from destination
+        #   2. The space where the pawn previously should have been is empty
+        #   2. On the previous turn, there was a pawn 1 space behind destination
+        #   3. On the previous turn, the current enemy space was empty
+        if isinstance(self.board_spaces[enemy_curr_space].occupying_piece, pawn.Pawn) and \
+           self.board_spaces[enemy_prev_space].occupying_piece is None and \
+           isinstance(prev_board_state[enemy_prev_space], pawn.Pawn) and \
+           enemy_curr_space not in prev_board_state:
+            # En passant is legal. Return the space the enemy pawn is on
+            return enemy_curr_space
+
+        return None
+
     def save_board_state(self):
         """
-        Creates and returns a list of tuples containing each piece on the board and where 
-        it currently is located. Useful for returning the board to a previous state.
+        Returns the current state of the board to be reused later.
 
         Args:
             None
 
         Returns:
-            board_positions: List of tuples containing piece objects and their occupied space name
-                             [(Pawn.pawn, piece.BoardSpace), (Pawn.pawn, piece.BoardSpace)...]
+            board_positions: Dictonary of all board spaces and their associated space objects.
+                             {'A1':rook.Rook, 'A2':bishop.Bishop... }
+
         """
-        board_positions = []
-        for piece in self.pieces:
-            # Add the piece and its current square to the list as a tuple
-            board_positions.append((piece, piece.occupied_square))
+        positions = {}
+        for space in self.board_spaces:
+            if self.board_spaces[space].occupying_piece:
+                # Ignore empty spaces to save on memory 
+                positions[space] = self.board_spaces[space].occupying_piece
 
-        return board_positions
+        return positions
 
-    def restore_board_state(self, board_state):
+    def restore_board_state(self, board_state:dict):
         """
         Restores a board state by moving pieces back to where they were at the time of the board state.
 
         Args:
-            board_state: List of tuples containing pieces and spaces they were on at the time
-                         [(Pawn.pawn, piece.BoardSpace), (Pawn.pawn, piece.BoardSpace)...]
+            board_state: Dictonary containing piece and board space objects
+                         {'A1':rook.Rook, 'A2':bishop.Bishop... }
 
         Returns:
             None
@@ -1066,16 +1136,14 @@ class Board():
         # Clear piece and sprite lists
         self.pieces = []
         self.sprite_list = arcade.SpriteList()
-                
-        for entry in board_state:
-            piece = entry[0]
-            space = entry[1]
 
-            # Update space for each piece
-            piece.update_space(space)
+        for space in board_state:
+            if board_state[space] is not None:
+                # Update space for each piece
+                board_state[space].update_space(self.board_spaces[space])
 
-            # Add back any missing pieces from the pieces list
-            self.pieces.append(piece)
+                # Add back any missing pieces from the pieces list
+                self.pieces.append(board_state[space])
 
-            # Add back any missing sprites from the sprite list
-            self.sprite_list.append(piece.sprite)
+                # Add back any missing sprites from the sprite list
+                self.sprite_list.append(board_state[space].sprite)
