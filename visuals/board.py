@@ -1090,8 +1090,8 @@ class Board():
         # En passant check logic:
         #   1. There is an enemy pawn currently 1 space forward from destination
         #   2. The space where the pawn previously should have been is empty
-        #   2. On the previous turn, there was a pawn 1 space behind destination
-        #   3. On the previous turn, the current enemy space was empty
+        #   3. On the previous turn, there was a pawn 1 space behind destination
+        #   4. On the previous turn, the current enemy space was empty
         if isinstance(self.board_spaces[enemy_curr_space].occupying_piece, pawn.Pawn) and \
            self.board_spaces[enemy_prev_space].occupying_piece is None and \
            isinstance(prev_board_state[enemy_prev_space], pawn.Pawn) and \
