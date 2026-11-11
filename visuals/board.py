@@ -618,16 +618,30 @@ class Board():
                         self.end_move_msg = f'There is another piece blocking the way.'
 
                 else:
-                    # Check for en passant
-                    en_passant_square = self.__is_move_en_passant(pawn_piece, next_space, self.prev_board_states[-1])
+                    if len(self.prev_board_states) > 0:
+                        # Check for en passant
+                        en_passant_square = self.__is_move_en_passant(pawn_piece, next_space, self.prev_board_states[-1])
+                    else:
+                        # Its the first turn. It cannot be en passant
+                        en_passant_square = None
                     
                     if en_passant_square:
-                        # We need to manually remove the pawn being captured by en passant here
+                        # Normally when a a piece moves to capture a piece, it is moving to the
+                        # same square the piece being captured resides. En passant is unique
+                        # in that the pawn moves to an unoccupied square and captures a pawn on
+                        # a different square. __move_piece() was not built to handle this situation,
+                        # so the workaround is to manually remove the pawn being captured by en 
+                        # passant here. This is done below
+
+                        # Remove the captured piece from the list of pieces
                         self.pieces.remove(self.board_spaces[en_passant_square].occupying_piece)
 
                         # Remove the sprite from the list so it no longer is drawn
                         self.sprite_list.remove(self.board_spaces[en_passant_square].occupying_piece.sprite)
 
+                        # Remove reference to piece on the given square
+                        self.board_spaces[en_passant_square].occupying_piece = None
+                        
                         # Set valid flag
                         move_is_valid = True
 
@@ -1067,10 +1081,6 @@ class Board():
         direction = 0
         enemy_curr_space = ''
         enemy_prev_space = ''
-
-        if prev_board_state == []:
-            # It's the firt turn. En passant is not possible.
-            return None
 
         if next_space[1] != '3' and next_space[1] != '6':
             # En passant can only occur on rows 3 and 6
