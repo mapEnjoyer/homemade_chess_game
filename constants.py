@@ -8,6 +8,7 @@ Date: 05/30/26
     This file contains constants intended to be used throughout the project.
 """
 
+from enum import Enum
 from typing import Final
 
 # List of all board spaces as strings
@@ -27,8 +28,8 @@ board_col_labels:Final = ["A", "B", "C", "D", "E", "F", "G", "H"]
 board_row_labels:Final = ["1", "2", "3", "4", "5", "6", "7", "8"]
 
 # Window Constants
-WINDOW_WIDTH = 1920
-WINDOW_HEIGHT = 1080
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
 WINDOW_TITLE = "EAK's Chess Game"
 
 # Piece texture image constants
@@ -59,3 +60,8 @@ queen_image_width = 125
 queen_image_height = 125
 king_image_width = 125
 king_image_height = 125
+
+# Player number enumeration
+class PlayerColor(Enum):
+    WHITE = 0
+    BLACK = 1

@@ -11,7 +11,7 @@ Date: 05/30/26
 import arcade
 import constants
 from pathlib import Path
-from visuals import board
+from visuals import board, move_parser
 
 class GameView(arcade.Window):
     """
@@ -22,6 +22,7 @@ class GameView(arcade.Window):
         - prev_height: Height of the screen when it was last drawn
         - background_color: Color of the background
         - chess_board: Chess board object to display in window
+        - move_parser: Handler for user controlled piece movement
     """
 
     def __init__(self):
@@ -31,6 +32,7 @@ class GameView(arcade.Window):
             - Initializes the saved prev_width/prev_height
             - Sets the background color
             - Initializes the chess board
+            - Initializes the move parser used for move entry
             - Runs setup
 
         Args:
@@ -54,6 +56,9 @@ class GameView(arcade.Window):
 
         # Chess board object
         self.chess_board = board.Board()
+
+        # Create move parser
+        self.move_parser = move_parser.MoveParser(self)
 
         # Run setup
         self.setup()
@@ -104,8 +109,28 @@ class GameView(arcade.Window):
         self.prev_height = self.height
         self.prev_width  = self.width
 
+        if all(val is not None for val in [self.move_parser.piece_type, self.move_parser.cur_space, self.move_parser.new_space]):
+            # Player move was input into move parser. Pass along to board
+            if self.chess_board.handle_move(self.move_parser.piece_type, 
+                                            self.move_parser.cur_space, 
+                                            self.move_parser.new_space,
+                                            self.move_parser._player_turn):
+            
+                # Update player turn based on if move was handled successfully
+                if self.move_parser.player_turn == constants.PlayerColor.WHITE:
+                     self.move_parser.player_turn = constants.PlayerColor.BLACK
+                else:
+                     self.move_parser.player_turn = constants.PlayerColor.WHITE
+    
+            # Clear move parser after move is handled
+            self.move_parser.piece_type = self.move_parser.cur_space = self.move_parser.new_space = None
+
+
         # Draw the chess board
         self.chess_board.draw_board()
+
+        # Draw the text box via the batch
+        self.move_parser.draw_text_box()
         return
 
     def __update_screen_positions(self):
@@ -126,13 +151,14 @@ class GameView(arcade.Window):
     def __update_board_positions(self):
         """
             Updates all positions of the checkerboard squares,
-            row labels and column labels. This is done by allocating
-            a 12x12 grid worth of squares in space starting at the 
-            bottom left hand corner of the screen. Position data
-            is assigned to each of the chess board squares and 
-            labels to have them appear on the screen in the proper
-            location. A 2x2 square border is alloted at the edges
-            of the board to give a margin
+            row labels, column labels, piece sprites and move _x
+            parser text box. This is done by allocating a 12x12 
+            grid worth of squares in space starting at the bottom 
+            left hand corner of the screen. Position data is assigned 
+            to each of the chess board squares and labels to have 
+            them appear on the screen in the proper location. A 2x2 
+            square border is alloted at the edges of the board to 
+            give a margin.
 
         Args:
             None
@@ -167,11 +193,8 @@ class GameView(arcade.Window):
 
         # After space positions are determined, piece sprite locations need updated to match those square locations
         # To do this, call the update_space method of each piece using the square it's already in
-        for piece in self.chess_board.white_pieces:
-            piece.update_space(piece.occupied_square)
-
-        for piece in self.chess_board.black_pieces:
-            piece.update_space(piece.occupied_square)            
+        for piece in self.chess_board.pieces:
+            piece.update_space(piece.occupied_square)          
 
         # Determine row/column label font size (1/4th square size seemed good from testing)
         font_size = square_size / 4 
@@ -195,7 +218,17 @@ class GameView(arcade.Window):
             
             # Row label y position is same as the square to the right shifted by the text shift
             self.chess_board.row_labels[row].y = self.chess_board.board_spaces["A"+row].center_y - text_shift
-            self.chess_board.row_labels[row].font_size = font_size      
+            self.chess_board.row_labels[row].font_size = font_size 
+
+        # Update the move parser text box size and location
+        # Move parser x location should start at last square
+        self.move_parser.text_entry.x = x_pos
+
+        # Move parser y location should be in line with row 1 of chess board
+        self.move_parser.text_entry.y = y_start
+
+        # Move parser width should always be 1/4th of window size
+        self.move_parser.text_entry.width =  self.width/4 
 
         return
 
