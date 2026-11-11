@@ -88,6 +88,7 @@ class Board():
         - game_is_over: boolean indicator on if game is over
         - prev_board_states: list of previous board states, newest states at the end of the list.
         - enable_msgs: boolean flag that enables setting the end_move_msg attribute. Useful during behind the scenes piece movements.
+        - pawn_promoting: boolean flag that indicates a pawn is attempting to promote and input is needed from the player.
     """
 
     def __init__(self):
@@ -118,20 +119,23 @@ class Board():
         self.pieces = []
 
         # Initialize king references (updated in __init_white_pieces/__init_black_pieces)
-        self.white_king = None
-        self.black_king = None
+        self.white_king:king.King = None
+        self.black_king:king.King = None
 
         # Initialize game over flag
         self.game_is_over:bool = False
 
         # Initialize previous board states
-        self.prev_board_states = []
+        self.prev_board_states:list = [dict[str, piece.Piece]]
 
         # Initialize enable msg flag
         self.enable_msgs:bool = True
 
         # Initialize move end message
-        self.end_move_msg = ''
+        self.end_move_msg:str = ''
+
+        # Initialize the pawn promotion flag
+        self.pawn_promoting:bool = False
 
         # Initialize chess board squares
         self.__init_squares()
@@ -462,6 +466,12 @@ class Board():
                     # Set piece_moved flag for both the function return and the piece
                     piece_moved = piece.has_moved = True
 
+                    # Check if a pawn promotion is occuring
+                    if isinstance(piece, pawn.Pawn):
+                        if (piece.color == constants.PlayerColor.WHITE and piece.occupied_square.square_row == '8') or \
+                           (piece.color == constants.PlayerColor.BLACK and piece.occupied_square.square_row == '1'):
+                            self.pawn_promoting = True
+
         except Exception:
             pass
 
@@ -594,10 +604,7 @@ class Board():
             if piece_to_cap is None or piece_to_move.color != piece_to_cap.color:
                 if piece_to_cap is not None:
                     # Remove the piece from the game
-                    self.pieces.remove(piece_to_cap)
-
-                    # Remove the sprite from the list so it no longer is drawn
-                    self.sprite_list.remove(piece_to_cap.sprite)
+                    self.__remove_piece(piece_to_cap)
 
                 # Move the piece to the new space
                 piece_to_move.update_space(self.board_spaces[next_space])
@@ -691,15 +698,7 @@ class Board():
                         # a different square. __move_piece() was not built to handle this situation,
                         # so the workaround is to manually remove the pawn being captured by en 
                         # passant here. This is done below
-
-                        # Remove the captured piece from the list of pieces
-                        self.pieces.remove(self.board_spaces[en_passant_square].occupying_piece)
-
-                        # Remove the sprite from the list so it no longer is drawn
-                        self.sprite_list.remove(self.board_spaces[en_passant_square].occupying_piece.sprite)
-
-                        # Remove reference to piece on the given square
-                        self.board_spaces[en_passant_square].occupying_piece = None
+                        self.__remove_piece(self.board_spaces[en_passant_square].occupying_piece)
                         
                         # Set valid flag
                         move_is_valid = True
@@ -714,8 +713,6 @@ class Board():
                         else:
                             # There is a piece to capture. Attempt to move the pawn
                             move_is_valid = True
-
-                # TODO: Pawn promotion
 
             else:
                 # Pawn move invalid. Raise an exception
@@ -1170,6 +1167,28 @@ class Board():
 
         return None
 
+    def __remove_piece(self, piece_to_remove:piece.Piece):
+        """
+        Removes a piece from the game by cutting any references to it.
+
+        Args:
+            piece_to_remove: Piece to remove from the game
+
+        Returns:
+            None
+        """
+
+        # Remove reference to piece on the given square
+        self.board_spaces[piece_to_remove.occupied_square.name].occupying_piece = None
+
+        # Remove the captured piece from the list of pieces
+        self.pieces.remove(piece_to_remove)
+
+        # Remove the sprite from the list so it no longer is drawn
+        self.sprite_list.remove(piece_to_remove.sprite)
+
+        return
+
     def save_board_state(self):
         """
         Returns the current state of the board to be reused later.
@@ -1216,3 +1235,36 @@ class Board():
 
                 # Add back any missing sprites from the sprite list
                 self.sprite_list.append(board_state[space].sprite)
+
+    def promote_pawn(self, pawn_to_promo:pawn.Pawn, promo_type):
+        """
+        Method to promote a pawn to a new piece type. Pawns cannot promote
+        to pawns.
+
+        Args:
+            pawn_to_promo: Pawn to be promoted
+            promo_type: Piece type to promote to
+
+        Returns:
+            pawn_promoted: boolean indicator that the pawn promoted successfully
+        """
+        pawn_promoted:bool = False
+        
+        if promo_type == pawn.Pawn or promo_type == king.King:
+            # Can't promote a pawn to a pawn or king
+            return pawn_promoted
+
+        # Save the name and color of the square the pawn currently occupies
+        square_name = pawn_to_promo.occupied_square.name
+        color = pawn_to_promo.color
+
+        # Remove the promoted pawn from the game
+        self.__remove_piece(pawn_to_promo)
+
+        # Create a new piece of the piece type on the square
+        new_piece = promo_type(self.board_spaces[square_name], color)
+        
+        # Add the piece and sprites to the list
+        self.pieces.append(new_piece)
+        self.sprite_list.append(new_piece.sprite)
+
