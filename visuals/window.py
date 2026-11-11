@@ -121,6 +121,11 @@ class GameView(arcade.Window):
                      self.move_parser.player_turn = constants.PlayerColor.BLACK
                 else:
                      self.move_parser.player_turn = constants.PlayerColor.WHITE
+
+                # TODO: Pawn promotion?
+
+                # Check for game over
+                self.chess_board.check_game_over(self.move_parser.player_turn)
     
             # Clear move parser after move is handled
             self.move_parser.piece_type = self.move_parser.cur_space = self.move_parser.new_space = None

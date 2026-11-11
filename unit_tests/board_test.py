@@ -1449,6 +1449,7 @@ def test_game_over_white():
 
     # Slide the F2 rook to H2 which will ladder mate the black king
     assert game_window.chess_board.handle_move(rook.Rook, 'F2', 'H2', constants.PlayerColor.WHITE)
+    game_window.chess_board.check_game_over(constants.PlayerColor.BLACK)
     assert game_window.chess_board.game_is_over
 
 def test_game_over_black():
@@ -1475,4 +1476,5 @@ def test_game_over_black():
 
     # Slide the C7 rook to A7 which will ladder mate the black king
     assert game_window.chess_board.handle_move(rook.Rook, 'C7', 'A7', constants.PlayerColor.BLACK)
+    game_window.chess_board.check_game_over(constants.PlayerColor.WHITE)
     assert game_window.chess_board.game_is_over

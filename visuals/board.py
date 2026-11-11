@@ -87,6 +87,7 @@ class Board():
         - black_king: reference to black king in pieces list
         - game_is_over: boolean indicator on if game is over
         - prev_board_states: list of previous board states, newest states at the end of the list.
+        - enable_msgs: boolean flag that enables setting the end_move_msg attribute. Useful during behind the scenes piece movements.
     """
 
     def __init__(self):
@@ -116,9 +117,6 @@ class Board():
         # List containing all pieces on board
         self.pieces = []
 
-        # Initialize move end message
-        self.end_move_msg = ''
-
         # Initialize king references (updated in __init_white_pieces/__init_black_pieces)
         self.white_king = None
         self.black_king = None
@@ -128,6 +126,12 @@ class Board():
 
         # Initialize previous board states
         self.prev_board_states = []
+
+        # Initialize enable msg flag
+        self.enable_msgs:bool = True
+
+        # Initialize move end message
+        self.end_move_msg = ''
 
         # Initialize chess board squares
         self.__init_squares()
@@ -145,6 +149,34 @@ class Board():
         self.init_sprites()
 
         return
+    
+    @property
+    def end_move_msg(self):
+        """
+        Method to get player turn.
+
+        Args:
+            None
+
+        Returns:
+            player_turn: Color of the player who's turn it is. Can be WHITE or BLACK.              
+        """
+        return self._end_move_msg
+    
+    @end_move_msg.setter
+    def end_move_msg(self, msg:str):
+        """
+        Set end move message. Attribute can only be set if enable_msgs attribute is True.
+
+        Args:
+            msg: string end move message
+
+        Returns:
+            None
+        """
+        if self.enable_msgs:
+            self._end_move_msg = msg
+
 
     def __init_squares(self):
         """
@@ -430,37 +462,6 @@ class Board():
                     # Set piece_moved flag for both the function return and the piece
                     piece_moved = piece.has_moved = True
 
-                    # Run check handler for king of opposite color to notify next player their king is in check
-                    match player_turn:
-                        case constants.PlayerColor.BLACK:
-                            # Get white king
-                            king_piece = self.__get_king(constants.PlayerColor.WHITE)
-                        case constants.PlayerColor.WHITE:
-                            # Get black king
-                            king_piece = self.__get_king(constants.PlayerColor.BLACK)
-                        case _:
-                            self.end_move_msg = f'How did the player color even do this?'
-                            raise InvalidMoveException()
-                        
-                    # Get active checks for this king
-                    active_checks = self.__determine_checks(king_piece.occupied_square.name, king_piece)
-
-                    if self.__game_over(king_piece, active_checks):
-                        # TODO: Enemy king is in check. If there are no moves that can stop the check, the game is over.
-                        self.game_is_over = True
-                        print('game over!')
-
-                    elif active_checks and king_piece.color == constants.PlayerColor.WHITE:
-                        # Set end of move msg 
-                        self.end_move_msg = f'The white king is in check!'
-
-                    elif active_checks and king_piece.color == constants.PlayerColor.BLACK:
-                        # Set end of move msg 
-                        self.end_move_msg = f'The black king is in check!'
-                    
-                    else:
-                        # No message to send to next player
-                        self.end_move_msg = ''
         except Exception:
             pass
 
@@ -470,6 +471,54 @@ class Board():
                 print(self.end_move_msg)
 
         return piece_moved
+
+    def check_game_over(self, player_turn:constants.PlayerColor):
+        """
+        High level method to check for game over. Should be called after a move is resolved.
+
+        Args:
+            player_turn: Player whose turn it is. King of the same color will be checked. 
+
+        Returns:
+            None
+        """
+        # Get king
+        king_piece = self.__get_king(player_turn)
+
+        # Turn off messaging
+        self.enable_msgs = False
+            
+        # Get active checks for this king
+        active_checks = self.__determine_checks(king_piece.occupied_square.name, king_piece)
+
+        # Check for game over
+        game_over = self.__game_over(king_piece, active_checks)
+
+        # Turn messaging back on
+        self.enable_msgs = True
+        
+        if game_over: 
+            # Enemy king is in check. If there are no moves that can stop the check, the game is over.
+            self.game_is_over = True
+            print('game over!')
+
+        elif active_checks and king_piece.color == constants.PlayerColor.WHITE:
+            # Set end of move msg 
+            self.end_move_msg = f'The white king is in check!'
+
+        elif active_checks and king_piece.color == constants.PlayerColor.BLACK:
+            # Set end of move msg 
+            self.end_move_msg = f'The black king is in check!'
+        
+        else:
+            # No message to send to next player
+            self.end_move_msg = ''
+
+        if self.end_move_msg:
+            # Print a message to the user regarding how the move went
+            print(self.end_move_msg)
+
+        return
 
     def __get_move_is_valid(self, piece_type, start_space:str, next_space:str):
         """
@@ -557,7 +606,17 @@ class Board():
                 # If the move would put the king into check, we have to reverse it and
                 # deny the move.
                 king_piece = self.__get_king(piece_to_move.color)
-                if self.__determine_checks(king_piece.occupied_square.name, king_piece):
+
+                # Suppress messaging
+                self.enable_msgs = False
+
+                # Look for king checks
+                king_in_check = self.__determine_checks(king_piece.occupied_square.name, king_piece)
+
+                # Turn messaging back on
+                self.enable_msgs = True
+
+                if king_in_check:
                     # This move would put the king in check. Undo it by 
                     # reverting the board state and throwing an exception
                     self.restore_board_state(prev_board_state)
