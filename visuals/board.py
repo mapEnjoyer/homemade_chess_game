@@ -1226,8 +1226,8 @@ class Board():
         self.pieces = []
         self.sprite_list = arcade.SpriteList()
 
-        for space in board_state:
-            if board_state[space] is not None:
+        for space in constants.space_names:
+            if space in board_state:
                 # Found in testing that leaving the occupied_square reference pointing
                 # to another space before calling update_space can interfere with properly 
                 # reloading a board state.
@@ -1249,6 +1249,10 @@ class Board():
 
                 # Add back any missing sprites from the sprite list
                 self.sprite_list.append(board_state[space].sprite)
+
+            else:
+                # Clear any potential reference of a piece on this square
+                self.board_spaces[space].occupying_piece = None
 
     def promote_pawn(self, pawn_to_promo:pawn.Pawn, promo_type):
         """

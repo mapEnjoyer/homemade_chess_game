@@ -60,6 +60,9 @@ class GameView(arcade.Window):
         # Create move parser
         self.move_parser = move_parser.MoveParser(self)
 
+        # Assign window "on click" method to our own method
+        self.on_mouse_press = self.parse_mouse_press
+
         # Run setup
         self.setup()
 
@@ -151,6 +154,58 @@ class GameView(arcade.Window):
 
         # Draw the text box via the batch
         self.move_parser.draw_text_box()
+        return
+
+    def parse_mouse_press(self, x: int, y: int, button: int, modifiers: int):
+        """
+        Handler for mouse button press. Player moves with the mouse are as follows:
+            1. Player clicks on a piece matching their color
+            2. Next click determines where the piece is going.
+
+        Args:
+            x: int - x position on screen where mouse was clicked
+            y: int - y position on screen where mouse was clicked
+            button: int - contains which buttons were pressed. Only LEFT and RIGHT are used
+            modifiers: int - unused
+        """
+        print(f'pressed! x={x}, y={y}, button={button}, modifiers={modifiers}')
+
+        col_final = None
+        row_final = None
+
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            # Determine which row the player clicked in
+            for row in constants.board_row_labels:
+                if y >= (self.chess_board.board_spaces['A' + row].center_y - self.chess_board.board_spaces['A' + row].length/2) and \
+                   y <= (self.chess_board.board_spaces['A' + row].center_y + self.chess_board.board_spaces['A' + row].length/2):
+                    # Click was in this column
+                    row_final = row
+                    break
+
+            # Determine which column the player clicked in
+            for col in constants.board_col_labels:
+                if x >= (self.chess_board.board_spaces[col + '1'].center_x - self.chess_board.board_spaces[col + '1'].length/2) and \
+                   x <= (self.chess_board.board_spaces[col + '1'].center_x + self.chess_board.board_spaces[col + '1'].length/2):
+                    # Click was in this column
+                    col_final = col
+                    break
+
+        if not row_final or not col_final or button == arcade.MOUSE_BUTTON_RIGHT:
+            # Player did not click on the chess board or right clicked. Clear move parser selection
+            self.move_parser.cur_space = None
+            self.move_parser.new_space = None
+            self.move_parser.piece_type = None
+            return
+
+        elif not self.move_parser.cur_space and not self.move_parser.piece_type:
+            # Must be the first click. Set the current space and piece type
+            self.move_parser.cur_space = col_final+row_final
+            self.move_parser.piece_type = type(self.chess_board.board_spaces[col_final+row_final].occupying_piece)
+
+        else:
+            # Must be the second click. Set the destination space
+            self.move_parser.new_space = col_final+row_final
+
         return
 
     def __update_screen_positions(self):
