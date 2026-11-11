@@ -1138,8 +1138,9 @@ class Board():
         enemy_curr_space = ''
         enemy_prev_space = ''
 
-        if next_space[1] != '3' and next_space[1] != '6':
-            # En passant can only occur on rows 3 and 6
+        if pawn_piece.color == constants.PlayerColor.WHITE and next_space[1] != '6'  or \
+           pawn_piece.color == constants.PlayerColor.BLACK and next_space[1] != '3':
+            # En passant can only occur on rows 3 and 6 based on color
             return None
 
         # Determine direction based on pawn color
@@ -1227,6 +1228,19 @@ class Board():
 
         for space in board_state:
             if board_state[space] is not None:
+                # Found in testing that leaving the occupied_square reference pointing
+                # to another space before calling update_space can interfere with properly 
+                # reloading a board state.
+                
+                # If a king had a valid way out of check by capturing the piece checking 
+                # it, upon moving the capturing piece back where it originally was, the
+                # square it is leaving from would think it was empty, but the checking piece 
+                # would beleive it was still there. This is because update_space() sets the 
+                # occupying_piece of the square the piece is moving from to None. By 
+                # forcing the occupied_square attribute to None before calling update_space()
+                # we avoid this issue. 
+                board_state[space].occupied_square = None
+
                 # Update space for each piece
                 board_state[space].update_space(self.board_spaces[space])
 
