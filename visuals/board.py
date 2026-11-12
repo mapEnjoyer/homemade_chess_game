@@ -154,34 +154,6 @@ class Board():
         self.init_sprites()
 
         return
-    
-    @property
-    def end_move_msg(self):
-        """
-        Method to get player turn.
-
-        Args:
-            None
-
-        Returns:
-            player_turn: Color of the player who's turn it is. Can be WHITE or BLACK.              
-        """
-        return self._end_move_msg
-    
-    @end_move_msg.setter
-    def end_move_msg(self, msg:str):
-        """
-        Set end move message. Attribute can only be set if enable_msgs attribute is True.
-
-        Args:
-            msg: string end move message
-
-        Returns:
-            None
-        """
-        if self.enable_msgs:
-            self._end_move_msg = msg
-
 
     def __init_squares(self):
         """
@@ -360,211 +332,6 @@ class Board():
         self.pieces.append(self.black_king)      
 
         return
-    
-    def init_sprites(self):
-        """
-        Initializes the sprite list by adding all piece sprites to the sprite list.
-
-        Args: 
-            None
-
-        Returns:
-            None    
-        """
-        # Clear the sprite list
-        self.sprite_list = arcade.SpriteList()
-
-        # Add each piece's sprite 
-        for piece in self.pieces:
-            self.sprite_list.append(piece.sprite)
-
-    def clear_board(self):
-        """
-        Clears the board post initialization by performing the following steps:
-            - Clearing all pieces from the piece list
-            - removing all references to pieces from each space
-
-        Args: 
-            None
-
-        Returns:
-            None    
-        """
-        # Clear pieces list
-        self.pieces = []
-
-        # Set all board space "occupying piece" attributes to None
-        for space in constants.space_names:
-            self.board_spaces[space].occupying_piece = None
-
-        # Clear king references
-        self.white_king = None
-        self.black_king = None
-
-    def draw_board(self):
-        """ 
-        Draws the chess board on screen by drawing each square,
-        row and column label based on set positions.
-
-        Args: 
-            None
-
-        Returns:
-            None    
-        """
-        for space in self.board_spaces:
-            # Draw the square on the screen
-            self.board_spaces[space].draw_square()
-
-        # Draw the column labels
-        for col in self.col_labels:
-            self.col_labels[col].draw()
-
-        # Draw the row labels
-        for row in self.row_labels:
-            self.row_labels[row].draw()
-
-        # Draw the pieces
-        self.sprite_list.draw()
-
-        return
-    
-    def handle_move(self, piece_type, curr_space:str, next_space:str, player_turn:constants.PlayerColor):
-        """
-        Handles incoming move by first determining if move is possible. If so,
-        the piece is moved to that square, resolving any captures at the destination.
-
-        Args: 
-            piece_type: type of piece being moved. Valid piece tpyes include:
-                - Pawn
-                - Rook
-                - Knight
-                - Bishop
-                - Queen
-                - King
-
-            curr_space: space to start from. Space must match one of the spaces found in constants.space_names
-            next_space: space to move to. Space must match one of the spaces found in constants.space_names
-
-        Returns:
-            piece_moved: Boolean indicator True if piece moved, False otherwise   
-        """
-        piece_moved = False
-
-        # Clear the msg
-        self.end_move_msg = ''
-        
-        try:
-            # Check that piece type is valid
-            if piece_type not in valid_piece_types:
-                # raise exception indicating the piece type is not valid
-                self.end_move_msg = f'Piece type does not exist.'
-                raise InvalidMoveException()       
-
-            # Check that starting square is valid
-            if curr_space not in constants.space_names:
-                # raise exception indicating the starting space does not exist
-                self.end_move_msg = f'Starting space does not exist.'
-                raise InvalidMoveException()     
-
-            # Check that next square is valid
-            if next_space not in constants.space_names:
-                # raise exception indicating destination space does not exist
-                self.end_move_msg = f'Destination space does not exist.'
-                raise InvalidMoveException()     
-            
-            # Set piece we are working with
-            piece = self.board_spaces[curr_space].occupying_piece
-            
-            if piece is None:
-                # No piece to move on that square. Raise an exception
-                self.end_move_msg = f'No piece to move.'
-                raise InvalidMoveException()
-            
-            if not isinstance(piece, piece_type):
-                # Piece on the square does not match the command. Raise an exception
-                self.end_move_msg = f'Wrong piece type.'
-                raise InvalidMoveException()
-
-            # Check that the piece being moved is the right color
-            if piece.color != player_turn:
-                # raise exception indicating the player is interacting with the wrong color pieces
-                self.end_move_msg = f'Wrong color piece.'
-                raise InvalidMoveException()
-
-            # Check if move is valid 
-            if self.__get_move_is_valid(piece_type, curr_space, next_space):
-                # Move the piece
-                if self.__move_piece(self.board_spaces[curr_space].occupying_piece, curr_space, next_space):
-                    # Set piece_moved flag for both the function return and the piece
-                    piece_moved = piece.has_moved = True
-
-                    # Check if a pawn promotion is occuring
-                    if isinstance(piece, pawn.Pawn):
-                        if (piece.color == constants.PlayerColor.WHITE and next_space[1] == '8') or \
-                           (piece.color == constants.PlayerColor.BLACK and next_space[1] == '1'):
-                            self.pawn_promoting = True
-
-        except InvalidMoveException:
-            pass
-
-        except Exception:
-            raise Exception('something went wrong in handle_move()')
-
-        finally:
-            if self.end_move_msg:
-                # Print a message to the user regarding how the move went
-                print(self.end_move_msg)
-
-        return piece_moved
-
-    def check_game_over(self, player_turn:constants.PlayerColor, curr_space:str):
-        """
-        High level method to check for game over. Should be called after a move is resolved.
-
-        Args:
-            player_turn: Player whose turn it is. King of the same color will be checked. 
-            curr_space: Space to look for king checks on
-        Returns:
-            None
-        """
-        # Get king
-        king_piece = self.get_king(player_turn)
-
-        # Turn off messaging
-        self.enable_msgs = False
-            
-        # Get active checks for this king
-        active_checks = self.__determine_checks(curr_space, king_piece)
-
-        # Check for game over
-        game_over = self.__game_over(king_piece, curr_space, active_checks)
-
-        # Turn messaging back on
-        self.enable_msgs = True
-        
-        if game_over: 
-            # Enemy king is in check. If there are no moves that can stop the check, the game is over.
-            self.game_is_over = True
-            print('game over!')
-
-        elif active_checks and king_piece.color == constants.PlayerColor.WHITE:
-            # Set end of move msg 
-            self.end_move_msg = f'The white king is in check!'
-
-        elif active_checks and king_piece.color == constants.PlayerColor.BLACK:
-            # Set end of move msg 
-            self.end_move_msg = f'The black king is in check!'
-        
-        else:
-            # No message to send to next player
-            self.end_move_msg = ''
-
-        if self.end_move_msg:
-            # Print a message to the user regarding how the move went
-            print(self.end_move_msg)
-
-        return
 
     def __get_move_is_valid(self, piece_type, curr_space:str, next_space:str):
         """
@@ -654,14 +421,8 @@ class Board():
                 # deny the move.
                 king_piece = self.get_king(piece_to_move.color)
 
-                # Suppress messaging
-                self.enable_msgs = False
-
                 # Look for king checks
                 king_in_check = self.__determine_checks(self.get_piece_space(king_piece), king_piece)
-
-                # Turn messaging back on
-                self.enable_msgs = True
 
                 if king_in_check:
                     # This move would put the king in check. Undo it by 
@@ -981,6 +742,75 @@ class Board():
             pass
 
         return move_is_valid
+
+    def __is_move_en_passant(self, pawn_piece:pawn.Pawn, next_space:str, prev_board_state:dict):
+        """
+        Returns space name  to remove pawn from if a move is a valid instance of "En Passant". 
+        En passant is a valid move under the following circumstances.
+            - Previous move was a pawn move forward 2 squares.
+            - Now moving pawn is trying to move diagonally to capture it. 
+
+        Args:
+            pawn_piece: pawn that is trying to perform en passant.
+            next_space: space the pawn is trying to move to
+            prev_board_state: previous board state from save_board_state()
+        """
+
+        direction = 0
+        enemy_curr_space = ''
+        enemy_prev_space = ''
+
+        if pawn_piece.color == constants.PlayerColor.WHITE and next_space[1] != '6'  or \
+           pawn_piece.color == constants.PlayerColor.BLACK and next_space[1] != '3':
+            # En passant can only occur on rows 3 and 6 based on color
+            return None
+
+        # Determine direction based on pawn color
+        if pawn_piece.color == constants.PlayerColor.WHITE:
+            direction = 1
+
+        else:
+            direction = -1
+
+        # Determine which squares needs checked for oppossing pawn
+        enemy_curr_space = next_space[0] + str(int(next_space[1]) - direction)
+        enemy_prev_space = next_space[0] + str(int(next_space[1]) + direction)
+
+        # En passant check logic:
+        #   1. There is an enemy pawn currently 1 space forward from destination
+        #   2. The space where the pawn previously should have been is empty
+        #   3. On the previous turn, there was a pawn 1 space behind destination
+        #   4. On the previous turn, the current enemy space was empty
+        if isinstance(self.board_spaces[enemy_curr_space].occupying_piece, pawn.Pawn) and \
+           self.board_spaces[enemy_prev_space].occupying_piece is None and \
+           isinstance(prev_board_state[enemy_prev_space], pawn.Pawn) and \
+           enemy_curr_space not in prev_board_state:
+            # En passant is legal. Return the space the enemy pawn is on
+            return enemy_curr_space
+
+        return None
+
+    def __remove_piece(self, piece_to_remove:piece.Piece, space_name:str):
+        """
+        Removes a piece from the game by cutting any references to it.
+
+        Args:
+            piece_to_remove: Piece to remove from the game
+            space_name: Name of space the piece is being removed from
+        Returns:
+            None
+        """
+
+        # Remove reference to piece on the given square
+        self.board_spaces[space_name].remove_occupying_piece()
+
+        # Remove the captured piece from the list of pieces
+        self.pieces.remove(piece_to_remove)
+
+        # Remove the sprite from the list so it no longer is drawn
+        self.sprite_list.remove(piece_to_remove.sprite)
+
+        return
     
     def __check_collisions(self, curr_space:str, nxt_space:str):
         """
@@ -1073,6 +903,9 @@ class Board():
 
         # Overarching plan see if any enemy piece can get to the space in question
 
+        # Suppress messaging
+        self.enable_msgs = False
+
         try:
             # Clear list of king checks
             king_checks = []
@@ -1084,6 +917,9 @@ class Board():
 
         except Exception:
             pass
+
+        # Turn messaging back on
+        self.enable_msgs = True
         
         return king_checks
 
@@ -1103,6 +939,10 @@ class Board():
         Returns:
             game_is_over: boolean True if game is over, false otherwise
         """
+
+        # Suppress messaging
+        self.enable_msgs = False
+
         if active_checks:
             # Assume game is over until proven otherwise
             game_is_over = True
@@ -1151,8 +991,237 @@ class Board():
         else:
             # Game can't be over if the king is not in check
             game_is_over = False
-            
+
+        # Turn messaging back on
+        self.enable_msgs = True
+
         return game_is_over
+    
+    @property
+    def end_move_msg(self):
+        """
+        Method to get player turn.
+
+        Args:
+            None
+
+        Returns:
+            player_turn: Color of the player who's turn it is. Can be WHITE or BLACK.              
+        """
+        return self._end_move_msg
+    
+    @end_move_msg.setter
+    def end_move_msg(self, msg:str):
+        """
+        Set end move message. Attribute can only be set if enable_msgs attribute is True.
+
+        Args:
+            msg: string end move message
+
+        Returns:
+            None
+        """
+        if self.enable_msgs:
+            self._end_move_msg = msg
+    
+    def init_sprites(self):
+        """
+        Initializes the sprite list by adding all piece sprites to the sprite list.
+
+        Args: 
+            None
+
+        Returns:
+            None    
+        """
+        # Clear the sprite list
+        self.sprite_list = arcade.SpriteList()
+
+        # Add each piece's sprite 
+        for piece in self.pieces:
+            self.sprite_list.append(piece.sprite)
+
+    def clear_board(self):
+        """
+        Clears the board post initialization by performing the following steps:
+            - Clearing all pieces from the piece list
+            - removing all references to pieces from each space
+
+        Args: 
+            None
+
+        Returns:
+            None    
+        """
+        # Clear pieces list
+        self.pieces = []
+
+        # Set all board space "occupying piece" attributes to None
+        for space in constants.space_names:
+            self.board_spaces[space].occupying_piece = None
+
+        # Clear king references
+        self.white_king = None
+        self.black_king = None
+
+    def draw_board(self):
+        """ 
+        Draws the chess board on screen by drawing each square,
+        row and column label based on set positions.
+
+        Args: 
+            None
+
+        Returns:
+            None    
+        """
+        for space in self.board_spaces:
+            # Draw the square on the screen
+            self.board_spaces[space].draw_square()
+
+        # Draw the column labels
+        for col in self.col_labels:
+            self.col_labels[col].draw()
+
+        # Draw the row labels
+        for row in self.row_labels:
+            self.row_labels[row].draw()
+
+        # Draw the pieces
+        self.sprite_list.draw()
+
+        return
+    
+    def handle_move(self, piece_type, curr_space:str, next_space:str, player_turn:constants.PlayerColor):
+        """
+        Handles incoming move by first determining if move is possible. If so,
+        the piece is moved to that square, resolving any captures at the destination.
+
+        Args: 
+            piece_type: type of piece being moved. Valid piece tpyes include:
+                - Pawn
+                - Rook
+                - Knight
+                - Bishop
+                - Queen
+                - King
+
+            curr_space: space to start from. Space must match one of the spaces found in constants.space_names
+            next_space: space to move to. Space must match one of the spaces found in constants.space_names
+
+        Returns:
+            piece_moved: Boolean indicator True if piece moved, False otherwise   
+        """
+        piece_moved = False
+
+        # Clear the msg
+        self.end_move_msg = ''
+        
+        try:
+            # Check that piece type is valid
+            if piece_type not in valid_piece_types:
+                # raise exception indicating the piece type is not valid
+                self.end_move_msg = f'Piece type does not exist.'
+                raise InvalidMoveException()       
+
+            # Check that starting square is valid
+            if curr_space not in constants.space_names:
+                # raise exception indicating the starting space does not exist
+                self.end_move_msg = f'Starting space does not exist.'
+                raise InvalidMoveException()     
+
+            # Check that next square is valid
+            if next_space not in constants.space_names:
+                # raise exception indicating destination space does not exist
+                self.end_move_msg = f'Destination space does not exist.'
+                raise InvalidMoveException()     
+            
+            # Set piece we are working with
+            piece = self.board_spaces[curr_space].occupying_piece
+            
+            if piece is None:
+                # No piece to move on that square. Raise an exception
+                self.end_move_msg = f'No piece to move.'
+                raise InvalidMoveException()
+            
+            if not isinstance(piece, piece_type):
+                # Piece on the square does not match the command. Raise an exception
+                self.end_move_msg = f'Wrong piece type.'
+                raise InvalidMoveException()
+
+            # Check that the piece being moved is the right color
+            if piece.color != player_turn:
+                # raise exception indicating the player is interacting with the wrong color pieces
+                self.end_move_msg = f'Wrong color piece.'
+                raise InvalidMoveException()
+
+            # Check if move is valid 
+            if self.__get_move_is_valid(piece_type, curr_space, next_space):
+                # Move the piece
+                if self.__move_piece(self.board_spaces[curr_space].occupying_piece, curr_space, next_space):
+                    # Set piece_moved flag for both the function return and the piece
+                    piece_moved = piece.has_moved = True
+
+                    # Check if a pawn promotion is occuring
+                    if isinstance(piece, pawn.Pawn):
+                        if (piece.color == constants.PlayerColor.WHITE and next_space[1] == '8') or \
+                           (piece.color == constants.PlayerColor.BLACK and next_space[1] == '1'):
+                            self.pawn_promoting = True
+
+        except InvalidMoveException:
+            pass
+
+        except Exception:
+            raise Exception('something went wrong in handle_move()')
+
+        finally:
+            if self.end_move_msg:
+                # Print a message to the user regarding how the move went
+                print(self.end_move_msg)
+
+        return piece_moved
+
+    def check_game_over(self, player_turn:constants.PlayerColor, curr_space:str):
+        """
+        High level method to check for game over. Should be called after a move is resolved.
+
+        Args:
+            player_turn: Player whose turn it is. King of the same color will be checked. 
+            curr_space: Space to look for king checks on
+        Returns:
+            None
+        """
+        # Get king
+        king_piece = self.get_king(player_turn)
+            
+        # Get active checks for this king
+        active_checks = self.__determine_checks(curr_space, king_piece)
+
+        # Check for game over
+        game_over = self.__game_over(king_piece, curr_space, active_checks)
+        
+        if game_over: 
+            # Enemy king is in check. If there are no moves that can stop the check, the game is over.
+            self.game_is_over = True
+            print('game over!')
+
+        elif active_checks and king_piece.color == constants.PlayerColor.WHITE:
+            # Set end of move msg 
+            self.end_move_msg = f'The white king is in check!'
+
+        elif active_checks and king_piece.color == constants.PlayerColor.BLACK:
+            # Set end of move msg 
+            self.end_move_msg = f'The black king is in check!'
+        
+        else:
+            # No message to send to next player
+            self.end_move_msg = ''
+
+        if self.end_move_msg:
+            # Print a message to the user regarding how the move went
+            print(self.end_move_msg)
+
+        return
 
     def get_king(self, color:constants.PlayerColor):
         """
@@ -1185,75 +1254,6 @@ class Board():
         for space in constants.space_names:
             if self.board_spaces[space].occupying_piece == piece_to_find:
                 return space
-
-    def __is_move_en_passant(self, pawn_piece:pawn.Pawn, next_space:str, prev_board_state:dict):
-        """
-        Returns space name  to remove pawn from if a move is a valid instance of "En Passant". 
-        En passant is a valid move under the following circumstances.
-            - Previous move was a pawn move forward 2 squares.
-            - Now moving pawn is trying to move diagonally to capture it. 
-
-        Args:
-            pawn_piece: pawn that is trying to perform en passant.
-            next_space: space the pawn is trying to move to
-            prev_board_state: previous board state from save_board_state()
-        """
-
-        direction = 0
-        enemy_curr_space = ''
-        enemy_prev_space = ''
-
-        if pawn_piece.color == constants.PlayerColor.WHITE and next_space[1] != '6'  or \
-           pawn_piece.color == constants.PlayerColor.BLACK and next_space[1] != '3':
-            # En passant can only occur on rows 3 and 6 based on color
-            return None
-
-        # Determine direction based on pawn color
-        if pawn_piece.color == constants.PlayerColor.WHITE:
-            direction = 1
-
-        else:
-            direction = -1
-
-        # Determine which squares needs checked for oppossing pawn
-        enemy_curr_space = next_space[0] + str(int(next_space[1]) - direction)
-        enemy_prev_space = next_space[0] + str(int(next_space[1]) + direction)
-
-        # En passant check logic:
-        #   1. There is an enemy pawn currently 1 space forward from destination
-        #   2. The space where the pawn previously should have been is empty
-        #   3. On the previous turn, there was a pawn 1 space behind destination
-        #   4. On the previous turn, the current enemy space was empty
-        if isinstance(self.board_spaces[enemy_curr_space].occupying_piece, pawn.Pawn) and \
-           self.board_spaces[enemy_prev_space].occupying_piece is None and \
-           isinstance(prev_board_state[enemy_prev_space], pawn.Pawn) and \
-           enemy_curr_space not in prev_board_state:
-            # En passant is legal. Return the space the enemy pawn is on
-            return enemy_curr_space
-
-        return None
-
-    def __remove_piece(self, piece_to_remove:piece.Piece, space_name:str):
-        """
-        Removes a piece from the game by cutting any references to it.
-
-        Args:
-            piece_to_remove: Piece to remove from the game
-            space_name: Name of space the piece is being removed from
-        Returns:
-            None
-        """
-
-        # Remove reference to piece on the given square
-        self.board_spaces[space_name].remove_occupying_piece()
-
-        # Remove the captured piece from the list of pieces
-        self.pieces.remove(piece_to_remove)
-
-        # Remove the sprite from the list so it no longer is drawn
-        self.sprite_list.remove(piece_to_remove.sprite)
-
-        return
 
     def save_board_state(self):
         """
