@@ -386,8 +386,8 @@ def test_pawn_promotion(promo_type):
     game_window.move_parser.pawn_promotion_type = promo_type
     game_window.move_parser.new_space = 'H8'
 
-    # Call window on_draw() to complete promo
-    game_window.on_draw()
+    # Call window on_update() to complete promo
+    game_window.on_update(0)
     assert game_window.chess_board.pawn_promoting == False
     assert game_window.move_parser.pawn_promoting == False
     assert game_window.move_parser.pawn_promotion_type == None
@@ -402,8 +402,8 @@ def test_pawn_promotion(promo_type):
     game_window.move_parser.pawn_promotion_type = promo_type
     game_window.move_parser.new_space = 'H1'
 
-    # Call window on_draw() to complete promo
-    game_window.on_draw()
+    # Call window on_update() to complete promo
+    game_window.on_update(0)
     assert game_window.chess_board.pawn_promoting == False
     assert game_window.move_parser.pawn_promoting == False
     assert game_window.move_parser.pawn_promotion_type == None

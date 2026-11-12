@@ -208,35 +208,19 @@ class GameView(arcade.Window):
         
         return
 
-    def on_draw(self):
+    def on_update(self, delta_time):
         """
-        Render the screen. Screen rendering requires updating positions of
-        on screen objects BEFORE drawing. Positions are always updated whenever
-        the size of the screen has changed from the last pass.
+        on_update called by arcade immediatley before on draw. Contains
+        logic for handling moves before draw.
 
         Args:
-            None
+            delta_time: unused
 
         Returns:
             None
         """
+        
         move_handled:bool = False
-
-        # The clear method should always be called at the start of on_draw.
-        # It clears the whole screen to whatever the background color is
-        # set to. This ensures that you have a clean slate for drawing each
-        # frame of the game.
-        self.clear()
-
-        # Code to draw other things will go here
-
-        if min(self.prev_height, self.prev_width) != min(self.height, self.width):
-            # Screen size has changed, update positions of all on screen objects
-            self.__update_screen_positions()
-
-        # Save screen size for next pass
-        self.prev_height = self.height
-        self.prev_width  = self.width
 
         if all(val is not None for val in [self.move_parser.piece_type, self.move_parser.cur_space, self.move_parser.new_space]):
             # Player move was input into move parser. Pass along to board
@@ -274,7 +258,35 @@ class GameView(arcade.Window):
 
             # Run turn cleanup
             self.__cleanup_turn()
+            
+    def on_draw(self):
+        """
+        Render the screen. Screen rendering requires updating positions of
+        on screen objects BEFORE drawing. Positions are always updated whenever
+        the size of the screen has changed from the last pass.
 
+        Args:
+            None
+
+        Returns:
+            None
+        """
+
+        # The clear method should always be called at the start of on_draw.
+        # It clears the whole screen to whatever the background color is
+        # set to. This ensures that you have a clean slate for drawing each
+        # frame of the game.
+        self.clear()
+
+        # Code to draw other things will go here
+
+        if min(self.prev_height, self.prev_width) != min(self.height, self.width):
+            # Screen size has changed, update positions of all on screen objects
+            self.__update_screen_positions()
+
+        # Save screen size for next pass
+        self.prev_height = self.height
+        self.prev_width  = self.width
 
         # Draw the chess board
         self.chess_board.draw_board()
