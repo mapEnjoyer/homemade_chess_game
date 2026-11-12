@@ -49,7 +49,7 @@ class Pawn(piece.Piece):
 
         return
 
-    def is_move_valid(self, space:str):
+    def is_move_valid(self, curr_space:str, end_space:str):
         """
         Method to determine if the pawn object can "theoretically" move to the indicated square.
         Valid pawn moves include:
@@ -62,7 +62,8 @@ class Pawn(piece.Piece):
         For black pawns the opposite is true. 
 
         Args:
-            space: Destination space string name for the pawn to move to ('A1', 'A2'...)
+            curr_space: Starting space string name for the pawn to move from ('A1', 'A2'...)
+            end_space: Destination space string name for the pawn to move to ('A1', 'A2'...)
 
         Returns:
             move_is_valid: True if the move is "theoretically" possible (not including pieces blocking the way/captures not being present)
@@ -70,8 +71,8 @@ class Pawn(piece.Piece):
         valid_spaces = []
 
         # Intitialize variables for readability
-        cur_col = constants.board_col_labels.index(self.occupied_square.square_col)
-        cur_row = constants.board_row_labels.index(self.occupied_square.square_row)
+        cur_col = constants.board_col_labels.index(curr_space[0])
+        cur_row = constants.board_row_labels.index(curr_space[1])
         max_col = len(constants.board_col_labels) - 1
 
         # Determine direction value based on color
@@ -99,4 +100,4 @@ class Pawn(piece.Piece):
         if not self.has_moved:
             valid_spaces.append(constants.board_col_labels[cur_col] + constants.board_row_labels[cur_row+2*direction])
 
-        return space in valid_spaces
+        return end_space in valid_spaces

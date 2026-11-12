@@ -49,7 +49,7 @@ class Queen(piece.Piece):
 
         return
 
-    def is_move_valid(self, space:str):
+    def is_move_valid(self, curr_space:str, next_space:str):
         """
         Method to determine if the queen object can "theoretically" move to the indicated square.
         Valid queen moves include:
@@ -57,15 +57,16 @@ class Queen(piece.Piece):
             - going vertical or horizontal in any direction
 
         Args:
-            space: Destination space string name for the queen to move to ('A1', 'A2'...)
+            next_space: Starting space string name for the queen to move from ('A1', 'A2'...)
+            next_space: Destination space string name for the queen to move to ('A1', 'A2'...)
 
         Returns:
             move_is_valid: True if the move is "theoretically" possible (not including pieces blocking the way/captures not being present)
         """
-        cur_col_idx = constants.board_col_labels.index(self.occupied_square.square_col)
-        cur_row_idx = constants.board_row_labels.index(self.occupied_square.square_row)
-        nxt_col_idx = constants.board_col_labels.index(space[0])
-        nxt_row_idx = constants.board_row_labels.index(space[1])
+        cur_col_idx = constants.board_col_labels.index(curr_space)
+        cur_row_idx = constants.board_row_labels.index(curr_space)
+        nxt_col_idx = constants.board_col_labels.index(next_space[0])
+        nxt_row_idx = constants.board_row_labels.index(next_space[1])
 
         move_is_valid = False
 

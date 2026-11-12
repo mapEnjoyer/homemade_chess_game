@@ -49,7 +49,7 @@ class Knight(piece.Piece):
 
         return
     
-    def is_move_valid(self, space:str):
+    def is_move_valid(self, curr_space:str, next_space:str):
         """
         Method to determine if the knight object can "theoretically" move to the indicated square.
         Valid knight moves include:
@@ -57,7 +57,8 @@ class Knight(piece.Piece):
             - going horizontal 2 spaces then vertical 1
 
         Args:
-            space:  Destination space string name for the knight to move to ('A1', 'A2'...)
+            curr_space:  Starting space string name for the knight to move from ('A1', 'A2'...)
+            next_space:  Destination space string name for the knight to move to ('A1', 'A2'...)
 
         Returns:
             move_is_valid: True if the move is "theoretically" possible (not including pieces blocking the way/captures not being present)
@@ -65,8 +66,8 @@ class Knight(piece.Piece):
         valid_spaces = []
 
         # Note that rows and columns are indexed between 0-7
-        col_idx = constants.board_col_labels.index(self.occupied_square.square_col)
-        row_idx = constants.board_row_labels.index(self.occupied_square.square_row)
+        col_idx = constants.board_col_labels.index(curr_space[0])
+        row_idx = constants.board_row_labels.index(curr_space[1])
         min_col = 0
         max_col = len(constants.board_col_labels) - 1
         min_row = 0
@@ -112,4 +113,4 @@ class Knight(piece.Piece):
             # Space is valid, add it to the list
             valid_spaces.append(constants.board_col_labels[col_idx+2] + constants.board_row_labels[row_idx-1])
 
-        return space in valid_spaces
+        return next_space in valid_spaces
