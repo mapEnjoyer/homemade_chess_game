@@ -8,14 +8,14 @@ Date: 08/06/26
     This file contains unit tests for the methods/function in board.py
 """
 
-from visuals import window, board
+from visuals import window, board, board_space
 from pieces import piece, pawn, rook, knight, bishop, queen, king
 from pathlib import Path
 import arcade
 import constants
 import pytest
 
-def setup_board(chess_board:board.Board, pieces:list[tuple]):
+def setup_board(chess_board:board.Board, board_state:dict):
     """
     Helper function to allow for tests to setup the board in a particular state.
     Note that this function does not automatically put kings on the board even
@@ -23,8 +23,7 @@ def setup_board(chess_board:board.Board, pieces:list[tuple]):
 
     Args:
         - chess_board: chess board to work on
-        - pieces: tuple with the following elements (piece_type_to_add, space_as_string, piece_color)
-                  example: (pawn.Pawn, 'E4', constants.PlayerColor.WHITE)
+        - board_state: dictonary built in the same fashion as a board state from board.save_board_state()
 
     Returns:
         - None
@@ -32,19 +31,19 @@ def setup_board(chess_board:board.Board, pieces:list[tuple]):
     # Clear all pieces except those needed in test
     chess_board.clear_board()
 
-    for piece in pieces:
-        # Append the piece to the piece list
-        chess_board.pieces.append(piece[0](chess_board.board_spaces[piece[1]], piece[2]))
+    # Set board state using restore
+    chess_board.restore_board_state(board_state)
 
-        if piece[0] == king.King:
-            match piece[2]:
+    for piece in chess_board.pieces:
+        if isinstance(piece, king.King):
+            match piece.color:
                 case constants.PlayerColor.WHITE:
                     # Set white king reference
-                    chess_board.white_king = chess_board.pieces[-1]
+                    chess_board.white_king = piece
 
                 case constants.PlayerColor.BLACK:
                     # Set black king reference
-                    chess_board.black_king = chess_board.pieces[-1]
+                    chess_board.black_king = piece
 
                 case _:
                     raise Exception
@@ -78,7 +77,7 @@ def test_board_init(square_color_1:arcade.color,
     color_2_count = 0
     for square in game_window.chess_board.board_spaces:
         # Make sure it's actually a board square
-        assert isinstance(game_window.chess_board.board_spaces[square], piece.Board_Space)
+        assert isinstance(game_window.chess_board.board_spaces[square], board_space.Board_Space)
 
         if game_window.chess_board.board_spaces[square].color == square_color_1:
             color_1_count+=1
@@ -128,7 +127,7 @@ def test_move_handle_invalid_piece_type():
 
     # Try making a pawn move with a piece type that isn't valid
     assert game_window.chess_board.handle_move(piece_type=None,
-                                               start_space='E2',
+                                               curr_space='E2',
                                                next_space='E4',
                                                player_turn=constants.PlayerColor.WHITE) is False
 
@@ -143,7 +142,7 @@ def test_move_handle_invalid_start_square():
 
     # Try making a pawn move with a start square that isn't valid
     assert game_window.chess_board.handle_move(piece_type=pawn.Pawn,
-                                               start_space='I2',
+                                               curr_space='I2',
                                                next_space='E4',
                                                player_turn=constants.PlayerColor.WHITE) is False
 
@@ -158,7 +157,7 @@ def test_move_handle_invalid_end_square():
 
     # Try making a pawn move with an end square that isn't valid
     assert game_window.chess_board.handle_move(piece_type=pawn.Pawn,
-                                               start_space='E2',
+                                               curr_space='E2',
                                                next_space='I4',
                                                player_turn=constants.PlayerColor.WHITE) is False
 
@@ -173,7 +172,7 @@ def test_move_handle_no_piece_on_square():
 
     # Try making a pawn move on a square with no piece
     assert game_window.chess_board.handle_move(piece_type=pawn.Pawn,
-                                               start_space='E3',
+                                               curr_space='E3',
                                                next_space='E4',
                                                player_turn=constants.PlayerColor.WHITE) is False
 
@@ -188,7 +187,7 @@ def test_move_handle_wrong_piece_type():
 
     # Try making a pawn move with the piece type set to bishop
     assert game_window.chess_board.handle_move(piece_type=bishop.Bishop,
-                                               start_space='E2',
+                                               curr_space='E2',
                                                next_space='E4',
                                                player_turn=constants.PlayerColor.WHITE) is False
 
@@ -203,14 +202,14 @@ def test_move_handle_wrong_color_piece():
 
     # Try moving black piece on white turn
     assert game_window.chess_board.handle_move(piece_type=pawn.Pawn,
-                                               start_space='E7',
+                                               curr_space='E7',
                                                next_space='E5',
                                                player_turn=constants.PlayerColor.WHITE) is False
 
     # Try moving white piece on black turn
     game_window.move_parser.player_turn = constants.PlayerColor.BLACK
     assert game_window.chess_board.handle_move(piece_type=pawn.Pawn,
-                                               start_space='E2',
+                                               curr_space='E2',
                                                next_space='E4',
                                                player_turn=constants.PlayerColor.BLACK) is False
 
@@ -232,7 +231,7 @@ def test_pawn_move_1_space_forward(col):
 
     # Move white pawn on row 2 to row 3
     assert game_window.chess_board.handle_move(pawn.Pawn,
-                                               start_space=white_start_space,
+                                               curr_space=white_start_space,
                                                next_space=white_end_space,
                                                player_turn=constants.PlayerColor.WHITE) is True
 
@@ -242,7 +241,7 @@ def test_pawn_move_1_space_forward(col):
 
     # Move black pawn on row 7 to row 6
     assert game_window.chess_board.handle_move(pawn.Pawn,
-                                               start_space=black_start_space,
+                                               curr_space=black_start_space,
                                                next_space=black_end_space,
                                                player_turn=constants.PlayerColor.BLACK) is True
 
@@ -266,7 +265,7 @@ def test_pawn_move_2_space_forward(col):
 
     # Move white pawn on row 2 to row 4
     assert game_window.chess_board.handle_move(pawn.Pawn,
-                                               start_space=white_start_space,
+                                               curr_space=white_start_space,
                                                next_space=white_end_space,
                                                player_turn=constants.PlayerColor.WHITE) is True
 
@@ -276,7 +275,7 @@ def test_pawn_move_2_space_forward(col):
 
     # Move black pawn on row 7 to row 5
     assert game_window.chess_board.handle_move(pawn.Pawn,
-                                               start_space=black_start_space,
+                                               curr_space=black_start_space,
                                                next_space=black_end_space,
                                                player_turn=constants.PlayerColor.BLACK) is True
 
@@ -295,16 +294,16 @@ def test_pawn_capture_A_side():
     # Black pawns on D5, E5
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((pawn.Pawn, 'D4', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'E4', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.BLACK))
-    pieces.append((pawn.Pawn, 'E5', constants.PlayerColor.BLACK))
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
+    board_spaces = {}
+    board_spaces['D4'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['E4'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['D5'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E5'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # White pawn on E4 captures black pawn on D5
     assert game_window.chess_board.handle_move(pawn.Pawn, 'E4', 'D5', constants.PlayerColor.WHITE) is True
@@ -329,16 +328,16 @@ def test_pawn_capture_H_side():
     # Black pawns on D5, E5
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((pawn.Pawn, 'D4', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'E4', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.BLACK))
-    pieces.append((pawn.Pawn, 'E5', constants.PlayerColor.BLACK))
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
+    board_spaces = {}
+    board_spaces['D4'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['E4'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['D5'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E5'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # White pawn on D4 captures black pawn on E5
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'E5', constants.PlayerColor.WHITE) is True
@@ -365,14 +364,14 @@ def test_pawn_promotion(promo_type):
     # Black pawn on H2
     # White king on E2
     # Black king on E7
-    pieces = []
-    pieces.append((pawn.Pawn, 'H7', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'H2', constants.PlayerColor.BLACK))
-    pieces.append((king.King, 'E2', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E7', constants.PlayerColor.BLACK))     
+    board_spaces = {}
+    board_spaces['H7'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['H2'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E2'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E7'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     # We have to set all the "has_moved" flags of the pieces as these positions are only possible if they have moved
     for piece in game_window.chess_board.pieces:
@@ -418,21 +417,21 @@ def test_en_passant():
     game_window = window.GameView(is_visible=False)    
 
     # White pawn on E2
-    # Black pawn on E7
     # White pawn on D5
+    # Black pawn on E7
     # Black pawn on D4
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((pawn.Pawn, 'E2', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'E7', constants.PlayerColor.BLACK))
-    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'D4', constants.PlayerColor.BLACK))
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['E2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['D5'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['E7'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['D4'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Move E2 pawn to E4
     assert game_window.chess_board.handle_move(pawn.Pawn, 'E2', 'E4', constants.PlayerColor.WHITE)
@@ -462,14 +461,14 @@ def test_pawn_invalid_moves():
     # Black pawn on D5
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((pawn.Pawn, 'D4', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.BLACK))
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
+    board_spaces = {}
+    board_spaces['D4'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['D5'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Try moving both pawns horizontally towards A rank, checking for failure
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'C4', constants.PlayerColor.WHITE) is False
@@ -516,16 +515,16 @@ def test_pawn_collision():
     # Black pawn on D6
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((pawn.Pawn, 'D2', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'D3', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'D6', constants.PlayerColor.BLACK))
-    pieces.append((pawn.Pawn, 'D7', constants.PlayerColor.BLACK))
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
+    board_spaces = {}
+    board_spaces['D2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['D3'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['D7'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['D6'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Try moving D2 pawn to D4
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D2', 'D4', constants.PlayerColor.WHITE) is False
@@ -551,14 +550,14 @@ def test_knight_valid_moves():
     # Black knight on D5
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((knight.Knight, w_knight_space, constants.PlayerColor.WHITE))
-    pieces.append((knight.Knight, b_knight_space, constants.PlayerColor.BLACK))
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
+    board_spaces = {}
+    board_spaces['D4'] = knight.Knight(constants.PlayerColor.WHITE)
+    board_spaces['D5'] = knight.Knight(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     # Test white knight movement
     for space in w_knight_end_spaces:
@@ -589,14 +588,14 @@ def test_knight_invalid_moves():
     # Black knight on E5
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((knight.Knight, w_knight_space, constants.PlayerColor.WHITE))
-    pieces.append((knight.Knight, b_knight_space, constants.PlayerColor.BLACK))
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
+    board_spaces = {}
+    board_spaces['D4'] = knight.Knight(constants.PlayerColor.WHITE)
+    board_spaces['E5'] = knight.Knight(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     # Try moving white knight straight forward
     assert game_window.chess_board.handle_move(knight.Knight, w_knight_space, 'D5', constants.PlayerColor.WHITE) is False
@@ -655,16 +654,16 @@ def test_knight_capture():
     # Black pawn on C6
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((knight.Knight, w_knight_space, constants.PlayerColor.WHITE))
-    pieces.append((knight.Knight, b_knight_space, constants.PlayerColor.BLACK))
-    pieces.append((pawn.Pawn, w_pawn_space, constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, b_pawn_space, constants.PlayerColor.BLACK))    
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))    
+    board_spaces = {}
+    board_spaces['D4'] = knight.Knight(constants.PlayerColor.WHITE)
+    board_spaces['C3'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['D5'] = knight.Knight(constants.PlayerColor.BLACK)
+    board_spaces['C6'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     # Capture black pawn using white knight
     assert game_window.chess_board.handle_move(knight.Knight, w_knight_space, b_pawn_space, constants.PlayerColor.WHITE)
@@ -693,17 +692,17 @@ def test_bishop_valid_moves():
     b_bishop_squares = ['A8', 'H7', 'B1', 'H1']
 
     # White bishop on D4
-    # Black bishop on E5
+    # Black bishop on E4
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((bishop.Bishop, w_bishop_space, constants.PlayerColor.WHITE))
-    pieces.append((bishop.Bishop, b_bishop_space, constants.PlayerColor.BLACK))  
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['D4'] = bishop.Bishop(constants.PlayerColor.WHITE)
+    board_spaces['E4'] = bishop.Bishop(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     for end_space in w_bishop_squares:
         # Move white bishop
@@ -732,14 +731,14 @@ def test_bishop_invalid_moves():
     # Black bishop on E5
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((bishop.Bishop, w_bishop_space, constants.PlayerColor.WHITE))
-    pieces.append((bishop.Bishop, b_bishop_space, constants.PlayerColor.BLACK))  
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['D4'] = bishop.Bishop(constants.PlayerColor.WHITE)
+    board_spaces['E5'] = bishop.Bishop(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     # Try moving bishops towards row 7 veritically
     assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'D7', constants.PlayerColor.WHITE) is False
@@ -798,16 +797,16 @@ def test_bishop_captures():
     # Black pawn on E5
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((bishop.Bishop, w_bishop_space, constants.PlayerColor.WHITE))
-    pieces.append((bishop.Bishop, b_bishop_space, constants.PlayerColor.BLACK)) 
-    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'E5', constants.PlayerColor.BLACK)) 
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['D4'] = bishop.Bishop(constants.PlayerColor.WHITE)
+    board_spaces['E4'] = bishop.Bishop(constants.PlayerColor.BLACK)
+    board_spaces['D5'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['E5'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     # Capture the black pawn with the white bishop
     assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'E5', constants.PlayerColor.WHITE)
@@ -838,14 +837,14 @@ def test_rook_valid_moves():
     # Black rook on H7
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((rook.Rook, w_rook_space, constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, b_rook_space, constants.PlayerColor.BLACK))  
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['A2'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['H7'] = rook.Rook(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     for w_space, b_space in zip(w_rook_squares, b_rook_squares):
         # Move white rook
@@ -869,17 +868,17 @@ def test_rook_invalid_moves():
     b_rook_space = 'E4'
 
     # White rook on D4
-    # Black rook on E5
+    # Black rook on E4
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((rook.Rook, w_rook_space, constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, b_rook_space, constants.PlayerColor.BLACK))  
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['D4'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['E4'] = rook.Rook(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     # Try moving rooks diagonally towards row 1/column A
     assert game_window.chess_board.handle_move(rook.Rook, w_rook_space, 'A1', constants.PlayerColor.WHITE) is False
@@ -934,16 +933,16 @@ def test_rook_captures():
     # Black pawn on A5
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((rook.Rook, w_rook_space, constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, b_rook_space, constants.PlayerColor.BLACK)) 
-    pieces.append((pawn.Pawn, 'B5', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'A5', constants.PlayerColor.BLACK)) 
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['A4'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['B4'] = rook.Rook(constants.PlayerColor.BLACK)
+    board_spaces['B5'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['A5'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     # Capture the black pawn with the white rook
     assert game_window.chess_board.handle_move(rook.Rook, w_rook_space, 'A5', constants.PlayerColor.WHITE)
@@ -974,14 +973,14 @@ def test_queen_valid_moves():
     # Black queen on D4
     # White king on E1
     # Black king on D8
-    pieces = []
-    pieces.append((queen.Queen, w_queen_space, constants.PlayerColor.WHITE))
-    pieces.append((queen.Queen, b_queen_space, constants.PlayerColor.BLACK))  
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'D8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['E4'] = queen.Queen(constants.PlayerColor.WHITE)
+    board_spaces['D4'] = queen.Queen(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['D8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     for w_space, b_space in zip(w_queen_squares, b_queen_squares):
         # Move white queen
@@ -1005,17 +1004,17 @@ def test_queen_invalid_moves():
     b_queen_space = 'D4'
 
     # White queen on D4
-    # Black queen on E5
+    # Black queen on E4
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((queen.Queen, w_queen_space, constants.PlayerColor.WHITE))
-    pieces.append((queen.Queen, b_queen_space, constants.PlayerColor.BLACK))  
-    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'D8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['E4'] = queen.Queen(constants.PlayerColor.WHITE)
+    board_spaces['D4'] = queen.Queen(constants.PlayerColor.BLACK)
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Try moving queens in knight shape
     assert game_window.chess_board.handle_move(queen.Queen, w_queen_space, 'F6', constants.PlayerColor.WHITE) is False
@@ -1059,18 +1058,18 @@ def test_queen_captures():
     # Black queen on B4
     # White pawn on B5
     # Black pawn on A5
-    # White king on E1
-    # Black king on E8
-    pieces = []
-    pieces.append((queen.Queen, w_queen_space, constants.PlayerColor.WHITE))
-    pieces.append((queen.Queen, b_queen_space, constants.PlayerColor.BLACK)) 
-    pieces.append((pawn.Pawn, 'B5', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'A5', constants.PlayerColor.BLACK)) 
-    pieces.append((king.King, 'H1', constants.PlayerColor.WHITE))
-    pieces.append((king.King, 'H8', constants.PlayerColor.BLACK))
+    # White king on H1
+    # Black king on H8
+    board_spaces = {}
+    board_spaces['A4'] = queen.Queen(constants.PlayerColor.WHITE)
+    board_spaces['B4'] = queen.Queen(constants.PlayerColor.BLACK)
+    board_spaces['B5'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['A5'] = pawn.Pawn(constants.PlayerColor.BLACK)
+    board_spaces['H1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['H8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Capture the black pawn with the white queen
     assert game_window.chess_board.handle_move(queen.Queen, w_queen_space, 'A5', constants.PlayerColor.WHITE)
@@ -1100,12 +1099,12 @@ def test_king_valid_moves():
 
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     for w_space, b_space in zip(w_king_squares, b_king_squares):
         # Move white king
@@ -1129,12 +1128,12 @@ def test_king_invalid_moves():
 
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))  
+    board_spaces = {}
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Try moving kings in knight shape
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'D3', constants.PlayerColor.WHITE) is False
@@ -1171,14 +1170,14 @@ def test_king_captures():
     # Black pawn on E2
     # White king on E1
     # Black king on E8
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK)) 
-    pieces.append((pawn.Pawn, 'E7', constants.PlayerColor.WHITE))
-    pieces.append((pawn.Pawn, 'E2', constants.PlayerColor.BLACK)) 
+    board_spaces = {}
+    board_spaces['E7'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['E2'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Capture the black pawn with the white king
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'E2', constants.PlayerColor.WHITE)
@@ -1205,19 +1204,33 @@ def test_king_side_castling_success():
     # White rook on H1
     # Black rook on H8
     # All pawns on rows 2 and 7
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'H1', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'H8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['A2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['B2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['C2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['D2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['E2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['F2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['G2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['H2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    
+    board_spaces['A7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['B7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['C7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['D7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['E7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['F7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['G7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['H7'] = pawn.Pawn(constants.PlayerColor.BLACK)
 
-    for col_idx in range(0, len(constants.board_col_labels)):
-        pieces.append((pawn.Pawn, constants.board_col_labels[col_idx]+'2', constants.PlayerColor.WHITE))
-        pieces.append((pawn.Pawn, constants.board_col_labels[col_idx]+'7', constants.PlayerColor.BLACK))
-
+    board_spaces['H1'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['H8'] = rook.Rook(constants.PlayerColor.BLACK)
+    
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Castle white king kingside
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE)
@@ -1248,16 +1261,16 @@ def test_king_side_castling_fail_out_of_check():
     # Black rook on H8
     # White queen on E5 to put black king in check
     # Black queen on E4 to put black king in check
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'H1', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'H8', constants.PlayerColor.BLACK))
-    pieces.append((queen.Queen, 'E5', constants.PlayerColor.WHITE))
-    pieces.append((queen.Queen, 'E4', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)   
+    board_spaces['H1'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['H8'] = rook.Rook(constants.PlayerColor.BLACK)
+    board_spaces['E5'] = queen.Queen(constants.PlayerColor.WHITE)
+    board_spaces['E4'] = queen.Queen(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE) is False
@@ -1282,16 +1295,16 @@ def test_king_side_castling_fail_through_check():
     # Black rook on H8
     # White rook on F5 to put F8 in check
     # Black rook on F4 to put F1 in check
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'H1', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'H8', constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'F5', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'F4', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)   
+    board_spaces['H1'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['H8'] = rook.Rook(constants.PlayerColor.BLACK)
+    board_spaces['F5'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['F4'] = rook.Rook(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE) is False
@@ -1316,16 +1329,16 @@ def test_king_side_castling_fail_into_check():
     # Black rook on H8
     # White rook on G5 to put G8 in check
     # Black rook on G4 to put G1 in check
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'H1', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'H8', constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'G5', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'G4', constants.PlayerColor.BLACK))
-
+    board_spaces = {}
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)   
+    board_spaces['H1'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['H8'] = rook.Rook(constants.PlayerColor.BLACK)
+    board_spaces['G5'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['G4'] = rook.Rook(constants.PlayerColor.BLACK)
+    
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE) is False
@@ -1350,19 +1363,33 @@ def test_queen_side_castling_success():
     # White rook on A1
     # Black rook on A8
     # All pawns on rows 2 and 7
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'A1', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'A8', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['A2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['B2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['C2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['D2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['E2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['F2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['G2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    board_spaces['H2'] = pawn.Pawn(constants.PlayerColor.WHITE)
+    
+    board_spaces['A7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['B7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['C7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['D7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['E7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['F7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['G7'] = pawn.Pawn(constants.PlayerColor.BLACK)   
+    board_spaces['H7'] = pawn.Pawn(constants.PlayerColor.BLACK)
 
-    for col_idx in range(0, len(constants.board_col_labels)):
-        pieces.append((pawn.Pawn, constants.board_col_labels[col_idx]+'2', constants.PlayerColor.WHITE))
-        pieces.append((pawn.Pawn, constants.board_col_labels[col_idx]+'7', constants.PlayerColor.BLACK))
-
+    board_spaces['A1'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['A8'] = rook.Rook(constants.PlayerColor.BLACK)
+    
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Castle white king kingside
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'C1', constants.PlayerColor.WHITE)
@@ -1393,16 +1420,16 @@ def test_queen_side_castling_fail_out_of_check():
     # Black rook on A8
     # White queen on E5 to put black king in check
     # Black queen on E4 to put black king in check
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'A1', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'A8', constants.PlayerColor.BLACK))
-    pieces.append((queen.Queen, 'E5', constants.PlayerColor.WHITE))
-    pieces.append((queen.Queen, 'E4', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)   
+    board_spaces['A1'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['A8'] = rook.Rook(constants.PlayerColor.BLACK)
+    board_spaces['E5'] = queen.Queen(constants.PlayerColor.WHITE)
+    board_spaces['E4'] = queen.Queen(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'C1', constants.PlayerColor.WHITE) is False
@@ -1427,16 +1454,16 @@ def test_queen_side_castling_fail_through_check():
     # Black rook on A8
     # White rook on D5 to put D8 in check
     # Black rook on D4 to put D1 in check
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'A1', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'A8', constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'D5', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'D4', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)   
+    board_spaces['A1'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['A8'] = rook.Rook(constants.PlayerColor.BLACK)
+    board_spaces['D5'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['D4'] = rook.Rook(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'C1', constants.PlayerColor.WHITE) is False
@@ -1461,16 +1488,16 @@ def test_queen_side_castling_fail_into_check():
     # Black rook on A8
     # White rook on C5 to put C8 in check
     # Black rook on C4 to put C1 in check
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'A1', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'A8', constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'C5', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'C4', constants.PlayerColor.BLACK))
-
+    board_spaces = {}
+    board_spaces['E1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['E8'] = king.King(constants.PlayerColor.BLACK)   
+    board_spaces['A1'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['A8'] = rook.Rook(constants.PlayerColor.BLACK)
+    board_spaces['C5'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['C4'] = rook.Rook(constants.PlayerColor.BLACK)
+    
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces)
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'C1', constants.PlayerColor.WHITE) is False
@@ -1486,26 +1513,22 @@ def test_game_over_white():
     # Game window to test on
     game_window = window.GameView(is_visible=False)
 
-    # Starting spaces for the white and black kings
-    w_king_space = 'A1'
-    b_king_space = 'H8'
-
     # White king on A1
     # Black king on H8
     # White rook on G1
     # White rook on F2
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'G1', constants.PlayerColor.WHITE))
-    pieces.append((rook.Rook, 'F2', constants.PlayerColor.WHITE))
+    board_spaces = {}
+    board_spaces['A1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['H8'] = king.King(constants.PlayerColor.BLACK)
+    board_spaces['G1'] = rook.Rook(constants.PlayerColor.WHITE)
+    board_spaces['F2'] = rook.Rook(constants.PlayerColor.WHITE)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     # Slide the F2 rook to H2 which will ladder mate the black king
     assert game_window.chess_board.handle_move(rook.Rook, 'F2', 'H2', constants.PlayerColor.WHITE)
-    game_window.chess_board.check_game_over(constants.PlayerColor.BLACK)
+    game_window.chess_board.check_game_over(constants.PlayerColor.BLACK, 'H8')
     assert game_window.chess_board.game_is_over
 
 def test_game_over_black():
@@ -1513,24 +1536,20 @@ def test_game_over_black():
     # Game window to test on
     game_window = window.GameView(is_visible=False)
 
-    # Starting spaces for the white and black kings
-    w_king_space = 'A1'
-    b_king_space = 'H8'
-
     # White king on A1
     # Black king on H8
     # Black rook on B8
     # Black rook on C7
-    pieces = []
-    pieces.append((king.King, w_king_space, constants.PlayerColor.WHITE))
-    pieces.append((king.King, b_king_space, constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'B8', constants.PlayerColor.BLACK))
-    pieces.append((rook.Rook, 'C7', constants.PlayerColor.BLACK))
+    board_spaces = {}
+    board_spaces['A1'] = king.King(constants.PlayerColor.WHITE)
+    board_spaces['H8'] = king.King(constants.PlayerColor.BLACK)
+    board_spaces['B8'] = rook.Rook(constants.PlayerColor.BLACK)
+    board_spaces['C7'] = rook.Rook(constants.PlayerColor.BLACK)
 
     # Setup the board
-    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+    setup_board(chess_board=game_window.chess_board, board_state=board_spaces) 
 
     # Slide the C7 rook to A7 which will ladder mate the black king
     assert game_window.chess_board.handle_move(rook.Rook, 'C7', 'A7', constants.PlayerColor.BLACK)
-    game_window.chess_board.check_game_over(constants.PlayerColor.WHITE)
+    game_window.chess_board.check_game_over(constants.PlayerColor.WHITE, 'A1')
     assert game_window.chess_board.game_is_over

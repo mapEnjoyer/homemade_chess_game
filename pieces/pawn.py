@@ -16,23 +16,18 @@ class Pawn(piece.Piece):
     Pawn class. Allows for the creation of pawn pieces, the creation of 
     their sprite objects and the ability to move around the chess board. 
     Attributes:
-        - occupied_space: board space object. Used to set which square the
-                          piece is on and draw the sprite on the screen. 
-
         - sprite: arcade sprite object. Used to draw the piece on the board.
                   Requires a valid texture path.
 
-        - image_width: Width in pixels of the image used in the sprite.
         - color: Color of piece. Can either be black or white
     """
-    def __init__(self, space: piece.Board_Space, color:constants.PlayerColor):
+    def __init__(self, color:constants.PlayerColor):
         """
         Initializes pawn object by performing the following steps:
             - Creating sprite
-            - Setting occupied square
+            - setting color
 
         Args:
-            space: Board_Space object the piece occupies
             color: Color of piece. Can either be black or white
 
         Returns:
@@ -45,7 +40,7 @@ class Pawn(piece.Piece):
             texture_path = str(Path(__file__).parent.parent / "visuals//textures" / constants.black_pawn_image_name)
 
         # Run parent class init
-        super().__init__(space=space, texture_path=texture_path, image_width=constants.pawn_image_width, color=color)
+        super().__init__(texture_path=texture_path, image_width=constants.pawn_image_width, color=color)
 
         return
 

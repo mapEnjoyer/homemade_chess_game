@@ -16,21 +16,16 @@ class Rook(piece.Piece):
     Rook class. Allows for the creation of rook pieces, the creation of 
     their sprite objects and the ability to move around the chess board. 
     Attributes:
-        - occupied_space: board space object. Used to set which square the
-                          piece is on and draw the sprite on the screen. 
-
         - sprite: arcade sprite object. Used to draw the piece on the board.
                   Requires a valid texture path.
 
-        - image_width: Width in pixels of the image used in the sprite.
         - color: Color of piece. Can either be black or white
     """
-    def __init__(self, space: piece.Board_Space, color:constants.PlayerColor):
+    def __init__(self, color:constants.PlayerColor):
         """
         Initializes rook object by performing the following steps:
             - Creating sprite
-            - Setting occupied square
-
+            - setting color
         Args:
             space: Board_Space object the piece occupies
             color: Color of piece. Can either be black or white
@@ -46,7 +41,7 @@ class Rook(piece.Piece):
             texture_path = str(Path(__file__).parent.parent / "visuals//textures" / constants.black_rook_image_name)        
 
         # Run parent class init
-        super().__init__(space=space, texture_path=texture_path, image_width=constants.rook_image_width, color=color)
+        super().__init__(texture_path=texture_path, image_width=constants.rook_image_width, color=color)
 
         return
 
@@ -64,7 +59,7 @@ class Rook(piece.Piece):
             move_is_valid: True if the move is "theoretically" possible (not including pieces blocking the way/captures not being present)
         """
         cur_col_idx = constants.board_col_labels.index(curr_space[0])
-        cur_row_idx = constants.board_row_labels.index(curr_space[0])
+        cur_row_idx = constants.board_row_labels.index(curr_space[1])
         nxt_col_idx = constants.board_col_labels.index(next_space[0])
         nxt_row_idx = constants.board_row_labels.index(next_space[1])
 

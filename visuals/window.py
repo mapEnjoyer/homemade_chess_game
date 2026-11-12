@@ -136,7 +136,9 @@ class GameView(arcade.Window):
 
         if self.move_parser.pawn_promoting and self.move_parser.pawn_promotion_type:
             # Promote the pawn
-            self.chess_board.promote_pawn(self.chess_board.board_spaces[self.move_parser.new_space].occupying_piece, self.move_parser.pawn_promotion_type)
+            self.chess_board.promote_pawn(self.chess_board.board_spaces[self.move_parser.new_space].occupying_piece,
+                                          self.move_parser.new_space,
+                                          self.move_parser.pawn_promotion_type)
 
             # Clear chess board pawn promotion info
             self.chess_board.pawn_promoting = False
@@ -190,7 +192,11 @@ class GameView(arcade.Window):
                     col_final = col
                     break
 
-        if not row_final or not col_final or button == arcade.MOUSE_BUTTON_RIGHT:
+        if self.move_parser.pawn_promoting:
+            # Player is selecting promotion type for pawn. Do nothing!
+            return
+
+        elif not row_final or not col_final or button == arcade.MOUSE_BUTTON_RIGHT:
             # Player did not click on the chess board or right clicked. Clear move parser selection
             self.move_parser.cur_space = None
             self.move_parser.new_space = None
@@ -267,9 +273,9 @@ class GameView(arcade.Window):
                 x_pos += square_size
 
         # After space positions are determined, piece sprite locations need updated to match those square locations
-        # To do this, call the update_space method of each piece using the square it's already in
+        # To do this, call the set_occupying_piece method of square containing a piece
         for piece in self.chess_board.pieces:
-            piece.update_space(piece.occupied_square)          
+            self.chess_board.board_spaces[self.chess_board.get_piece_space(piece)].set_occupying_piece(piece)
 
         # Determine row/column label font size (1/4th square size seemed good from testing)
         font_size = square_size / 4 
@@ -327,7 +333,8 @@ class GameView(arcade.Window):
                 self.move_parser.player_turn = constants.PlayerColor.WHITE
 
         # Check for game over
-        self.chess_board.check_game_over(self.move_parser.player_turn)
+        self.chess_board.check_game_over(self.move_parser.player_turn, 
+                                         self.chess_board.get_piece_space(self.chess_board.get_king(self.move_parser.player_turn)))
 
         # Finish move parser cleanup
         self.move_parser.new_space = None
