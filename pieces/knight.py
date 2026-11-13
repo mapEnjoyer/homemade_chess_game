@@ -9,6 +9,7 @@ Date: 05/30/26
 """
 import constants
 from pieces import piece
+from pathlib import Path
 
 class Knight(piece.Piece):
     """
@@ -24,7 +25,7 @@ class Knight(piece.Piece):
         - image_width: Width in pixels of the image used in the sprite.
         - color: Color of piece. Can either be black or white
     """
-    def __init__(self, space: piece.Board_Space, texture_path:str, image_width:int, color:constants.PlayerColor):
+    def __init__(self, space:piece.Board_Space, color:constants.PlayerColor):
         """
         Initializes knight object by performing the following steps:
             - Creating sprite
@@ -32,15 +33,19 @@ class Knight(piece.Piece):
 
         Args:
             space: Board_Space object the piece occupies
-            texture_path: str to image file used for piece sprite.
-            image_width: integer width of the image used for the sprite in pixels.
             color: Color of piece. Can either be black or white
 
         Returns:
             None
         """
+        # Determine texture path from piece color
+        if color == constants.PlayerColor.WHITE:
+            texture_path = str(Path(__file__).parent.parent / "visuals//textures" / constants.white_knight_image_name)
+        else:
+            texture_path = str(Path(__file__).parent.parent / "visuals//textures" / constants.black_knight_image_name)
+
         # Run parent class init
-        super().__init__(space, texture_path, image_width, color)
+        super().__init__(space=space, texture_path=texture_path, image_width=constants.knight_image_width, color=color)
 
         return
     

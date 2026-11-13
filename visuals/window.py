@@ -25,7 +25,7 @@ class GameView(arcade.Window):
         - move_parser: Handler for user controlled piece movement
     """
 
-    def __init__(self):
+    def __init__(self, is_visible:bool = True):
         """
         Initializes the game window by performing the following steps:
             - Creates the window
@@ -36,7 +36,7 @@ class GameView(arcade.Window):
             - Runs setup
 
         Args:
-            None
+            is_visible: Optional boolean arguement to hide instances of the window. Useful during unit tests.
 
         Returns:
             None  
@@ -44,7 +44,7 @@ class GameView(arcade.Window):
 
         # Call the parent class to set up the window
         # TODO: Probably want to save these settings in a user_config.json 
-        super().__init__(constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT, constants.WINDOW_TITLE, resizable=True)
+        super().__init__(constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT, constants.WINDOW_TITLE, resizable=True, visible=is_visible)
 
         # Initialize "previous" screen sizes. Used for determining if 
         # screen size has changed and position values need calculated

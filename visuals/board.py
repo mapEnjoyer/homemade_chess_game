@@ -14,6 +14,9 @@ import constants
 from pieces import piece, pawn, rook, knight, bishop, queen, king
 from pathlib import Path
 
+# List of valid piece types
+valid_piece_types = [pawn.Pawn, rook.Rook, knight.Knight, bishop.Bishop, queen.Queen, king.King]
+
 class KingCheck():
     """
     King check class. Contains the king object in check and the piece causing the check.
@@ -82,6 +85,7 @@ class Board():
         - end_move_msg: Message to send to console once move is parsed
         - white_king: reference to white king in pieces list
         - black_king: reference to black king in pieces list
+        - game_is_over: boolean indicator on if game is over
     """
 
     def __init__(self):
@@ -111,15 +115,15 @@ class Board():
         # List containing all pieces on board
         self.pieces = []
 
-        # Sprite list containing all sprites on the board
-        self.sprite_list = arcade.SpriteList()
-
         # Initialize move end message
         self.end_move_msg = ''
 
         # Initialize king references (updated in __init_white_pieces/__init_black_pieces)
         self.white_king = None
         self.black_king = None
+
+        # Initialize game over flag
+        self.game_is_over:bool = False
 
         # Initialize chess board squares
         self.__init_squares()
@@ -134,7 +138,7 @@ class Board():
         self.__init_black_pieces()
 
         # Initialize sprites
-        self.__init_sprites()
+        self.init_sprites()
 
         return
 
@@ -210,45 +214,34 @@ class Board():
         Returns:
             None         
         """
-        # Create the A2-H2 pawns
-        text_file_path = str(Path(__file__).parent / "textures" / constants.white_pawn_image_name)
-        
-        self.pieces.append(pawn.Pawn(self.board_spaces["A2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(pawn.Pawn(self.board_spaces["B2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(pawn.Pawn(self.board_spaces["C2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(pawn.Pawn(self.board_spaces["D2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(pawn.Pawn(self.board_spaces["E2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(pawn.Pawn(self.board_spaces["F2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(pawn.Pawn(self.board_spaces["G2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(pawn.Pawn(self.board_spaces["H2"], text_file_path, constants.pawn_image_width, constants.PlayerColor.WHITE))
+        # Create the A2-H2 pawns        
+        self.pieces.append(pawn.Pawn(self.board_spaces["A2"], constants.PlayerColor.WHITE))
+        self.pieces.append(pawn.Pawn(self.board_spaces["B2"], constants.PlayerColor.WHITE))
+        self.pieces.append(pawn.Pawn(self.board_spaces["C2"], constants.PlayerColor.WHITE))
+        self.pieces.append(pawn.Pawn(self.board_spaces["D2"], constants.PlayerColor.WHITE))
+        self.pieces.append(pawn.Pawn(self.board_spaces["E2"], constants.PlayerColor.WHITE))
+        self.pieces.append(pawn.Pawn(self.board_spaces["F2"], constants.PlayerColor.WHITE))
+        self.pieces.append(pawn.Pawn(self.board_spaces["G2"], constants.PlayerColor.WHITE))
+        self.pieces.append(pawn.Pawn(self.board_spaces["H2"], constants.PlayerColor.WHITE))
 
         # Create A1/H1 rooks
-        text_file_path = str(Path(__file__).parent / "textures" / constants.white_rook_image_name)
-
-        self.pieces.append(rook.Rook(self.board_spaces["A1"], text_file_path, constants.rook_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(rook.Rook(self.board_spaces["H1"], text_file_path, constants.rook_image_width, constants.PlayerColor.WHITE))
+        self.pieces.append(rook.Rook(self.board_spaces["A1"], constants.PlayerColor.WHITE))
+        self.pieces.append(rook.Rook(self.board_spaces["H1"], constants.PlayerColor.WHITE))
 
         # Create B1/G1 knights
-        text_file_path = str(Path(__file__).parent / "textures" / constants.white_knight_image_name)
-
-        self.pieces.append(knight.Knight(self.board_spaces["B1"], text_file_path, constants.knight_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(knight.Knight(self.board_spaces["G1"], text_file_path, constants.knight_image_width, constants.PlayerColor.WHITE))
+        self.pieces.append(knight.Knight(self.board_spaces["B1"], constants.PlayerColor.WHITE))
+        self.pieces.append(knight.Knight(self.board_spaces["G1"], constants.PlayerColor.WHITE))
 
         # Create C1/F1 bishops
-        text_file_path = str(Path(__file__).parent / "textures" / constants.white_bishop_image_name)
-
-        self.pieces.append(bishop.Bishop(self.board_spaces["C1"], text_file_path, constants.bishop_image_width, constants.PlayerColor.WHITE))
-        self.pieces.append(bishop.Bishop(self.board_spaces["F1"], text_file_path, constants.bishop_image_width, constants.PlayerColor.WHITE))
+        self.pieces.append(bishop.Bishop(self.board_spaces["C1"], constants.PlayerColor.WHITE))
+        self.pieces.append(bishop.Bishop(self.board_spaces["F1"], constants.PlayerColor.WHITE))
 
         # Create D1 queen
-        text_file_path = str(Path(__file__).parent / "textures" / constants.white_queen_image_name)
-
-        self.pieces.append(queen.Queen(self.board_spaces["D1"], text_file_path, constants.queen_image_width, constants.PlayerColor.WHITE))
+        self.pieces.append(queen.Queen(self.board_spaces["D1"], constants.PlayerColor.WHITE))
 
         # Create E1 king
         # Save white king to reference for easy access
-        text_file_path  = str(Path(__file__).parent / "textures" / constants.white_king_image_name)
-        self.white_king = king.King(self.board_spaces["E1"], text_file_path, constants.king_image_width, constants.PlayerColor.WHITE)
+        self.white_king = king.King(self.board_spaces["E1"], constants.PlayerColor.WHITE)
         self.pieces.append(self.white_king)
 
         return
@@ -264,49 +257,38 @@ class Board():
             None         
         """
         # Create the A7-H7 pawns
-        text_file_path = str(Path(__file__).parent / "textures" / constants.black_pawn_image_name)
-
-        self.pieces.append(pawn.Pawn(self.board_spaces["A7"], text_file_path.__str__(), constants.pawn_image_width, constants.PlayerColor.BLACK))
-        self.pieces.append(pawn.Pawn(self.board_spaces["B7"], text_file_path.__str__(), constants.pawn_image_width, constants.PlayerColor.BLACK))
-        self.pieces.append(pawn.Pawn(self.board_spaces["C7"], text_file_path.__str__(), constants.pawn_image_width, constants.PlayerColor.BLACK))
-        self.pieces.append(pawn.Pawn(self.board_spaces["D7"], text_file_path.__str__(), constants.pawn_image_width, constants.PlayerColor.BLACK))
-        self.pieces.append(pawn.Pawn(self.board_spaces["E7"], text_file_path.__str__(), constants.pawn_image_width, constants.PlayerColor.BLACK))
-        self.pieces.append(pawn.Pawn(self.board_spaces["F7"], text_file_path.__str__(), constants.pawn_image_width, constants.PlayerColor.BLACK))
-        self.pieces.append(pawn.Pawn(self.board_spaces["G7"], text_file_path.__str__(), constants.pawn_image_width, constants.PlayerColor.BLACK))
-        self.pieces.append(pawn.Pawn(self.board_spaces["H7"], text_file_path.__str__(), constants.pawn_image_width, constants.PlayerColor.BLACK))
+        self.pieces.append(pawn.Pawn(self.board_spaces["A7"], constants.PlayerColor.BLACK))
+        self.pieces.append(pawn.Pawn(self.board_spaces["B7"], constants.PlayerColor.BLACK))
+        self.pieces.append(pawn.Pawn(self.board_spaces["C7"], constants.PlayerColor.BLACK))
+        self.pieces.append(pawn.Pawn(self.board_spaces["D7"], constants.PlayerColor.BLACK))
+        self.pieces.append(pawn.Pawn(self.board_spaces["E7"], constants.PlayerColor.BLACK))
+        self.pieces.append(pawn.Pawn(self.board_spaces["F7"], constants.PlayerColor.BLACK))
+        self.pieces.append(pawn.Pawn(self.board_spaces["G7"], constants.PlayerColor.BLACK))
+        self.pieces.append(pawn.Pawn(self.board_spaces["H7"], constants.PlayerColor.BLACK))
 
         # Create A8/H8 rooks
-        text_file_path = str(Path(__file__).parent / "textures" / constants.black_rook_image_name)
-
-        self.pieces.append(rook.Rook(self.board_spaces["A8"], text_file_path.__str__(), constants.rook_image_width, constants.PlayerColor.BLACK))
-        self.pieces.append(rook.Rook(self.board_spaces["H8"], text_file_path.__str__(), constants.rook_image_width, constants.PlayerColor.BLACK))
+        self.pieces.append(rook.Rook(self.board_spaces["A8"], constants.PlayerColor.BLACK))
+        self.pieces.append(rook.Rook(self.board_spaces["H8"], constants.PlayerColor.BLACK))
 
         # Create B8/G8 knights
-        text_file_path = str(Path(__file__).parent / "textures" / constants.black_knight_image_name)
-
-        self.pieces.append(knight.Knight(self.board_spaces["B8"], text_file_path.__str__(), constants.knight_image_width, constants.PlayerColor.BLACK))
-        self.pieces.append(knight.Knight(self.board_spaces["G8"], text_file_path.__str__(), constants.knight_image_width, constants.PlayerColor.BLACK))
+        self.pieces.append(knight.Knight(self.board_spaces["B8"], constants.PlayerColor.BLACK))
+        self.pieces.append(knight.Knight(self.board_spaces["G8"], constants.PlayerColor.BLACK))
 
         # Create C8/F8 bishops
-        text_file_path = str(Path(__file__).parent / "textures" / constants.black_bishop_image_name)
-
-        self.pieces.append(bishop.Bishop(self.board_spaces["C8"], text_file_path.__str__(), constants.bishop_image_width, constants.PlayerColor.BLACK))
-        self.pieces.append(bishop.Bishop(self.board_spaces["F8"], text_file_path.__str__(), constants.bishop_image_width, constants.PlayerColor.BLACK))   
+        self.pieces.append(bishop.Bishop(self.board_spaces["C8"], constants.PlayerColor.BLACK))
+        self.pieces.append(bishop.Bishop(self.board_spaces["F8"], constants.PlayerColor.BLACK))   
 
         # Create D8 queen
-        text_file_path = str(Path(__file__).parent / "textures" / constants.black_queen_image_name)
-
-        self.pieces.append(queen.Queen(self.board_spaces["D8"], text_file_path.__str__(), constants.queen_image_width, constants.PlayerColor.BLACK))
+        self.pieces.append(queen.Queen(self.board_spaces["D8"], constants.PlayerColor.BLACK))
 
         # Create E8 king
         # Save black king to reference for easy access
-        text_file_path  = str(Path(__file__).parent / "textures" / constants.black_king_image_name)
-        self.black_king = king.King(self.board_spaces["E8"], text_file_path.__str__(), constants.king_image_width, constants.PlayerColor.BLACK)
+        self.black_king = king.King(self.board_spaces["E8"], constants.PlayerColor.BLACK)
         self.pieces.append(self.black_king)        
 
         return
     
-    def __init_sprites(self):
+    def init_sprites(self):
         """
         Initializes the sprite list by adding all piece sprites to the sprite list.
 
@@ -316,8 +298,35 @@ class Board():
         Returns:
             None    
         """
+        # Clear the sprite list
+        self.sprite_list = arcade.SpriteList()
+
+        # Add each piece's sprite 
         for piece in self.pieces:
             self.sprite_list.append(piece.sprite)
+
+    def clear_board(self):
+        """
+        Clears the board post initialization by performing the following steps:
+            - Clearing all pieces from the piece list
+            - removing all references to pieces from each space
+
+        Args: 
+            None
+
+        Returns:
+            None    
+        """
+        # Clear pieces list
+        self.pieces = []
+
+        # Set all board space "occupying piece" attributes to None
+        for space in constants.space_names:
+            self.board_spaces[space].occupying_piece = None
+
+        # Clear king references
+        self.white_king = None
+        self.black_king = None
 
     def draw_board(self):
         """ 
@@ -368,10 +377,13 @@ class Board():
             piece_moved: Boolean indicator True if piece moved, False otherwise   
         """
         piece_moved = False
+
+        # Clear the msg
+        self.end_move_msg = ''
         
         try:
             # Check that piece type is valid
-            if piece_type not in [pawn.Pawn, rook.Rook, knight.Knight, bishop.Bishop, queen.Queen, king.King]:
+            if piece_type not in valid_piece_types:
                 # raise exception indicating the piece type is not valid
                 self.end_move_msg = f'Piece type does not exist.'
                 raise InvalidMoveException()       
@@ -431,9 +443,8 @@ class Board():
 
                     if self.__game_over(king_piece, active_checks):
                         # TODO: Enemy king is in check. If there are no moves that can stop the check, the game is over.
+                        self.game_is_over = True
                         print('game over!')
-                        while(1):
-                            pass
 
                     elif active_checks and king_piece.color == constants.PlayerColor.WHITE:
                         # Set end of move msg 
@@ -453,9 +464,6 @@ class Board():
             if self.end_move_msg:
                 # Print a message to the user regarding how the move went
                 print(self.end_move_msg)
-
-                # Clear the msg
-                self.end_move_msg = ''
 
         return piece_moved
 
@@ -594,8 +602,13 @@ class Board():
                     # Pawn is staying in the same column. Run standard collision check
                     self.__check_collisions(pawn_piece.occupied_square.name, next_space)
 
-                    # Assuming no exception was raised, the move is valid. Attempt to move the pawn
-                    move_is_valid = True                     
+                    # Assuming no exception was raised, we must now check the destination. Pawns cannot capture moving forwards
+                    if self.board_spaces[next_space].occupying_piece is None:
+                        move_is_valid = True
+
+                    else:
+                        # There is a piece in the way
+                        self.end_move_msg = f'There is another piece blocking the way.'
 
                 else:
                     # Pawn is moving diagonally. Check destination for opposing color piece
@@ -674,7 +687,7 @@ class Board():
                 move_is_valid = True
             else:
                 # Bishop move invalid. Raise an exception
-                self.end_move_msg = f'Bishops cannot move that way'
+                self.end_move_msg = f'Bishops cannot move that way.'
                 raise InvalidMoveException()
                 
         except Exception:
@@ -934,6 +947,7 @@ class Board():
             pass
         
         return king_checks
+
     def __game_over(self, king_piece:king.King, active_checks:KingCheck):
         """
         Method to check for game over on the king who is actively in check. The game is considered over if the following
