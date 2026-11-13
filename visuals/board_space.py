@@ -23,7 +23,8 @@ class Board_Space():
         - center_x: Square's center x position in the window
         - center_y: Square's center y position in the window
         - length: Length of the sqaure edge
-        - color: Color of the sqaure
+        - def_color: Default color of the sqaure when it is not selected
+        - act_color: Current color of the square
         - name: Name of the square on the board (A1, A2...)
         - occupying_piece: Piece object that occupies the square. 
                            Set to none on creation, updated when
@@ -36,11 +37,12 @@ class Board_Space():
         Initializes space object
         
         Args:
-            center_x: Center x position of the space
-            center_y: Center y position of the space
-            length:   Length of square
-            color:    Color of the square
-            name:     Name of the square based on row and column it occupies
+            center_x:  Center x position of the space
+            center_y:  Center y position of the space
+            length:    Length of square
+            def_color: Default color of the square
+            act_color: Current color of the square
+            name:      Name of the square based on row and column it occupies
 
         Returns:
             None
@@ -50,7 +52,8 @@ class Board_Space():
         self.center_x = center_x
         self.center_y = center_y
         self.length = length
-        self.color = color
+        self.def_color = color
+        self.act_color = color
         self.name = name
 
         # Initialize the occupying piece
@@ -122,7 +125,7 @@ class Board_Space():
             None
         """
         # self.length used as both height and width args to ensure square shape
-        arcade.draw_rect_filled(arcade.rect.XYWH(self.center_x, self.center_y, self.length, self.length), self.color)
+        arcade.draw_rect_filled(arcade.rect.XYWH(self.center_x, self.center_y, self.length, self.length), self.act_color)
         return
 
     def remove_occupying_piece(self):
@@ -155,3 +158,27 @@ class Board_Space():
         except Exception:
             # Probably tried to divide by 0
             self.occupying_piece.sprite.scale = 1
+
+    def set_active_color(self, color:arcade.color):
+        """
+        Sets the displayed color of the tile.
+
+        Args: 
+            color: arcade.color to set the tile to
+
+        Returns:
+            None
+        """
+        self.act_color = color
+
+    def restore_active_color(self):
+        """
+        Sets the displayed color of the tile back to its orginal color.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        self.act_color = self.def_color

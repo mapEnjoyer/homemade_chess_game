@@ -232,7 +232,14 @@ class GameView(arcade.Window):
             # Clear move parser after move is handled
             # Dont clear self.move_parser.new_space here as it is used for pawn promotion.
             # It should be cleared in __cleanup_turn()
+            self.chess_board.board_spaces[self.move_parser.cur_space].restore_active_color()
             self.move_parser.piece_type = self.move_parser.cur_space = None
+
+            if not move_handled:
+                # Since the move wasn't completed due to being invalid, we must finish
+                # cleaning up move parser here.
+                self.move_parser.new_space = None
+
 
         if move_handled and not self.chess_board.pawn_promoting:        
             # Run turn cleanup
@@ -258,7 +265,7 @@ class GameView(arcade.Window):
 
             # Run turn cleanup
             self.__cleanup_turn()
-            
+
     def on_draw(self):
         """
         Render the screen. Screen rendering requires updating positions of
@@ -307,7 +314,6 @@ class GameView(arcade.Window):
             button: int - contains which buttons were pressed. Only LEFT and RIGHT are used
             modifiers: int - unused
         """
-        print(f'pressed! x={x}, y={y}, button={button}, modifiers={modifiers}')
 
         col_final = None
         row_final = None
@@ -334,6 +340,10 @@ class GameView(arcade.Window):
             return
 
         elif not row_final or not col_final or button == arcade.MOUSE_BUTTON_RIGHT:
+            if (self.move_parser.cur_space):
+                # Player selected a space and changed their mind. Restore the space color
+                self.chess_board.board_spaces[self.move_parser.cur_space].restore_active_color()
+            
             # Player did not click on the chess board or right clicked. Clear move parser selection
             self.move_parser.cur_space = None
             self.move_parser.new_space = None
@@ -344,6 +354,9 @@ class GameView(arcade.Window):
             # Must be the first click. Set the current space and piece type
             self.move_parser.cur_space = col_final+row_final
             self.move_parser.piece_type = type(self.chess_board.board_spaces[col_final+row_final].occupying_piece)
+
+            # Change the color of the sqaure being selected
+            self.chess_board.board_spaces[self.move_parser.cur_space].set_active_color(arcade.color.YELLOW)
 
         else:
             # Must be the second click. Set the destination space
