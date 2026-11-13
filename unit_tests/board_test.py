@@ -352,7 +352,63 @@ def test_pawn_capture_H_side():
     assert isinstance(game_window.chess_board.board_spaces['E4'].occupying_piece, pawn.Pawn)
     assert game_window.chess_board.board_spaces['E4'].occupying_piece.color == constants.PlayerColor.BLACK
 
-#TODO: pawn promotion test
+@pytest.mark.parametrize('promo_type', [rook.Rook, bishop.Bishop, knight.Knight, queen.Queen])
+def test_pawn_promotion(promo_type):
+    """
+    Test promoting pawns
+    """
+
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)
+
+    # White pawn on H7
+    # Black pawn on H2
+    # White king on E2
+    # Black king on E7
+    pieces = []
+    pieces.append((pawn.Pawn, 'H7', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'H2', constants.PlayerColor.BLACK))
+    pieces.append((king.King, 'E2', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E7', constants.PlayerColor.BLACK))     
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # We have to set all the "has_moved" flags of the pieces as these positions are only possible if they have moved
+    for piece in game_window.chess_board.pieces:
+        piece.has_moved = True
+
+    # Move the white pawn to promote
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'H7', 'H8', constants.PlayerColor.WHITE)
+    assert game_window.chess_board.pawn_promoting
+
+    # Set move parser attributes to mimic user input
+    game_window.move_parser.pawn_promoting = True
+    game_window.move_parser.pawn_promotion_type = promo_type
+    game_window.move_parser.new_space = 'H8'
+
+    # Call window on_draw() to complete promo
+    game_window.on_draw()
+    assert game_window.chess_board.pawn_promoting == False
+    assert game_window.move_parser.pawn_promoting == False
+    assert game_window.move_parser.pawn_promotion_type == None
+    assert isinstance(game_window.chess_board.board_spaces['H8'].occupying_piece, promo_type)
+
+    # Move the black pawn to promote
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'H2', 'H1', constants.PlayerColor.BLACK)
+    assert game_window.chess_board.pawn_promoting    
+
+    # Set move parser attributes to mimic user input
+    game_window.move_parser.pawn_promoting = True
+    game_window.move_parser.pawn_promotion_type = promo_type
+    game_window.move_parser.new_space = 'H1'
+
+    # Call window on_draw() to complete promo
+    game_window.on_draw()
+    assert game_window.chess_board.pawn_promoting == False
+    assert game_window.move_parser.pawn_promoting == False
+    assert game_window.move_parser.pawn_promotion_type == None
+    assert isinstance(game_window.chess_board.board_spaces['H1'].occupying_piece, promo_type)
 
 def test_en_passant():
     """
@@ -1449,6 +1505,7 @@ def test_game_over_white():
 
     # Slide the F2 rook to H2 which will ladder mate the black king
     assert game_window.chess_board.handle_move(rook.Rook, 'F2', 'H2', constants.PlayerColor.WHITE)
+    game_window.chess_board.check_game_over(constants.PlayerColor.BLACK)
     assert game_window.chess_board.game_is_over
 
 def test_game_over_black():
@@ -1475,4 +1532,5 @@ def test_game_over_black():
 
     # Slide the C7 rook to A7 which will ladder mate the black king
     assert game_window.chess_board.handle_move(rook.Rook, 'C7', 'A7', constants.PlayerColor.BLACK)
+    game_window.chess_board.check_game_over(constants.PlayerColor.WHITE)
     assert game_window.chess_board.game_is_over

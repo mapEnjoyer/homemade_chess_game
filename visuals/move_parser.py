@@ -28,6 +28,8 @@ class MoveParser():
         cur_space: Space next move is starting from. Will be 'None' if no move is to be processed.
         new_space: Space next move is moving to. Will be 'None' if no move is to be processed.
         _player_turn: Indicates which player's turn it is. Set to WHITE on startup.
+        pawn_promoting: Boolean flag indicating next user input is for pawn promotion.
+        pawn_promotion_type: Type of piece a pawn is promoting to on a given promo (can also be None)
     """
 
     def __init__(self, window:arcade.Window):
@@ -48,6 +50,8 @@ class MoveParser():
         self.cur_space = None
         self.new_space = None
         self.player_turn = constants.PlayerColor.WHITE
+        self.pawn_promoting:bool = False
+        self.pawn_promotion_type = None
 
         # Text entry window
         # The only way I could find to get the text box widget
@@ -150,67 +154,94 @@ class MoveParser():
 
         # Convert to upper case
         text = text.upper()
+        if self.pawn_promoting:
+            try:
+                if len(text) == 1:
+                    if text[0] == 'R':
+                        # Piece is of type 'rook'
+                        self.pawn_promotion_type = rook.Rook
 
-        try:
-            if len(text) == 4:
-                # Assume piece is of type 'pawn' as pawn moves do not 
-                # include the piece type in algebraic notation (ex: e4)
-                piece_type = pawn.Pawn
+                    elif text[0] == 'N':
+                        # Piece is of type 'knight'
+                        self.pawn_promotion_type = knight.Knight
 
-            elif len(text) == 5:
+                    elif text[0] == 'B':
+                        # Piece is of type 'bishop'
+                        self.pawn_promotion_type = bishop.Bishop
 
-                if text[0] == 'R':
-                    # Piece is of type 'rook'
-                    piece_type = rook.Rook
+                    elif text[0] == 'Q':
+                        # Piece is of type 'queen'
+                        self.pawn_promotion_type = queen.Queen
 
-                elif text[0] == 'N':
-                    # Piece is of type 'knight'
-                    piece_type = knight.Knight
-
-                elif text[0] == 'B':
-                    # Piece is of type 'bishop'
-                    piece_type = bishop.Bishop
-
-                elif text[0] == 'Q':
-                    # Piece is of type 'queen'
-                    piece_type = queen.Queen
-
-                elif text[0] == 'K':
-                    # Piece is of type 'king'
-                    piece_type = king.King
-
+                    else:
+                        raise excpetions.InvalidPieceTypeError(f'Invalid piece type! Valid piece types include "R":Rook, "N":Knight, "B":Bishop, "Q":Queen.')
                 else:
-                    # Invalid move entry, notify
-                    raise excpetions.InvalidPieceTypeError(f'Invalid piece type! Valid piece types include "R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King. Pawn moves do not include a "P" (ex: E4).')
-                
-            else:
-                # Move input too long. Raise exception
-                raise InvalidMoveEntry(f'Move entry is invalid. Length of move should be between 4-5characters (ex: NB1C3)')
+                    raise excpetions.InvalidPieceTypeError(f'Too many characters! Valid piece types include "R":Rook, "N":Knight, "B":Bishop, "Q":Queen.')
 
-                
-            # Now that we have determined piece type, attempt to determine current and new squares
-            cur_space = text[-4:-2]
-            new_space = text[-2:]
-
-            if cur_space == new_space:
-                # No piece is allowed to stay in the same space as a valid move
-                raise InvalidMoveEntry(f'Piece cannot move to the space it is already in!')
-
-            if any(space not in constants.space_names for space in [cur_space, new_space]):
-                raise excpetions.InvalidSpaceError(f'Space does not exist on board! Use the row/column labels to determine square piece is moving to. Column letter always comes before row number (ex: E4).')
-
-        except Exception:
-            pass
+            except Exception:
+                pass
 
         else:
-            # Assign piece type and space to move parser so they can be used by the window
-            self.piece_type = piece_type
-            self.cur_space = cur_space
-            self.new_space = new_space
+            try:
+                if len(text) == 4:
+                    # Assume piece is of type 'pawn' as pawn moves do not 
+                    # include the piece type in algebraic notation (ex: e4)
+                    piece_type = pawn.Pawn
 
-        finally:
-            # Clear text box after parsing is complete
-            self.text_entry._doc.text = ""
+                elif len(text) == 5:
+
+                    if text[0] == 'R':
+                        # Piece is of type 'rook'
+                        piece_type = rook.Rook
+
+                    elif text[0] == 'N':
+                        # Piece is of type 'knight'
+                        piece_type = knight.Knight
+
+                    elif text[0] == 'B':
+                        # Piece is of type 'bishop'
+                        piece_type = bishop.Bishop
+
+                    elif text[0] == 'Q':
+                        # Piece is of type 'queen'
+                        piece_type = queen.Queen
+
+                    elif text[0] == 'K':
+                        # Piece is of type 'king'
+                        piece_type = king.King
+
+                    else:
+                        # Invalid move entry, notify
+                        raise excpetions.InvalidPieceTypeError(f'Invalid piece type! Valid piece types include "R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King. Pawn moves do not include a "P" (ex: E4).')
+                    
+                else:
+                    # Move input too long. Raise exception
+                    raise InvalidMoveEntry(f'Move entry is invalid. Length of move should be between 4-5characters (ex: NB1C3)')
+
+                    
+                # Now that we have determined piece type, attempt to determine current and new squares
+                cur_space = text[-4:-2]
+                new_space = text[-2:]
+
+                if cur_space == new_space:
+                    # No piece is allowed to stay in the same space as a valid move
+                    raise InvalidMoveEntry(f'Piece cannot move to the space it is already in!')
+
+                if any(space not in constants.space_names for space in [cur_space, new_space]):
+                    raise excpetions.InvalidSpaceError(f'Space does not exist on board! Use the row/column labels to determine square piece is moving to. Column letter always comes before row number (ex: E4).')
+
+            except Exception:
+                pass
+
+            else:
+                # Assign piece type and space to move parser so they can be used by the window
+                self.piece_type = piece_type
+                self.cur_space = cur_space
+                self.new_space = new_space
+
+
+        # Clear text box after parsing is complete
+        self.text_entry._doc.text = ""
 
         return
 

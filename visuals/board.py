@@ -87,6 +87,8 @@ class Board():
         - black_king: reference to black king in pieces list
         - game_is_over: boolean indicator on if game is over
         - prev_board_states: list of previous board states, newest states at the end of the list.
+        - enable_msgs: boolean flag that enables setting the end_move_msg attribute. Useful during behind the scenes piece movements.
+        - pawn_promoting: boolean flag that indicates a pawn is attempting to promote and input is needed from the player.
     """
 
     def __init__(self):
@@ -116,12 +118,24 @@ class Board():
         # List containing all pieces on board
         self.pieces = []
 
-        # Initialize move end message
-        self.end_move_msg = ''
-
         # Initialize king references (updated in __init_white_pieces/__init_black_pieces)
-        self.white_king = None
-        self.black_king = None
+        self.white_king:king.King = None
+        self.black_king:king.King = None
+
+        # Initialize game over flag
+        self.game_is_over:bool = False
+
+        # Initialize previous board states
+        self.prev_board_states:list = [dict[str, piece.Piece]]
+
+        # Initialize enable msg flag
+        self.enable_msgs:bool = True
+
+        # Initialize move end message
+        self.end_move_msg:str = ''
+
+        # Initialize the pawn promotion flag
+        self.pawn_promoting:bool = False
 
         # Initialize game over flag
         self.game_is_over:bool = False
@@ -145,6 +159,34 @@ class Board():
         self.init_sprites()
 
         return
+    
+    @property
+    def end_move_msg(self):
+        """
+        Method to get player turn.
+
+        Args:
+            None
+
+        Returns:
+            player_turn: Color of the player who's turn it is. Can be WHITE or BLACK.              
+        """
+        return self._end_move_msg
+    
+    @end_move_msg.setter
+    def end_move_msg(self, msg:str):
+        """
+        Set end move message. Attribute can only be set if enable_msgs attribute is True.
+
+        Args:
+            msg: string end move message
+
+        Returns:
+            None
+        """
+        if self.enable_msgs:
+            self._end_move_msg = msg
+
 
     def __init_squares(self):
         """
@@ -430,37 +472,12 @@ class Board():
                     # Set piece_moved flag for both the function return and the piece
                     piece_moved = piece.has_moved = True
 
-                    # Run check handler for king of opposite color to notify next player their king is in check
-                    match player_turn:
-                        case constants.PlayerColor.BLACK:
-                            # Get white king
-                            king_piece = self.__get_king(constants.PlayerColor.WHITE)
-                        case constants.PlayerColor.WHITE:
-                            # Get black king
-                            king_piece = self.__get_king(constants.PlayerColor.BLACK)
-                        case _:
-                            self.end_move_msg = f'How did the player color even do this?'
-                            raise InvalidMoveException()
-                        
-                    # Get active checks for this king
-                    active_checks = self.__determine_checks(king_piece.occupied_square.name, king_piece)
+                    # Check if a pawn promotion is occuring
+                    if isinstance(piece, pawn.Pawn):
+                        if (piece.color == constants.PlayerColor.WHITE and piece.occupied_square.square_row == '8') or \
+                           (piece.color == constants.PlayerColor.BLACK and piece.occupied_square.square_row == '1'):
+                            self.pawn_promoting = True
 
-                    if self.__game_over(king_piece, active_checks):
-                        # TODO: Enemy king is in check. If there are no moves that can stop the check, the game is over.
-                        self.game_is_over = True
-                        print('game over!')
-
-                    elif active_checks and king_piece.color == constants.PlayerColor.WHITE:
-                        # Set end of move msg 
-                        self.end_move_msg = f'The white king is in check!'
-
-                    elif active_checks and king_piece.color == constants.PlayerColor.BLACK:
-                        # Set end of move msg 
-                        self.end_move_msg = f'The black king is in check!'
-                    
-                    else:
-                        # No message to send to next player
-                        self.end_move_msg = ''
         except Exception:
             pass
 
@@ -470,6 +487,54 @@ class Board():
                 print(self.end_move_msg)
 
         return piece_moved
+
+    def check_game_over(self, player_turn:constants.PlayerColor):
+        """
+        High level method to check for game over. Should be called after a move is resolved.
+
+        Args:
+            player_turn: Player whose turn it is. King of the same color will be checked. 
+
+        Returns:
+            None
+        """
+        # Get king
+        king_piece = self.__get_king(player_turn)
+
+        # Turn off messaging
+        self.enable_msgs = False
+            
+        # Get active checks for this king
+        active_checks = self.__determine_checks(king_piece.occupied_square.name, king_piece)
+
+        # Check for game over
+        game_over = self.__game_over(king_piece, active_checks)
+
+        # Turn messaging back on
+        self.enable_msgs = True
+        
+        if game_over: 
+            # Enemy king is in check. If there are no moves that can stop the check, the game is over.
+            self.game_is_over = True
+            print('game over!')
+
+        elif active_checks and king_piece.color == constants.PlayerColor.WHITE:
+            # Set end of move msg 
+            self.end_move_msg = f'The white king is in check!'
+
+        elif active_checks and king_piece.color == constants.PlayerColor.BLACK:
+            # Set end of move msg 
+            self.end_move_msg = f'The black king is in check!'
+        
+        else:
+            # No message to send to next player
+            self.end_move_msg = ''
+
+        if self.end_move_msg:
+            # Print a message to the user regarding how the move went
+            print(self.end_move_msg)
+
+        return
 
     def __get_move_is_valid(self, piece_type, start_space:str, next_space:str):
         """
@@ -545,10 +610,7 @@ class Board():
             if piece_to_cap is None or piece_to_move.color != piece_to_cap.color:
                 if piece_to_cap is not None:
                     # Remove the piece from the game
-                    self.pieces.remove(piece_to_cap)
-
-                    # Remove the sprite from the list so it no longer is drawn
-                    self.sprite_list.remove(piece_to_cap.sprite)
+                    self.__remove_piece(piece_to_cap)
 
                 # Move the piece to the new space
                 piece_to_move.update_space(self.board_spaces[next_space])
@@ -557,7 +619,17 @@ class Board():
                 # If the move would put the king into check, we have to reverse it and
                 # deny the move.
                 king_piece = self.__get_king(piece_to_move.color)
-                if self.__determine_checks(king_piece.occupied_square.name, king_piece):
+
+                # Suppress messaging
+                self.enable_msgs = False
+
+                # Look for king checks
+                king_in_check = self.__determine_checks(king_piece.occupied_square.name, king_piece)
+
+                # Turn messaging back on
+                self.enable_msgs = True
+
+                if king_in_check:
                     # This move would put the king in check. Undo it by 
                     # reverting the board state and throwing an exception
                     self.restore_board_state(prev_board_state)
@@ -632,15 +704,7 @@ class Board():
                         # a different square. __move_piece() was not built to handle this situation,
                         # so the workaround is to manually remove the pawn being captured by en 
                         # passant here. This is done below
-
-                        # Remove the captured piece from the list of pieces
-                        self.pieces.remove(self.board_spaces[en_passant_square].occupying_piece)
-
-                        # Remove the sprite from the list so it no longer is drawn
-                        self.sprite_list.remove(self.board_spaces[en_passant_square].occupying_piece.sprite)
-
-                        # Remove reference to piece on the given square
-                        self.board_spaces[en_passant_square].occupying_piece = None
+                        self.__remove_piece(self.board_spaces[en_passant_square].occupying_piece)
                         
                         # Set valid flag
                         move_is_valid = True
@@ -655,8 +719,6 @@ class Board():
                         else:
                             # There is a piece to capture. Attempt to move the pawn
                             move_is_valid = True
-
-                # TODO: Pawn promotion
 
             else:
                 # Pawn move invalid. Raise an exception
@@ -1111,6 +1173,28 @@ class Board():
 
         return None
 
+    def __remove_piece(self, piece_to_remove:piece.Piece):
+        """
+        Removes a piece from the game by cutting any references to it.
+
+        Args:
+            piece_to_remove: Piece to remove from the game
+
+        Returns:
+            None
+        """
+
+        # Remove reference to piece on the given square
+        self.board_spaces[piece_to_remove.occupied_square.name].occupying_piece = None
+
+        # Remove the captured piece from the list of pieces
+        self.pieces.remove(piece_to_remove)
+
+        # Remove the sprite from the list so it no longer is drawn
+        self.sprite_list.remove(piece_to_remove.sprite)
+
+        return
+
     def save_board_state(self):
         """
         Returns the current state of the board to be reused later.
@@ -1157,3 +1241,36 @@ class Board():
 
                 # Add back any missing sprites from the sprite list
                 self.sprite_list.append(board_state[space].sprite)
+
+    def promote_pawn(self, pawn_to_promo:pawn.Pawn, promo_type):
+        """
+        Method to promote a pawn to a new piece type. Pawns cannot promote
+        to pawns.
+
+        Args:
+            pawn_to_promo: Pawn to be promoted
+            promo_type: Piece type to promote to
+
+        Returns:
+            pawn_promoted: boolean indicator that the pawn promoted successfully
+        """
+        pawn_promoted:bool = False
+        
+        if promo_type == pawn.Pawn or promo_type == king.King:
+            # Can't promote a pawn to a pawn or king
+            return pawn_promoted
+
+        # Save the name and color of the square the pawn currently occupies
+        square_name = pawn_to_promo.occupied_square.name
+        color = pawn_to_promo.color
+
+        # Remove the promoted pawn from the game
+        self.__remove_piece(pawn_to_promo)
+
+        # Create a new piece of the piece type on the square
+        new_piece = promo_type(self.board_spaces[square_name], color)
+        
+        # Add the piece and sprites to the list
+        self.pieces.append(new_piece)
+        self.sprite_list.append(new_piece.sprite)
+

@@ -92,6 +92,7 @@ class GameView(arcade.Window):
         Returns:
             None
         """
+        move_handled:bool = False
 
         # The clear method should always be called at the start of on_draw.
         # It clears the whole screen to whatever the background color is
@@ -111,19 +112,38 @@ class GameView(arcade.Window):
 
         if all(val is not None for val in [self.move_parser.piece_type, self.move_parser.cur_space, self.move_parser.new_space]):
             # Player move was input into move parser. Pass along to board
-            if self.chess_board.handle_move(self.move_parser.piece_type, 
-                                            self.move_parser.cur_space, 
-                                            self.move_parser.new_space,
-                                            self.move_parser._player_turn):
+            move_handled = self.chess_board.handle_move(self.move_parser.piece_type, 
+                                                        self.move_parser.cur_space, 
+                                                        self.move_parser.new_space,
+                                                        self.move_parser.player_turn)
             
-                # Update player turn based on if move was handled successfully
-                if self.move_parser.player_turn == constants.PlayerColor.WHITE:
-                     self.move_parser.player_turn = constants.PlayerColor.BLACK
-                else:
-                     self.move_parser.player_turn = constants.PlayerColor.WHITE
-    
             # Clear move parser after move is handled
-            self.move_parser.piece_type = self.move_parser.cur_space = self.move_parser.new_space = None
+            # Dont clear self.move_parser.new_space here as it is used for pawn promotion.
+            # It should be cleared in __cleanup_turn()
+            self.move_parser.piece_type = self.move_parser.cur_space = None
+
+        if move_handled and not self.chess_board.pawn_promoting:        
+            # Run turn cleanup
+            self.__cleanup_turn()
+
+        elif move_handled and self.chess_board.pawn_promoting:
+            # Relay to the move parser that the user's next input should be the piece type they want to promote the pawn to
+            self.move_parser.pawn_promoting = True
+            print(f'Enter the piece type you wish to promote the pawn on {self.move_parser.new_space} to:')
+
+        if self.move_parser.pawn_promoting and self.move_parser.pawn_promotion_type:
+            # Promote the pawn
+            self.chess_board.promote_pawn(self.chess_board.board_spaces[self.move_parser.new_space].occupying_piece, self.move_parser.pawn_promotion_type)
+
+            # Clear chess board pawn promotion info
+            self.chess_board.pawn_promoting = False
+
+            # Clear move parser pawn promotion info
+            self.move_parser.pawn_promoting = False
+            self.move_parser.pawn_promotion_type = None
+
+            # Run turn cleanup
+            self.__cleanup_turn()
 
 
         # Draw the chess board
@@ -231,4 +251,29 @@ class GameView(arcade.Window):
         self.move_parser.text_entry.width =  self.width/4 
 
         return
+
+    def __cleanup_turn(self):
+        """
+        Runs cleanup once a turn is complete.
+        1. Sets next player
+        2. Checks for game over
+        3. Finishes move parser cleanup
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        # Update player turn based on if move was handled successfully
+        if self.move_parser.player_turn == constants.PlayerColor.WHITE:
+                self.move_parser.player_turn = constants.PlayerColor.BLACK
+        else:
+                self.move_parser.player_turn = constants.PlayerColor.WHITE
+
+        # Check for game over
+        self.chess_board.check_game_over(self.move_parser.player_turn)
+
+        # Finish move parser cleanup
+        self.move_parser.new_space = None
 
