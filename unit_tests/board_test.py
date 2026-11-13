@@ -79,10 +79,10 @@ def test_board_init(square_color_1:arcade.color,
         # Make sure it's actually a board square
         assert isinstance(game_window.chess_board.board_spaces[square], board_space.Board_Space)
 
-        if game_window.chess_board.board_spaces[square].color == square_color_1:
+        if game_window.chess_board.board_spaces[square].act_color == square_color_1:
             color_1_count+=1
 
-        elif game_window.chess_board.board_spaces[square].color == square_color_2:
+        elif game_window.chess_board.board_spaces[square].act_color == square_color_2:
             color_2_count+=1
 
     # Total square count should be 64, with 32 of each color
@@ -131,8 +131,6 @@ def test_move_handle_invalid_piece_type():
                                                next_space='E4',
                                                player_turn=constants.PlayerColor.WHITE) is False
 
-    assert game_window.chess_board.end_move_msg == f'Piece type does not exist.'
-
 def test_move_handle_invalid_start_square():
     """
     Test trying to make a move with an invalid starting square.
@@ -146,8 +144,6 @@ def test_move_handle_invalid_start_square():
                                                next_space='E4',
                                                player_turn=constants.PlayerColor.WHITE) is False
 
-    assert game_window.chess_board.end_move_msg == f'Starting space does not exist.'
-
 def test_move_handle_invalid_end_square():
     """
     Test trying to make a move with an invalid ending square.
@@ -160,8 +156,6 @@ def test_move_handle_invalid_end_square():
                                                curr_space='E2',
                                                next_space='I4',
                                                player_turn=constants.PlayerColor.WHITE) is False
-
-    assert game_window.chess_board.end_move_msg == f'Destination space does not exist.'
     
 def test_move_handle_no_piece_on_square():
     """
@@ -176,8 +170,6 @@ def test_move_handle_no_piece_on_square():
                                                next_space='E4',
                                                player_turn=constants.PlayerColor.WHITE) is False
 
-    assert game_window.chess_board.end_move_msg == f'No piece to move.'
-
 def test_move_handle_wrong_piece_type():
     """
     Test trying to move a piece with the wrong piece type
@@ -190,8 +182,6 @@ def test_move_handle_wrong_piece_type():
                                                curr_space='E2',
                                                next_space='E4',
                                                player_turn=constants.PlayerColor.WHITE) is False
-
-    assert game_window.chess_board.end_move_msg == f'Wrong piece type.'   
 
 def test_move_handle_wrong_color_piece():
     """
@@ -212,8 +202,6 @@ def test_move_handle_wrong_color_piece():
                                                curr_space='E2',
                                                next_space='E4',
                                                player_turn=constants.PlayerColor.BLACK) is False
-
-    assert game_window.chess_board.end_move_msg == f'Wrong color piece.'
 
 @pytest.mark.parametrize('col', constants.board_col_labels)
 def test_pawn_move_1_space_forward(col):
@@ -472,37 +460,25 @@ def test_pawn_invalid_moves():
 
     # Try moving both pawns horizontally towards A rank, checking for failure
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'C4', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Pawns cannot move that way.'
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'C5', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Pawns cannot move that way.'
 
     # Try moving both pawns horizontally towards H rank, checking for failure
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'E4', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Pawns cannot move that way.'
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'E5', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Pawns cannot move that way.'
 
     # Try moving both pawns backwards, checking for failure
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'D3', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Pawns cannot move that way.'
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'D6', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Pawns cannot move that way.'
 
     # Try moving both pawns forwards, checking for failure since they cannot capture pieces in front of them
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'D5', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'D4', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
 
     # Try moving pawns diagonally with no pieces to capture, checking for failure
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'E5', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Pawns can only move diagonally when capturing.'
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'C5', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Pawns can only move diagonally when capturing.'
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'E4', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Pawns can only move diagonally when capturing.'
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'C4', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Pawns can only move diagonally when capturing.'
 
 def test_pawn_collision():
     """Test trying to move pawn through another piece"""
@@ -528,12 +504,10 @@ def test_pawn_collision():
 
     # Try moving D2 pawn to D4
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D2', 'D4', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
 
 
     # Try moving D7 pawn to D5
     assert game_window.chess_board.handle_move(pawn.Pawn, 'D7', 'D5', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
 
 def test_knight_valid_moves():
     "test moving knights to empty/valid spaces"
@@ -599,43 +573,33 @@ def test_knight_invalid_moves():
 
     # Try moving white knight straight forward
     assert game_window.chess_board.handle_move(knight.Knight, w_knight_space, 'D5', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Knights cannot move that way.'
 
     # Try moving white knight straight backward
     assert game_window.chess_board.handle_move(knight.Knight, w_knight_space, 'D3', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Knights cannot move that way.'
 
     # Try moving white knight towards A column
     assert game_window.chess_board.handle_move(knight.Knight, w_knight_space, 'C4', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Knights cannot move that way.'
 
     # Try moving white knight towards H column
     assert game_window.chess_board.handle_move(knight.Knight, w_knight_space, 'E4', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Knights cannot move that way.'
 
     # Try moving white knight diagonally
     assert game_window.chess_board.handle_move(knight.Knight, w_knight_space, 'C3', constants.PlayerColor.WHITE) is False    
-    assert game_window.chess_board.end_move_msg == f'Knights cannot move that way.'
 
     # Try moving black knight straight forward
     assert game_window.chess_board.handle_move(knight.Knight, b_knight_space, 'E4', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Knights cannot move that way.'
 
     # Try moving black knight straight backward
     assert game_window.chess_board.handle_move(knight.Knight, b_knight_space, 'E3', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Knights cannot move that way.'
 
     # Try moving black knight towards A column
     assert game_window.chess_board.handle_move(knight.Knight, b_knight_space, 'D4', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Knights cannot move that way.'
 
     # Try moving black knight towards H column
     assert game_window.chess_board.handle_move(knight.Knight, b_knight_space, 'F4', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Knights cannot move that way.'
 
     # Try moving black knight diagonally
     assert game_window.chess_board.handle_move(knight.Knight, b_knight_space, 'F6', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Knights cannot move that way.'
 
 def test_knight_capture():
     "test capturing enemy pieces with knights"
@@ -742,31 +706,19 @@ def test_bishop_invalid_moves():
 
     # Try moving bishops towards row 7 veritically
     assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'D7', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Bishops cannot move that way.'
-
     assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'E7', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Bishops cannot move that way.'
 
     # Try moving bishops towards row 2 vertically
     assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'D2', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Bishops cannot move that way.'
-
     assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'E2', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Bishops cannot move that way.'
 
     # Try moving bishops towards column A horizontally
     assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'A4', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Bishops cannot move that way.'
-
     assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'A5', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Bishops cannot move that way.'
 
     # Try moving bishops towards column H horizontally
     assert game_window.chess_board.handle_move(bishop.Bishop, w_bishop_space, 'H4', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Bishops cannot move that way.'
-
     assert game_window.chess_board.handle_move(bishop.Bishop, b_bishop_space, 'H5', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Bishops cannot move that way.'
 
 def test_bishop_collision():
     """Test trying to move bishops through other pieces"""
@@ -776,11 +728,9 @@ def test_bishop_collision():
 
     # Try moving C1 bishop through D2 pawn
     assert game_window.chess_board.handle_move(bishop.Bishop, 'C1', 'E3', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
 
     # Try moving C8 bishop through D7 pawn
     assert game_window.chess_board.handle_move(bishop.Bishop, 'C8', 'E6', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
 
 def test_bishop_captures():
     """Test capturing a piece with a bishop"""
@@ -882,27 +832,19 @@ def test_rook_invalid_moves():
 
     # Try moving rooks diagonally towards row 1/column A
     assert game_window.chess_board.handle_move(rook.Rook, w_rook_space, 'A1', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Rooks cannot move that way.'
     assert game_window.chess_board.handle_move(rook.Rook, b_rook_space, 'B1', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Rooks cannot move that way.'
 
     # Try moving rooks diagonally towards row 1/column H
     assert game_window.chess_board.handle_move(rook.Rook, w_rook_space, 'G1', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Rooks cannot move that way.'
     assert game_window.chess_board.handle_move(rook.Rook, b_rook_space, 'H1', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Rooks cannot move that way.'
 
     # Try moving rooks diagonally towards row 8/column A
     assert game_window.chess_board.handle_move(rook.Rook, w_rook_space, 'A7', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Rooks cannot move that way.'
     assert game_window.chess_board.handle_move(rook.Rook, b_rook_space, 'A8', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Rooks cannot move that way.'
 
     # Try moving rooks diagonally towards row 8/column H
     assert game_window.chess_board.handle_move(rook.Rook, w_rook_space, 'G8', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Rooks cannot move that way.'
     assert game_window.chess_board.handle_move(rook.Rook, b_rook_space, 'G7', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Rooks cannot move that way.'
 
 def test_rook_collision():
     """Test trying to move rooks through other pieces"""
@@ -912,11 +854,9 @@ def test_rook_collision():
 
     # Try moving A1 rook through A2 pawn
     assert game_window.chess_board.handle_move(rook.Rook, 'A1', 'A3', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
 
     # Try moving A8 rook through A7 pawn
     assert game_window.chess_board.handle_move(rook.Rook, 'A8', 'A6', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
 
 def test_rook_captures():
     """Test capturing a piece with a rook"""
@@ -1018,10 +958,7 @@ def test_queen_invalid_moves():
 
     # Try moving queens in knight shape
     assert game_window.chess_board.handle_move(queen.Queen, w_queen_space, 'F6', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Queens cannot move that way.'
-
     assert game_window.chess_board.handle_move(queen.Queen, b_queen_space, 'C6', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Queens cannot move that way.'
 
 def test_queen_collision():
     """Test trying to move queens through other pieces"""
@@ -1031,19 +968,13 @@ def test_queen_collision():
 
     # Try moving D1 queen through pawns in front of it
     assert game_window.chess_board.handle_move(queen.Queen, 'D1', 'B3', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
     assert game_window.chess_board.handle_move(queen.Queen, 'D1', 'D3', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
     assert game_window.chess_board.handle_move(queen.Queen, 'D1', 'F3', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
 
     # Try moving A8 queen through A7 pawn
     assert game_window.chess_board.handle_move(queen.Queen, 'D8', 'B6', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
     assert game_window.chess_board.handle_move(queen.Queen, 'D8', 'D6', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
     assert game_window.chess_board.handle_move(queen.Queen, 'D8', 'F6', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'There is another piece blocking the way.'
 
 def test_queen_captures():
     """Test capturing a piece with a queen"""
@@ -1137,25 +1068,17 @@ def test_king_invalid_moves():
 
     # Try moving kings in knight shape
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'D3', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Kings cannot move that way.'
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'D6', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Kings cannot move that way.'
 
     # Try moving kings like bishop
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'H4', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Kings cannot move that way.'
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'H5', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Kings cannot move that way.'
 
     # Try moving kings like rooks
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'A1', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Kings cannot move that way.'
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'A8', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Kings cannot move that way.'
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'H1', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'Kings cannot move that way.'
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'H8', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'Kings cannot move that way.'
 
 def test_king_captures():
     """Test capturing a piece with a king"""
@@ -1274,11 +1197,9 @@ def test_king_side_castling_fail_out_of_check():
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
     # Try castling black side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'G8', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
 def test_king_side_castling_fail_through_check():
     """test that castling king through a check results in failure"""
@@ -1308,11 +1229,9 @@ def test_king_side_castling_fail_through_check():
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
     # Try castling black side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'G8', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
 def test_king_side_castling_fail_into_check():
     """test that castling king into check results in failure"""
@@ -1342,11 +1261,9 @@ def test_king_side_castling_fail_into_check():
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'G1', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
     # Try castling black side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'G8', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
 def test_queen_side_castling_success():
     """Test castling queen side successfully"""
@@ -1433,11 +1350,9 @@ def test_queen_side_castling_fail_out_of_check():
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'C1', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
     # Try castling black side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'C8', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
 def test_queen_side_castling_fail_through_check():
     """test that castling king through a check results in failure"""
@@ -1467,11 +1382,9 @@ def test_queen_side_castling_fail_through_check():
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'C1', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
     # Try castling black side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'C8', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
 def test_queen_side_castling_fail_into_check():
     """test that castling king into check results in failure"""
@@ -1501,11 +1414,9 @@ def test_queen_side_castling_fail_into_check():
 
     # Try castling white side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, w_king_space, 'C1', constants.PlayerColor.WHITE) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
     # Try castling black side king which should result in failure
     assert game_window.chess_board.handle_move(king.King, b_king_space, 'C8', constants.PlayerColor.BLACK) is False
-    assert game_window.chess_board.end_move_msg == f'You cannot castle out of or into check!'
 
 
 def test_game_over_white():
