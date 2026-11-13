@@ -509,7 +509,7 @@ class Board():
 
         else:
             # Pawn move invalid. Raise an exception
-            InvalidMoveException()
+            raise InvalidMoveException()
             
         return move_is_valid
     
@@ -1096,6 +1096,18 @@ class Board():
 
         # Check for game over
         game_over = self.__game_over(king_piece, curr_space, active_checks)
+
+        # Reset all colors on the board
+        for space in constants.space_names:
+            self.board_spaces[space].restore_active_color()
+
+        # Set the square(s) checking the king to red
+        if active_checks:
+            # Set the king's square to red as well
+            self.board_spaces[self.get_piece_space(active_checks[0].king_piece)].set_active_color(arcade.color.RED)
+
+            for check in active_checks:
+                self.board_spaces[self.get_piece_space(check.checking_piece)].set_active_color(arcade.color.RED)
         
         if game_over: 
             # Enemy king is in check. If there are no moves that can stop the check, the game is over.
