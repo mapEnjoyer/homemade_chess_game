@@ -137,6 +137,12 @@ class Board():
         # Initialize the pawn promotion flag
         self.pawn_promoting:bool = False
 
+        # Initialize game over flag
+        self.game_is_over:bool = False
+
+        # Initialize previous board states
+        self.prev_board_states = []
+
         # Initialize chess board squares
         self.__init_squares()
 
