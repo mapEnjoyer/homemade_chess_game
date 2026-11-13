@@ -353,7 +353,47 @@ def test_pawn_capture_H_side():
     assert game_window.chess_board.board_spaces['E4'].occupying_piece.color == constants.PlayerColor.BLACK
 
 #TODO: pawn promotion test
-#TODO: en passante test
+
+def test_en_passant():
+    """
+    Test valid en passant on both colors
+    """
+    # Game window to test on
+    game_window = window.GameView(is_visible=False)    
+
+    # White pawn on E2
+    # Black pawn on E7
+    # White pawn on D5
+    # Black pawn on D4
+    # White king on E1
+    # Black king on E8
+    pieces = []
+    pieces.append((pawn.Pawn, 'E2', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'E7', constants.PlayerColor.BLACK))
+    pieces.append((pawn.Pawn, 'D5', constants.PlayerColor.WHITE))
+    pieces.append((pawn.Pawn, 'D4', constants.PlayerColor.BLACK))
+    pieces.append((king.King, 'E1', constants.PlayerColor.WHITE))
+    pieces.append((king.King, 'E8', constants.PlayerColor.BLACK))
+
+    # Setup the board
+    setup_board(chess_board=game_window.chess_board, pieces=pieces)
+
+    # Move E2 pawn to E4
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'E2', 'E4', constants.PlayerColor.WHITE)
+
+    # D4 black pawn en passant to E3
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D4', 'E3', constants.PlayerColor.BLACK)
+    assert isinstance(game_window.chess_board.board_spaces['E3'].occupying_piece, pawn.Pawn)
+    assert game_window.chess_board.board_spaces['E4'].occupying_piece is None
+
+    # Move E7 pawn to E5
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'E7', 'E5', constants.PlayerColor.BLACK)
+
+    # D5 white pawn en passant to E6
+    assert game_window.chess_board.handle_move(pawn.Pawn, 'D5', 'E6', constants.PlayerColor.WHITE)
+    assert isinstance(game_window.chess_board.board_spaces['E6'].occupying_piece, pawn.Pawn)
+    assert game_window.chess_board.board_spaces['E5'].occupying_piece is None   
+
 
 def test_pawn_invalid_moves():
     """
